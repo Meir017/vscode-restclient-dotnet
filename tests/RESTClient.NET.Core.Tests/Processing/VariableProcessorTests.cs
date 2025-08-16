@@ -1,0 +1,237 @@
+using FluentAssertions;
+using RESTClient.NET.Core.Processing;
+using Xunit;
+
+namespace RESTClient.NET.Core.Tests.Processing
+{
+    public class VariableProcessorTests
+    {
+        [Fact]
+        public void ResolveVariables_WithFileVariables_ShouldReplaceCorrectly()
+        {
+            // Arrange
+            var content = "GET {{baseUrl}}/api/{{endpoint}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "baseUrl", "http://localhost:5000" },
+                { "endpoint", "users" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables);
+
+            // Assert
+            result.Should().Be("GET http://localhost:5000/api/users");
+        }
+
+        [Fact]
+        public void ResolveVariables_WithEnvironmentVariables_ShouldReplaceCorrectly()
+        {
+            // Arrange
+            var content = "Authorization: Bearer ${API_TOKEN}";
+            var environmentVariables = new Dictionary<string, string>
+            {
+                { "API_TOKEN", "secret123" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, null, environmentVariables);
+
+            // Assert
+            result.Should().Be("Authorization: Bearer secret123");
+        }
+
+        [Fact]
+        public void ResolveVariables_WithNestedVariables_ShouldResolveRecursively()
+        {
+            // Arrange
+            var content = "GET {{fullUrl}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "fullUrl", "{{baseUrl}}/{{endpoint}}" },
+                { "baseUrl", "http://localhost:5000" },
+                { "endpoint", "api/users" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables);
+
+            // Assert
+            result.Should().Be("GET http://localhost:5000/api/users");
+        }
+
+        [Fact]
+        public void ResolveVariables_WithUnknownVariable_ShouldLeaveUnchanged()
+        {
+            // Arrange
+            var content = "GET {{baseUrl}}/{{unknown}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "baseUrl", "http://localhost:5000" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables);
+
+            // Assert
+            result.Should().Be("GET http://localhost:5000/{{unknown}}");
+        }
+
+        [Fact]
+        public void ResolveVariables_WithNullOrEmptyContent_ShouldReturnOriginal()
+        {
+            // Act & Assert
+            VariableProcessor.ResolveVariables(null).Should().BeNull();
+            VariableProcessor.ResolveVariables("").Should().Be("");
+            VariableProcessor.ResolveVariables("   ").Should().Be("   ");
+        }
+
+        [Fact]
+        public void ExtractVariableReferences_ShouldReturnAllVariables()
+        {
+            // Arrange
+            var content = "GET {{baseUrl}}/api/{{endpoint}}?token=${API_TOKEN}";
+
+            // Act
+            var variables = VariableProcessor.ExtractVariableReferences(content);
+
+            // Assert
+            variables.Should().HaveCount(3);
+            variables.Should().Contain("baseUrl");
+            variables.Should().Contain("endpoint");
+            variables.Should().Contain("${API_TOKEN}");
+        }
+
+        [Fact]
+        public void ValidateVariableReferences_WithUnresolvedVariables_ShouldReturnUnresolved()
+        {
+            // Arrange
+            var content = "GET {{baseUrl}}/{{unknown}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "baseUrl", "http://localhost:5000" }
+            };
+
+            // Act
+            var unresolved = VariableProcessor.ValidateVariableReferences(content, fileVariables);
+
+            // Assert
+            unresolved.Should().HaveCount(1);
+            unresolved.Should().Contain("{{unknown}}");
+        }
+
+        [Fact]
+        public void DetectCircularReferences_WithCircularDependency_ShouldDetectCorrectly()
+        {
+            // Arrange
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "var1", "{{var2}}" },
+                { "var2", "{{var3}}" },
+                { "var3", "{{var1}}" }, // Circular reference
+                { "var4", "normal value" }
+            };
+
+            // Act
+            var circularVariables = VariableProcessor.DetectCircularReferences(fileVariables);
+
+            // Assert
+            circularVariables.Should().HaveCount(3);
+            circularVariables.Should().Contain("var1");
+            circularVariables.Should().Contain("var2");
+            circularVariables.Should().Contain("var3");
+            circularVariables.Should().NotContain("var4");
+        }
+
+        [Fact]
+        public void DetectCircularReferences_WithSelfReference_ShouldDetectCorrectly()
+        {
+            // Arrange
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "recursive", "value with {{recursive}} reference" },
+                { "normal", "normal value" }
+            };
+
+            // Act
+            var circularVariables = VariableProcessor.DetectCircularReferences(fileVariables);
+
+            // Assert
+            circularVariables.Should().HaveCount(1);
+            circularVariables.Should().Contain("recursive");
+            circularVariables.Should().NotContain("normal");
+        }
+
+        [Fact]
+        public void DetectCircularReferences_WithNoCircularReferences_ShouldReturnEmpty()
+        {
+            // Arrange
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "baseUrl", "http://localhost:5000" },
+                { "endpoint", "api/users" },
+                { "fullUrl", "{{baseUrl}}/{{endpoint}}" }
+            };
+
+            // Act
+            var circularVariables = VariableProcessor.DetectCircularReferences(fileVariables);
+
+            // Assert
+            circularVariables.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("{{variable}}", "variable")]
+        [InlineData("{{ variable }}", "variable")]
+        [InlineData("{{  variable  }}", "variable")]
+        [InlineData("prefix{{variable}}suffix", "variable")]
+        [InlineData("{{var1}}{{var2}}", "var1", "var2")]
+        public void ExtractVariableReferences_WithVariousFormats_ShouldExtractCorrectly(string content, params string[] expectedVariables)
+        {
+            // Act
+            var variables = VariableProcessor.ExtractVariableReferences(content);
+
+            // Assert
+            foreach (var expected in expectedVariables)
+            {
+                variables.Should().Contain(expected);
+            }
+        }
+
+        [Theory]
+        [InlineData("${ENV_VAR}", "${ENV_VAR}")]
+        [InlineData("${ ENV_VAR }", "${ENV_VAR}")]
+        [InlineData("${  ENV_VAR  }", "${ENV_VAR}")]
+        [InlineData("prefix${ENV_VAR}suffix", "${ENV_VAR}")]
+        public void ExtractVariableReferences_WithEnvironmentVariables_ShouldExtractCorrectly(string content, string expectedVariable)
+        {
+            // Act
+            var variables = VariableProcessor.ExtractVariableReferences(content);
+
+            // Assert
+            variables.Should().Contain(expectedVariable);
+        }
+
+        [Fact]
+        public void ResolveVariables_WithMixedVariableTypes_ShouldResolveInCorrectOrder()
+        {
+            // Arrange
+            var content = "{{greeting}} ${USER}, your token is {{token}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "greeting", "Hello" },
+                { "token", "abc123" }
+            };
+            var environmentVariables = new Dictionary<string, string>
+            {
+                { "USER", "John" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables, environmentVariables);
+
+            // Assert
+            result.Should().Be("Hello John, your token is abc123");
+        }
+    }
+}

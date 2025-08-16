@@ -1,0 +1,11 @@
+{
+    "github.copilot.chat.agent.terminal.allowList": {
+        "dotnet": true,
+        "/^git status\\b.*$/": true
+    },
+    "github.copilot.chat.agent.thinkingTool": true,
+    "chat.tools.autoApprove": true,
+    "github.copilot.chat.codesearch.enabled": true,
+    "github.copilot.chat.generateTests.codeLens": true,
+    "chat.agent.maxRequests": 200
+}
