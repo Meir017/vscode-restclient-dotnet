@@ -37,7 +37,7 @@ namespace RESTClient.NET.Core
         /// <param name="filePath">Path to the HTTP file</param>
         /// <param name="options">Parsing options</param>
         /// <returns>Parsed HTTP file</returns>
-        public async Task<HttpFile> ParseFileAsync(string filePath, HttpParseOptions options = null)
+        public async Task<HttpFile> ParseFileAsync(string filePath, HttpParseOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
@@ -56,7 +56,7 @@ namespace RESTClient.NET.Core
         /// <param name="content">HTTP file content</param>
         /// <param name="options">Parsing options</param>
         /// <returns>Parsed HTTP file</returns>
-        public Task<HttpFile> ParseContentAsync(string content, HttpParseOptions options = null)
+        public Task<HttpFile> ParseContentAsync(string content, HttpParseOptions? options = null)
         {
             if (content == null)
                 throw new ArgumentNullException(nameof(content));
@@ -211,7 +211,7 @@ namespace RESTClient.NET.Core
 
             _logger?.LogDebug("Processing request '{RequestName}'", requestName);
 
-            return VariableProcessor.ProcessRequest(request, httpFile.FileVariables, environmentVariables);
+            return VariableProcessor.ProcessRequest(request!, httpFile.FileVariables, environmentVariables);
         }
 
         /// <summary>

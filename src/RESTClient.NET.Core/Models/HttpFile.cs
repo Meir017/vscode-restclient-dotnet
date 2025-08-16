@@ -64,7 +64,7 @@ namespace RESTClient.NET.Core.Models
         {
             if (TryGetRequestByName(name, out var request))
             {
-                return request;
+                return request!;
             }
             
             throw new KeyNotFoundException($"Request with name '{name}' not found");

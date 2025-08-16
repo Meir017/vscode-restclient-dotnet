@@ -123,7 +123,7 @@ namespace RESTClient.NET.Core.Parsing
 
 #if NETSTANDARD2_0
             var content = File.ReadAllText(filePath);
-            return Parse(content, options);
+            return await Task.FromResult(Parse(content, options)).ConfigureAwait(false);
 #else
             var content = await File.ReadAllTextAsync(filePath).ConfigureAwait(false);
             return Parse(content, options);

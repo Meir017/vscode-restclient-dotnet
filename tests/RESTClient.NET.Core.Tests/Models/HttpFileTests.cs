@@ -37,7 +37,7 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithNullRequests_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            Action act = () => new HttpFile(null);
+            Action act = () => new HttpFile(null!);
             act.Should().Throw<ArgumentNullException>().WithParameterName("requests");
         }
 
@@ -91,7 +91,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var httpFile = new HttpFile(requests);
 
             // Act & Assert
-            httpFile.TryGetRequestByName(null, out var request1).Should().BeFalse();
+            httpFile.TryGetRequestByName(null!, out var request1).Should().BeFalse();
             request1.Should().BeNull();
 
             httpFile.TryGetRequestByName("", out var request2).Should().BeFalse();
