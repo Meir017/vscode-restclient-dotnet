@@ -103,51 +103,5 @@ namespace RESTClient.NET.Core.Models
         {
             return _requestsByName.ContainsKey(name);
         }
-
-        // Backward compatibility methods - these will be removed in a future version
-        /// <summary>
-        /// Gets an HTTP request by its unique ID
-        /// </summary>
-        /// <param name="requestId">The request ID to search for</param>
-        /// <returns>The HTTP request with the specified ID</returns>
-        /// <exception cref="System.Collections.Generic.KeyNotFoundException">Thrown when no request with the specified ID is found</exception>
-        [Obsolete("Use GetRequestByName instead. This method will be removed in a future version.")]
-        public HttpRequest GetRequestById(string requestId)
-        {
-            return GetRequestByName(requestId);
-        }
-
-        /// <summary>
-        /// Attempts to get an HTTP request by its unique ID
-        /// </summary>
-        /// <param name="requestId">The request ID to search for</param>
-        /// <param name="request">When this method returns, contains the HTTP request if found; otherwise, null</param>
-        /// <returns>true if a request with the specified ID was found; otherwise, false</returns>
-        [Obsolete("Use TryGetRequestByName instead. This method will be removed in a future version.")]
-        public bool TryGetRequestById(string requestId, out HttpRequest? request)
-        {
-            return TryGetRequestByName(requestId, out request);
-        }
-
-        /// <summary>
-        /// Gets all unique request IDs in the file
-        /// </summary>
-        /// <returns>A collection of request IDs</returns>
-        [Obsolete("Use GetRequestNames instead. This method will be removed in a future version.")]
-        public IEnumerable<string> GetRequestIds()
-        {
-            return GetRequestNames();
-        }
-
-        /// <summary>
-        /// Checks if a request with the specified ID exists
-        /// </summary>
-        /// <param name="requestId">The request ID to check</param>
-        /// <returns>true if a request with the specified ID exists; otherwise, false</returns>
-        [Obsolete("Use ContainsRequestName instead. This method will be removed in a future version.")]
-        public bool ContainsRequestId(string requestId)
-        {
-            return ContainsRequestName(requestId);
-        }
     }
 }

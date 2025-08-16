@@ -14,16 +14,6 @@ namespace RESTClient.NET.Core.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the unique request identifier
-        /// </summary>
-        [Obsolete("Use Name property instead. This property will be removed in a future version.")]
-        public string RequestId
-        {
-            get => Name;
-            set => Name = value;
-        }
-
-        /// <summary>
         /// Gets or sets the HTTP method (GET, POST, PUT, DELETE, etc.)
         /// </summary>
         public string Method { get; set; } = "GET";

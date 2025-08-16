@@ -12,8 +12,8 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { RequestId = "test2", Method = "POST", Url = "http://api.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
 
             var fileVariables = new Dictionary<string, string>
@@ -42,38 +42,38 @@ namespace RESTClient.NET.Core.Tests.Models
         }
 
         [Fact]
-        public void TryGetRequestById_WithExistingId_ShouldReturnTrue()
+        public void TryGetRequestByName_WithExistingId_ShouldReturnTrue()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { RequestId = "test2", Method = "POST", Url = "http://api.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = httpFile.TryGetRequestById("test1", out var request);
+            var result = httpFile.TryGetRequestByName("test1", out var request);
 
             // Assert
             result.Should().BeTrue();
             request.Should().NotBeNull();
-            request!.RequestId.Should().Be("test1");
+            request!.Name.Should().Be("test1");
             request.Method.Should().Be("GET");
         }
 
         [Fact]
-        public void TryGetRequestById_WithNonExistingId_ShouldReturnFalse()
+        public void TryGetRequestByName_WithNonExistingId_ShouldReturnFalse()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = httpFile.TryGetRequestById("nonexistent", out var request);
+            var result = httpFile.TryGetRequestByName("nonexistent", out var request);
 
             // Assert
             result.Should().BeFalse();
@@ -81,71 +81,71 @@ namespace RESTClient.NET.Core.Tests.Models
         }
 
         [Fact]
-        public void TryGetRequestById_WithNullOrEmptyId_ShouldReturnFalse()
+        public void TryGetRequestByName_WithNullOrEmptyId_ShouldReturnFalse()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act & Assert
-            httpFile.TryGetRequestById(null, out var request1).Should().BeFalse();
+            httpFile.TryGetRequestByName(null, out var request1).Should().BeFalse();
             request1.Should().BeNull();
 
-            httpFile.TryGetRequestById("", out var request2).Should().BeFalse();
+            httpFile.TryGetRequestByName("", out var request2).Should().BeFalse();
             request2.Should().BeNull();
 
-            httpFile.TryGetRequestById("   ", out var request3).Should().BeFalse();
+            httpFile.TryGetRequestByName("   ", out var request3).Should().BeFalse();
             request3.Should().BeNull();
         }
 
         [Fact]
-        public void GetRequestById_WithExistingId_ShouldReturnRequest()
+        public void GetRequestByName_WithExistingId_ShouldReturnRequest()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { RequestId = "test2", Method = "POST", Url = "http://api.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var request = httpFile.GetRequestById("test2");
+            var request = httpFile.GetRequestByName("test2");
 
             // Assert
             request.Should().NotBeNull();
-            request.RequestId.Should().Be("test2");
+            request.Name.Should().Be("test2");
             request.Method.Should().Be("POST");
         }
 
         [Fact]
-        public void GetRequestById_WithNonExistingId_ShouldThrowKeyNotFoundException()
+        public void GetRequestByName_WithNonExistingId_ShouldThrowKeyNotFoundException()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act & Assert
-            Action act = () => httpFile.GetRequestById("nonexistent");
+            Action act = () => httpFile.GetRequestByName("nonexistent");
             act.Should().Throw<KeyNotFoundException>()
                 .WithMessage("Request with name 'nonexistent' not found");
         }
 
         [Fact]
-        public void Constructor_WithDuplicateRequestIds_ShouldStoreAllRequests()
+        public void Constructor_WithDuplicateNames_ShouldStoreAllRequests()
         {
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "duplicate", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { RequestId = "duplicate", Method = "POST", Url = "http://api.com" },
-                new HttpRequest { RequestId = "unique", Method = "PUT", Url = "http://other.com" }
+                new HttpRequest { Name = "duplicate", Method = "GET", Url = "http://example.com" },
+                new HttpRequest { Name = "duplicate", Method = "POST", Url = "http://api.com" },
+                new HttpRequest { Name = "unique", Method = "PUT", Url = "http://other.com" }
             };
 
             // Act
@@ -155,7 +155,7 @@ namespace RESTClient.NET.Core.Tests.Models
             httpFile.Requests.Should().HaveCount(3);
             
             // The lookup should return the first occurrence
-            var foundRequest = httpFile.GetRequestById("duplicate");
+            var foundRequest = httpFile.GetRequestByName("duplicate");
             foundRequest.Method.Should().Be("GET");
         }
 
@@ -165,7 +165,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
 
             // Act
@@ -182,7 +182,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { RequestId = "test1", Method = "GET", Url = "http://example.com" }
+                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
 
             var fileVariables = new Dictionary<string, string>
