@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        dotnet-version: ['8.0.x']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+        
+    - name: Restore dependencies
+      run: dotnet restore vscode-restclient-dotnet.slnx
+      
+    - name: Build
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      
+    - name: Test
+      run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --verbosity normal --logger trx --results-directory TestResults
+      
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.dotnet-version }}
+        path: TestResults/*.trx
+
+  code-coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore vscode-restclient-dotnet.slnx
+      
+    - name: Build
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      
+    - name: Test with coverage
+      run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+      
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        directory: TestResults
+        fail_ci_if_error: false
+        verbose: true
+
+  build-matrix:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet-version: ['8.0.x']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+        
+    - name: Restore dependencies
+      run: dotnet restore vscode-restclient-dotnet.slnx
+      
+    - name: Build
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      
+    - name: Test
+      run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --verbosity normal
