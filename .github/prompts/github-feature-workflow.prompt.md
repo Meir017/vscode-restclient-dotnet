@@ -1,7 +1,7 @@
 ---
 description: "Complete GitHub feature branch workflow with automated PR management"
 mode: agent
-tools: ["github", "vscode", "filesystem"]
+tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'readCellOutput', 'runCommands', 'runNotebooks', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'updateUserPreferences', 'usages', 'vscodeAPI', 'github', 'create_pull_request', 'get_job_logs', 'get_pull_request', 'get_pull_request_comments', 'get_pull_request_diff', 'get_pull_request_status', 'get_workflow_run', 'get_workflow_run_logs', 'list_pull_requests', 'list_workflow_runs', 'rerun_failed_jobs', 'rerun_workflow_run', 'run_workflow', 'search_code', 'update_issue', 'update_pull_request', 'update_pull_request_branch', 'microsoft.docs.mcp', 'context7']
 ---
 
 # GitHub Feature Branch Workflow

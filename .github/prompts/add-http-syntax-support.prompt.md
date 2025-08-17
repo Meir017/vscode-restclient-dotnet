@@ -1,7 +1,7 @@
 ---
 description: "Add support for new VS Code REST Client HTTP syntax features"
 mode: agent
-tools: ["github", "vscode", "filesystem"]
+tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'readCellOutput', 'runCommands', 'runNotebooks', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'updateUserPreferences', 'usages', 'vscodeAPI', 'microsoft.docs.mcp', 'context7']
 ---
 
 # Add HTTP Syntax Support
@@ -22,7 +22,7 @@ RESTClient.NET is a C# library that parses VS Code REST Client (.http) files. Th
 When adding new HTTP syntax support:
 
 ### 1. Analyze the Syntax
-- Research the VS Code REST Client feature documentation
+- Research the VS Code REST Client feature documentation (https://github.com/Huachao/vscode-restclient)
 - Understand the syntax format and expected behavior
 - Identify how it should integrate with existing parsing
 
