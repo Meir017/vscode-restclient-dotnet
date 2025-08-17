@@ -2,8 +2,10 @@
 
 [![CI](https://github.com/Meir017/vscode-restclient-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/Meir017/vscode-restclient-dotnet/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Meir017/vscode-restclient-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/Meir017/vscode-restclient-dotnet)
+[![RESTClient.NET.Core](https://img.shields.io/nuget/v/RESTClient.NET.Core.svg?label=RESTClient.NET.Core)](https://www.nuget.org/packages/RESTClient.NET.Core/)
+[![RESTClient.NET.Testing](https://img.shields.io/nuget/v/RESTClient.NET.Testing.svg?label=RESTClient.NET.Testing)](https://www.nuget.org/packages/RESTClient.NET.Testing/)
 
-A comprehensive C# library for parsing HTTP files with full VS Code REST Client compatibility and ASP.NET Core integration testing capabilities.
+A comprehensive C# library for parsing HTTP files with full [VS Code REST Client](https://github.com/Huachao/vscode-restclient) compatibility and ASP.NET Core integration testing capabilities.
 
 ## 🚀 Features
 
@@ -24,7 +26,7 @@ A comprehensive C# library for parsing HTTP files with full VS Code REST Client 
 ## 🛠️ Installation
 
 ```bash
-# Core library (available soon)
+# Core library
 dotnet add package RESTClient.NET.Core
 
 # Testing framework (coming soon)
