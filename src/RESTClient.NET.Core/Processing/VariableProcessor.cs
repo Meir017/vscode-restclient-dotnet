@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using RESTClient.NET.Core.Models;
 
@@ -15,7 +15,10 @@ namespace RESTClient.NET.Core.Processing
         private static readonly Regex EnvironmentVariableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.Compiled);
 
         /// <summary>
-        /// Resolves variables in text content using provided variable values
+        /// Resolves variables in content using a three-pass approach:
+        /// 1. File variables ({{variable}})
+        /// 2. Environment variables (${variable})
+        /// 3. System variables ({{$variable}})
         /// </summary>
         /// <param name="content">The content to process</param>
         /// <param name="fileVariables">File-level variables</param>
@@ -76,6 +79,9 @@ namespace RESTClient.NET.Core.Processing
                     return envValue ?? match.Value;
                 });
             }
+
+            // Third pass: resolve system variables ({{$variable}})
+            result = SystemVariableProcessor.ResolveSystemVariables(result);
 
             return result;
         }
