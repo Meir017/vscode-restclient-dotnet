@@ -1,0 +1,39 @@
+# Example HTTP file demonstrating system variables support
+
+@baseUrl = https://api.example.com
+
+# @name create-user
+POST {{baseUrl}}/users HTTP/1.1
+Content-Type: application/json
+X-Request-ID: {{$guid}}
+X-Timestamp: {{$timestamp}}
+X-Random-Value: {{$randomInt 1000 9999}}
+
+{
+  "id": "{{$guid}}",
+  "username": "user_{{$randomInt 100 999}}",
+  "email": "test-{{$guid}}@example.com",
+  "created": "{{$datetime iso8601}}",
+  "lastLogin": "{{$localDatetime rfc1123 -2 h}}"
+}
+
+###
+
+# @name get-user-by-id
+GET {{baseUrl}}/users/{{$guid}} HTTP/1.1
+Authorization: Bearer token-{{$randomInt 10000 99999}}
+If-None-Match: "{{$timestamp -1 d}}"
+
+###
+
+# @name update-user-password
+PATCH {{baseUrl}}/users/current/password HTTP/1.1
+Content-Type: application/json
+X-Request-ID: {{$guid}}
+X-Client-Time: {{$datetime "yyyy-MM-dd HH:mm:ss"}}
+
+{
+  "oldPassword": "{{$randomInt 100000 999999}}",
+  "newPassword": "{{$randomInt 100000 999999}}",
+  "timestamp": {{$timestamp}}
+}
