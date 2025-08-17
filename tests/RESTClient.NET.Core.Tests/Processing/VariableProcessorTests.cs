@@ -233,5 +233,96 @@ namespace RESTClient.NET.Core.Tests.Processing
             // Assert
             result.Should().Be("Hello John, your token is abc123");
         }
+
+        [Fact]
+        public void ResolveVariables_WithSystemVariables_ShouldReplaceCorrectly()
+        {
+            // Arrange
+            var content = "X-Request-ID: {{$guid}}";
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content);
+
+            // Assert
+            result.Should().NotBe(content);
+            result.Should().StartWith("X-Request-ID: ");
+            var guidPart = result.Substring("X-Request-ID: ".Length);
+            Guid.TryParse(guidPart, out _).Should().BeTrue();
+        }
+
+        [Fact]
+        public void ResolveVariables_WithMixedVariableTypes_ShouldResolveAllTypes()
+        {
+            // Arrange
+            var content = "POST {{baseUrl}}/api/test\nAuthorization: Bearer ${API_TOKEN}\nX-Request-ID: {{$guid}}\nX-Timestamp: {{$timestamp}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "baseUrl", "https://api.example.com" }
+            };
+            var environmentVariables = new Dictionary<string, string>
+            {
+                { "API_TOKEN", "secret123" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables, environmentVariables);
+
+            // Assert
+            result.Should().NotBe(content);
+            result.Should().Contain("https://api.example.com/api/test");
+            result.Should().Contain("Bearer secret123");
+            result.Should().NotContain("{{$guid}}");
+            result.Should().NotContain("{{$timestamp}}");
+            result.Should().NotContain("{{baseUrl}}");
+            result.Should().NotContain("${API_TOKEN}");
+        }
+
+        [Fact]
+        public void ResolveVariables_WithSystemVariablesInFileVariables_ShouldResolveSystemVariablesInValues()
+        {
+            // Arrange
+            var content = "Authorization: {{authHeader}}";
+            var fileVariables = new Dictionary<string, string>
+            {
+                { "authHeader", "Bearer {{$guid}}" }
+            };
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content, fileVariables);
+
+            // Assert
+            result.Should().NotBe(content);
+            result.Should().StartWith("Authorization: Bearer ");
+            result.Should().NotContain("{{$guid}}");
+            result.Should().NotContain("{{authHeader}}");
+            
+            var guidPart = result.Substring("Authorization: Bearer ".Length);
+            Guid.TryParse(guidPart, out _).Should().BeTrue();
+        }
+
+        [Fact]
+        public void ResolveVariables_WithComplexSystemVariables_ShouldResolveCorrectly()
+        {
+            // Arrange
+            var content = @"POST /api/test
+Content-Type: application/json
+X-Random-Value: {{$randomInt 100 200}}
+X-Timestamp: {{$timestamp -1 h}}
+
+{
+  ""id"": ""{{$guid}}"",
+  ""created"": ""{{$datetime iso8601}}""
+}";
+
+            // Act
+            var result = VariableProcessor.ResolveVariables(content);
+
+            // Assert
+            result.Should().NotBe(content);
+            result.Should().NotContain("{{$randomInt");
+            result.Should().NotContain("{{$timestamp");
+            result.Should().NotContain("{{$guid}}");
+            result.Should().NotContain("{{$datetime");
+        }
     }
 }
