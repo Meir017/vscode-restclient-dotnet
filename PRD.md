@@ -59,6 +59,7 @@ The core library (Phase 1) is **production-ready** with 100% test success rate (
 - 🚧 Provide a comprehensive ASP.NET Core integration testing framework
 - 🚧 Eliminate the need for manual test data setup in integration tests
 - 📋 Enable test-driven API development using HTTP files as living documentation
+- 📋 **NEW:** Implement full built-in system variables support for complete VS Code REST Client compatibility
 
 **Key Achievements:**
 
@@ -68,6 +69,12 @@ The core library (Phase 1) is **production-ready** with 100% test success rate (
 - High-performance parsing architecture with metadata-driven approach
 - Complete core test suite with 100% pass rate
 - Production-ready core parsing functionality
+
+**Planned Enhancements:**
+
+- Built-in system variables (`{{$guid}}`, `{{$randomInt}}`, `{{$timestamp}}`, etc.)
+- Dynamic test data generation capabilities
+- Complete feature parity with VS Code REST Client extension
 
 ### 4. Core Requirements
 
@@ -459,6 +466,222 @@ public class ValidationError
 - ✅ Backward compatibility with legacy RequestId exceptions
 - ✅ Comprehensive validation framework
 
+#### 4.6 Built-in System Variables Support (Planned)
+
+**4.6.1 System Variable Overview (Priority: High)**
+
+To achieve full VS Code REST Client compatibility, RESTClient.NET will support built-in system variables that generate dynamic values at request time. These variables use the `{{$variableName}}` syntax and provide essential functionality for testing and API development.
+
+**4.6.2 Core System Variables (Phase 1 - High Priority):**
+
+- **`{{$guid}}`** - RFC 4122 v4 UUID generation
+  ```http
+  POST {{baseUrl}}/api/users HTTP/1.1
+  Request-ID: {{$guid}}
+  ```
+
+- **`{{$randomInt min max}}`** - Random integer between min (included) and max (excluded)
+  ```http
+  POST {{baseUrl}}/api/users HTTP/1.1
+  Content-Type: application/json
+  
+  {
+      "id": {{$randomInt 1000 9999}},
+      "score": {{$randomInt 1 100}}
+  }
+  ```
+
+- **`{{$timestamp [offset option]}}`** - UTC timestamp with optional offset
+  ```http
+  GET {{baseUrl}}/api/events?since={{$timestamp -1 d}} HTTP/1.1
+  X-Request-Time: {{$timestamp}}
+  ```
+
+- **`{{$datetime rfc1123|iso8601|"custom format" [offset option]}}`** - Formatted datetime
+  ```http
+  POST {{baseUrl}}/api/logs HTTP/1.1
+  Content-Type: application/json
+  
+  {
+      "timestamp": "{{$datetime iso8601}}",
+      "futureDate": "{{$datetime "yyyy-MM-dd" 7 d}}",
+      "rfc1123Date": "{{$datetime rfc1123 -2 h}}"
+  }
+  ```
+
+- **`{{$localDatetime rfc1123|iso8601|"custom format" [offset option]}}`** - Local timezone datetime
+  ```http
+  POST {{baseUrl}}/api/reports HTTP/1.1
+  Content-Type: application/json
+  
+  {
+      "localTime": "{{$localDatetime iso8601}}",
+      "reportDate": "{{$localDatetime "MM/dd/yyyy" 1 w}}"
+  }
+  ```
+
+**4.6.3 Environment Integration Variables (Phase 2 - Medium Priority):**
+
+- **`{{$processEnv [%]envVarName}}`** - Process environment variables
+  ```http
+  GET {{baseUrl}}/api/secure HTTP/1.1
+  Authorization: Bearer {{$processEnv API_TOKEN}}
+  X-User-ID: {{$processEnv USER_ID}}
+  ```
+
+- **`{{$dotenv [%]variableName}}`** - Load from .env files
+  ```http
+  POST {{baseUrl}}/api/config HTTP/1.1
+  API-Key: {{$dotenv API_KEY}}
+  Environment: {{$dotenv ENVIRONMENT}}
+  ```
+
+**4.6.4 Advanced Authentication Variables (Phase 3 - Future):**
+
+- **`{{$aadToken [options]}}`** - Azure Active Directory tokens
+- **`{{$aadV2Token [options]}}`** - Microsoft Identity Platform tokens  
+- **`{{$oidcAccessToken [options]}}`** - OIDC Identity Server tokens
+
+**4.6.5 Implementation Architecture:**
+
+```csharp
+// New SystemVariableProcessor class
+namespace RESTClient.NET.Core.Processing
+{
+    /// <summary>
+    /// Processes built-in system variables ({{$variableName}})
+    /// </summary>
+    public static class SystemVariableProcessor
+    {
+        public static string? ResolveSystemVariables(string? content);
+        
+        // Individual variable resolvers
+        private static string ResolveGuid();
+        private static string ResolveRandomInt(string parameters);
+        private static string ResolveTimestamp(string parameters);
+        private static string ResolveDatetime(string parameters);
+        private static string ResolveLocalDatetime(string parameters);
+        private static string ResolveProcessEnv(string parameters);
+        private static string ResolveDotenv(string parameters);
+    }
+    
+    // Enhanced VariableProcessor integration
+    public static class VariableProcessor
+    {
+        public static string? ResolveVariables(
+            string? content, 
+            IReadOnlyDictionary<string, string>? fileVariables = null,
+            IDictionary<string, string>? environmentVariables = null)
+        {
+            // First pass: resolve file variables ({{variable}})
+            // Second pass: resolve environment variables (${variable})  
+            // Third pass: resolve system variables ({{$variable}}) - NEW
+            result = SystemVariableProcessor.ResolveSystemVariables(result);
+            
+            return result;
+        }
+    }
+}
+```
+
+**4.6.6 System Variable Models:**
+
+```csharp
+namespace RESTClient.NET.Core.Models
+{
+    /// <summary>
+    /// Represents a parsed system variable reference
+    /// </summary>
+    public record SystemVariable(
+        string Name,
+        string[] Parameters,
+        string OriginalText
+    );
+
+    /// <summary>
+    /// DateTime format options for system variables
+    /// </summary>
+    public enum DateTimeFormat
+    {
+        Rfc1123,
+        Iso8601,
+        Custom
+    }
+
+    /// <summary>
+    /// Time offset units for timestamp variables
+    /// </summary>
+    public enum TimeOffsetUnit
+    {
+        Year, Month, Week, Day, Hour, Minute, Second, Millisecond
+    }
+}
+```
+
+**4.6.7 Time Offset Specification:**
+
+System variables support time offsets using the format `[offset option]` where:
+
+- **Offset:** Integer value (positive for future, negative for past)
+- **Unit:** Time unit abbreviation
+  - `y` - Year
+  - `M` - Month  
+  - `w` - Week
+  - `d` - Day
+  - `h` - Hour
+  - `m` - Minute
+  - `s` - Second
+  - `ms` - Millisecond
+
+Examples:
+- `{{$timestamp -3 h}}` - 3 hours ago
+- `{{$datetime iso8601 2 d}}` - 2 days from now
+- `{{$localDatetime "yyyy-MM-dd" 1 M}}` - 1 month from now
+
+**4.6.8 VS Code REST Client Compatibility:**
+
+This implementation ensures 100% compatibility with VS Code REST Client system variables, enabling users to:
+
+- Use existing HTTP files without modification
+- Share HTTP files across different tools
+- Maintain standard workflows while benefiting from .NET integration
+- Leverage dynamic test data generation for comprehensive API testing
+
+**4.6.9 Testing Integration:**
+
+System variables automatically integrate with the testing framework:
+
+```http
+# @name create-user-dynamic
+# @expect status 201
+# @expect body-path $.id
+POST {{baseUrl}}/api/users HTTP/1.1
+Content-Type: application/json
+Request-ID: {{$guid}}
+
+{
+    "id": {{$randomInt 1000 9999}},
+    "name": "TestUser",
+    "email": "user-{{$randomInt 100 999}}@example.com",
+    "createdAt": "{{$datetime iso8601}}",
+    "score": {{$randomInt 1 100}}
+}
+```
+
+**4.6.10 Implementation Plan:**
+
+- **Phase 1:** Core variables (`$guid`, `$randomInt`, `$timestamp`, `$datetime`, `$localDatetime`)
+- **Phase 2:** Environment integration (`$processEnv`, `$dotenv`)
+- **Phase 3:** Authentication variables (`$aadToken`, `$aadV2Token`, `$oidcAccessToken`)
+
+**Implementation Status:**
+
+- 📋 Architecture designed and planned
+- 📋 System variable parsing patterns defined
+- 📋 Integration points with existing VariableProcessor identified
+- 📋 Test cases planned for comprehensive coverage
+- 📋 VS Code compatibility verified through documentation analysis
+
 ### 5. Functional Requirements
 
 #### 5.1 Core Parsing Capabilities
@@ -475,8 +698,15 @@ public class ValidationError
 
 - Parse file variable definitions (`@variable = value`)
 - Identify variable references (`{{variable}}`)
-- Support for environment variable placeholders
-- Basic system variable recognition (implementation of resolution optional)
+- Support for environment variable placeholders (`${variable}`)
+- **NEW:** Built-in system variable support (`{{$variable}}`) with dynamic value generation
+  - `{{$guid}}` - RFC 4122 v4 UUID generation
+  - `{{$randomInt min max}}` - Random integer generation within range
+  - `{{$timestamp [offset option]}}` - UTC timestamp with optional time offset
+  - `{{$datetime format [offset option]}}` - Formatted datetime strings
+  - `{{$localDatetime format [offset option]}}` - Local timezone datetime
+  - `{{$processEnv envVar}}` - Process environment variable access
+  - `{{$dotenv variable}}` - .env file variable loading
 
 **5.1.3 Advanced Features (Priority: Medium)**
 
@@ -857,6 +1087,11 @@ Content-Type: image/png
 
 #### Phase 3: Advanced Features 📋 PLANNED
 
+- 📋 Built-in System Variables Support (NEW - High Priority)
+  - 📋 Core system variables (`$guid`, `$randomInt`, `$timestamp`, `$datetime`, `$localDatetime`)
+  - 📋 Environment integration variables (`$processEnv`, `$dotenv`)
+  - 📋 Authentication variables (`$aadToken`, `$aadV2Token`, `$oidcAccessToken`)
+  - 📋 Complete VS Code REST Client system variable compatibility
 - 📋 Variable processing (interface defined, implementation pending)
 - 📋 File inclusion support
 - ✅ Request metadata parsing (expectations implemented)
@@ -950,7 +1185,27 @@ Previous issues that have been fixed:
 
 ### 13. Future Enhancements
 
-#### 12.1 Testing Framework Enhancements (Post-MVP)
+#### 13.1 Built-in System Variables (Near-Term Priority)
+
+- **Phase 1: Core System Variables (In Planning)**
+  - `{{$guid}}` - RFC 4122 v4 UUID generation
+  - `{{$randomInt min max}}` - Random integer generation
+  - `{{$timestamp [offset option]}}` - UTC timestamp with time offsets
+  - `{{$datetime format [offset option]}}` - Formatted datetime strings
+  - `{{$localDatetime format [offset option]}}` - Local timezone datetime
+
+- **Phase 2: Environment Integration Variables**
+  - `{{$processEnv [%]envVarName}}` - Process environment variable access
+  - `{{$dotenv [%]variableName}}` - .env file variable loading
+  - Advanced offset parsing for time-based variables
+  - Custom datetime format support
+
+- **Phase 3: Authentication Variables (Future)**
+  - `{{$aadToken [options]}}` - Azure Active Directory tokens
+  - `{{$aadV2Token [options]}}` - Microsoft Identity Platform tokens
+  - `{{$oidcAccessToken [options]}}` - OIDC Identity Server tokens
+
+#### 13.2 Testing Framework Enhancements (Post-MVP)
 
 - Real-time test execution and debugging
 - Integration with popular mocking frameworks (Moq, NSubstitute)
@@ -960,8 +1215,9 @@ Previous issues that have been fixed:
 - Integration with CI/CD pipelines
 - Test data factories and builders
 
-#### 12.2 Core Library Enhancements (Post-MVP)
+#### 13.3 Core Library Enhancements (Post-MVP)
 
+- **Built-in System Variables Support** (moved to high priority - see section 13.1)
 - HTTP file generation/serialization
 - Request execution engine for live API testing
 - Visual Studio/VS Code extension integration
@@ -970,7 +1226,7 @@ Previous issues that have been fixed:
 - Request collection management
 - Advanced variable processing with environment resolution
 
-#### 12.3 Enterprise Features
+#### 13.4 Enterprise Features
 
 - Team collaboration features
 - Test result analytics and reporting
@@ -1004,6 +1260,7 @@ This PRD documents the successful completion of a comprehensive solution that co
 3. **✅ Robust Error Handling:** Comprehensive validation with clear, actionable error messages
 4. **✅ Production-Ready Core Library:** Stable parsing functionality with 100% test pass rate
 5. **🚧 Integration Testing Foundation:** ASP.NET Core testing framework architecture established
+6. **📋 System Variables Support:** Planned implementation of built-in variables for complete VS Code compatibility
 
 **Current Achievement Summary:**
 
@@ -1015,12 +1272,21 @@ The project has successfully completed all core parsing objectives and establish
 - **✅ Complete Expectation Framework:** Full parsing infrastructure for test automation
 - **✅ Stable Core Library:** All 47 tests passing with comprehensive coverage and production-ready reliability
 
+**Next Phase Development:**
+
+The **built-in system variables support** has been identified as the next high-priority enhancement to achieve complete VS Code REST Client feature parity. This will include:
+
+- Dynamic value generation (`{{$guid}}`, `{{$randomInt}}`, `{{$timestamp}}`)
+- Advanced datetime formatting capabilities
+- Environment variable integration
+- Complete compatibility with existing VS Code REST Client workflows
+
 **Development Status:**
 
-The core library (Phase 1) is **production-ready** with 100% test success rate (47/47 tests) and full compatibility with existing VS Code REST Client files. The testing framework (Phase 2) foundation is architecturally complete with active development on assertion logic and test integration.
+The core library (Phase 1) is **production-ready** with 100% test success rate (47/47 tests) and full compatibility with existing VS Code REST Client files. The testing framework (Phase 2) foundation is architecturally complete with active development on assertion logic and test integration. Phase 3 will focus on system variables implementation for complete VS Code compatibility.
 
 **Value Proposition:**
 
-This implementation creates a unique offering in the .NET ecosystem that bridges the gap between simple HTTP parsing libraries and complex API testing frameworks. The project's commitment to VS Code standard compatibility ensures immediate utility for existing REST Client users while the enhanced expectation framework provides advanced testing capabilities not available elsewhere.
+This implementation creates a unique offering in the .NET ecosystem that bridges the gap between simple HTTP parsing libraries and complex API testing frameworks. The project's commitment to VS Code standard compatibility ensures immediate utility for existing REST Client users while the enhanced expectation framework provides advanced testing capabilities not available elsewhere. The planned system variables support will make RESTClient.NET the most comprehensive VS Code REST Client compatible library available for .NET developers.
 
 The successful implementation positions the project for strong adoption in the .NET community, particularly among teams practicing API-first development and comprehensive integration testing with existing VS Code REST Client workflows. The stable core library provides a reliable foundation for building advanced testing and automation tools.
