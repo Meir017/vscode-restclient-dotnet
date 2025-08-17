@@ -1,0 +1,87 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF.Substring('refs/tags/v'.Length)
+          Write-Host "Version: $tag"
+          echo "VERSION=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore vscode-restclient-dotnet.slnx
+
+      - name: Build solution
+        run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release --verbosity minimal
+
+      - name: Run tests
+        run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --verbosity normal
+
+      - name: Pack RESTClient.NET.Core
+        run: |
+          dotnet pack src/RESTClient.NET.Core/RESTClient.NET.Core.csproj \
+            --output out \
+            --configuration Release \
+            --no-build \
+            --include-symbols \
+            -p:PackageVersion=${{ steps.version.outputs.VERSION }}
+
+      - name: Pack RESTClient.NET.Testing  
+        run: |
+          dotnet pack src/RESTClient.NET.Testing/RESTClient.NET.Testing.csproj \
+            --output out \
+            --configuration Release \
+            --no-build \
+            --include-symbols \
+            -p:PackageVersion=${{ steps.version.outputs.VERSION }}
+
+      - name: Publish NuGet packages
+        shell: pwsh
+        run: |
+          $nupkgs = Get-ChildItem out/*.nupkg -Exclude "*.symbols.nupkg" | ForEach-Object FullName
+          foreach ($nupkg in $nupkgs) {
+            Write-Host "Pushing package: $nupkg"
+            dotnet nuget push $nupkg --skip-duplicate --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          }
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Changes in ${{ steps.version.outputs.VERSION }}
+            
+            ### NuGet Packages Published
+            - RESTClient.NET.Core ${{ steps.version.outputs.VERSION }}
+            - RESTClient.NET.Testing ${{ steps.version.outputs.VERSION }}
+            
+            See the [CHANGELOG](CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'preview') || contains(steps.version.outputs.VERSION, 'alpha') || contains(steps.version.outputs.VERSION, 'beta') }}
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages-${{ steps.version.outputs.VERSION }}
+          path: out/*.nupkg
