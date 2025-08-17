@@ -43,7 +43,7 @@ public class BasicApiTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task ApiIsRunning_ShouldReturnSuccess()
+    public void ApiIsRunning_ShouldReturnSuccess()
     {
         // This basic test just checks if the test setup works
         var client = _factory.CreateClient();
