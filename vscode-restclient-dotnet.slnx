@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/RESTClient.NET.Core/RESTClient.NET.Core.csproj" />
+    <Project Path="src/RESTClient.NET.Testing/RESTClient.NET.Testing.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/RESTClient.NET.Core.Tests/RESTClient.NET.Core.Tests.csproj" />
+    <Project Path="tests/RESTClient.NET.Testing.Tests/RESTClient.NET.Testing.Tests.csproj" />
   </Folder>
 </Solution>
