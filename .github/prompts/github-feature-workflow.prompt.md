@@ -81,6 +81,8 @@ git push origin feature/{feature-name}
 - **Labels**: Add appropriate labels (feature, bug, documentation, etc.)
 - **Reviewers**: Request reviews from relevant team members
 
+**request a review from copilot using #request_copilot_review tool**
+
 **PR Description Template:**
 ```markdown
 ## Description
