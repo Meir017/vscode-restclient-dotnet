@@ -7,4 +7,8 @@
     <Project Path="tests/RESTClient.NET.Core.Tests/RESTClient.NET.Core.Tests.csproj" />
     <Project Path="tests/RESTClient.NET.Testing.Tests/RESTClient.NET.Testing.Tests.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/RESTClient.NET.Sample.Api/RESTClient.NET.Sample.Api.csproj" />
+    <Project Path="samples/RESTClient.NET.Sample.Tests/RESTClient.NET.Sample.Tests.csproj" />
+  </Folder>
 </Solution>
