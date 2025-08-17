@@ -8,6 +8,9 @@ tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFile
 
 You are tasked with implementing a complete feature branch workflow including branch creation, development, pull request management, and cleanup.
 
+1. If there are pending changes - use them to decide what the git-branch should be called.
+2. If there are pending pushes on the `main` branch, undo these local changes and follow step #1.
+
 ## Workflow Overview
 
 This prompt guides you through the complete GitHub feature development lifecycle:

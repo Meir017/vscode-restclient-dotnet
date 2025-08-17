@@ -17,6 +17,7 @@ This document outlines the comprehensive integration testing strategy for RESTCl
 - Provide comprehensive examples for developers adopting the library
 - Validate the testing framework against actual ASP.NET Core applications using `WebApplicationFactory`
 - Create a reference implementation for best practices in HTTP file-based integration testing
+- Showcase built-in system variables for dynamic test data generation
 
 ### 2. Project Structure
 
@@ -239,13 +240,17 @@ public enum OrderStatus
 # @expect body-path $.email customer@example.com
 POST {{baseUrl}}/api/auth/register HTTP/1.1
 Content-Type: {{contentType}}
+X-Request-ID: {{$guid}}
+X-Timestamp: {{$timestamp}}
 
 {
-    "username": "customer",
+    "username": "customer_{{$randomInt 100 999}}",
     "email": "{{customerEmail}}",
     "password": "{{customerPassword}}",
     "firstName": "John",
-    "lastName": "Customer"
+    "lastName": "Customer",
+    "registrationId": "{{$guid}}",
+    "registrationDate": "{{$datetime iso8601}}"
 }
 
 # @name login-customer
@@ -384,13 +389,16 @@ GET {{baseUrl}}/api/products/99999 HTTP/1.1
 POST {{baseUrl}}/api/products HTTP/1.1
 Content-Type: {{contentType}}
 Authorization: Bearer {{adminToken}}
+X-Request-ID: {{$guid}}
+X-Creation-Time: {{$datetime iso8601}}
 
 {
-    "name": "Test Product",
-    "description": "A test product for integration testing",
-    "price": 299.99,
+    "name": "Test Product {{$randomInt 1000 9999}}",
+    "description": "Dynamic test product created at {{$datetime iso8601}}",
+    "price": {{$randomInt 10 100}}.99,
     "category": "Test",
-    "stockQuantity": 50
+    "sku": "SKU-{{$guid}}",
+    "stockQuantity": {{$randomInt 1 100}}
 }
 
 # @name create-product-unauthorized
@@ -441,16 +449,23 @@ Authorization: Bearer {{adminToken}}
 POST {{baseUrl}}/api/orders HTTP/1.1
 Content-Type: {{contentType}}
 Authorization: Bearer {{customerToken}}
+X-Request-ID: {{$guid}}
+X-Order-Time: {{$datetime iso8601}}
 
 {
+    "orderId": "{{$guid}}",
+    "orderNumber": "ORD-{{$randomInt 100000 999999}}",
+    "orderDate": "{{$datetime iso8601}}",
     "items": [
         {
             "productId": 1,
-            "quantity": 2
+            "quantity": {{$randomInt 1 5}},
+            "requestId": "{{$guid}}"
         },
         {
             "productId": 2,
-            "quantity": 1
+            "quantity": {{$randomInt 1 3}},
+            "requestId": "{{$guid}}"
         }
     ]
 }

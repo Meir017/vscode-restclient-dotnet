@@ -8,6 +8,7 @@ A comprehensive C# library for parsing HTTP files with full VS Code REST Client 
 ## 🚀 Features
 
 - **✅ VS Code REST Client Compatibility**: Full support for standard `# @name` format
+- **✅ System Variables Support**: Built-in variables (`{{$guid}}`, `{{$randomInt}}`, `{{$timestamp}}`, `{{$datetime}}`)
 - **✅ Enhanced Expectation Comments**: Parse `# @expect-*` comments for automated testing
 - **✅ Request Parsing**: Robust HTTP request parsing with headers, body, and metadata
 - **✅ Name-Based API**: Complete request lookup and validation API
@@ -64,10 +65,13 @@ foreach (var expectation in loginRequest.Metadata.Expectations)
 # @expect body-contains "token"
 POST {{baseUrl}}/{{apiVersion}}/auth/login HTTP/1.1
 Content-Type: application/json
+X-Request-ID: {{$guid}}
+X-Timestamp: {{$timestamp}}
 
 {
     "username": "user@example.com",
-    "password": "secure_password"
+    "password": "secure_password",
+    "sessionId": "{{$randomInt 1000 9999}}"
 }
 
 # @name get-user-profile
@@ -76,25 +80,29 @@ Content-Type: application/json
 GET {{baseUrl}}/{{apiVersion}}/users/me HTTP/1.1
 Authorization: Bearer {{login.response.body.$.token}}
 Accept: application/json
+X-Client-Time: {{$datetime iso8601}}
 ```
 
 ## 🏗️ Development Status
 
 ### ✅ Completed Features (Production Ready)
+
 - VS Code REST Client format compatibility
 - Request name validation (`# @name` format)
+- Built-in system variables (`{{$guid}}`, `{{$randomInt}}`, `{{$timestamp}}`, `{{$datetime}}`)
 - Enhanced expectation comment parsing
 - Comprehensive exception handling
 - Metadata-driven parsing architecture
 - 100% test pass rate for core functionality
 
 ### 🚧 In Progress
+
 - ASP.NET Core integration testing framework
 - HTTP response assertion framework
 - Testing documentation
 
 ### 📋 Planned
-- Variable processing and resolution
+
 - Performance optimizations
 - NuGet package publishing
 
@@ -149,10 +157,11 @@ For detailed documentation, see the [Product Requirements Document (PRD)](PRD.md
 
 - ✅ 100% VS Code REST Client format compatibility
 - ✅ Complete `# @name` format support
+- ✅ Built-in system variables implementation
 - ✅ All core functionality tests passing
 - ✅ Comprehensive error handling and validation
 - 🚧 ASP.NET Core integration framework (75% complete)
 
 ---
 
-**Built with ❤️ for the .NET community**
+Built with ❤️ for the .NET community
