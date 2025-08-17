@@ -189,25 +189,6 @@ namespace RESTClient.NET.Core.Validation
         /// <summary>
         /// Invalid expectation format
         /// </summary>
-        InvalidExpectation,
-
-        // Legacy compatibility - these will be removed in a future version
-        /// <summary>
-        /// Invalid or missing request ID
-        /// </summary>
-        [Obsolete("Use InvalidRequestName instead. This value will be removed in a future version.")]
-        InvalidRequestId = InvalidRequestName,
-
-        /// <summary>
-        /// Duplicate request ID
-        /// </summary>
-        [Obsolete("Use DuplicateRequestName instead. This value will be removed in a future version.")]
-        DuplicateRequestId = DuplicateRequestName,
-
-        /// <summary>
-        /// Missing required request ID
-        /// </summary>
-        [Obsolete("Use MissingRequestName instead. This value will be removed in a future version.")]
-        MissingRequestId = MissingRequestName
+        InvalidExpectation
     }
 }

@@ -21,7 +21,7 @@ namespace RESTClient.NET.Core.Processing
         /// <param name="fileVariables">File-level variables</param>
         /// <param name="environmentVariables">Environment variables</param>
         /// <returns>Content with variables resolved</returns>
-        public static string ResolveVariables(
+        public static string? ResolveVariables(
             string? content, 
             IReadOnlyDictionary<string, string>? fileVariables = null,
             IDictionary<string, string>? environmentVariables = null)
@@ -41,7 +41,7 @@ namespace RESTClient.NET.Core.Processing
                     if (fileVariables.TryGetValue(variableName, out var value))
                     {
                         // Recursively resolve variables in the value
-                        return ResolveVariables(value, fileVariables, environmentVariables);
+                        return ResolveVariables(value, fileVariables, environmentVariables) ?? string.Empty;
                     }
 
                     // Return original if variable not found
@@ -58,7 +58,7 @@ namespace RESTClient.NET.Core.Processing
                     
                     if (environmentVariables.TryGetValue(variableName, out var value))
                     {
-                        return value;
+                        return value ?? string.Empty;
                     }
 
                     // Try system environment variables as fallback
@@ -98,8 +98,8 @@ namespace RESTClient.NET.Core.Processing
             var processedRequest = new HttpRequest
             {
                 Name = request.Name,
-                Method = ResolveVariables(request.Method, fileVariables, environmentVariables),
-                Url = ResolveVariables(request.Url, fileVariables, environmentVariables),
+                Method = ResolveVariables(request.Method, fileVariables, environmentVariables) ?? string.Empty,
+                Url = ResolveVariables(request.Url, fileVariables, environmentVariables) ?? string.Empty,
                 Body = ResolveVariables(request.Body, fileVariables, environmentVariables),
                 LineNumber = request.LineNumber
             };
@@ -107,8 +107,8 @@ namespace RESTClient.NET.Core.Processing
             // Process headers
             foreach (var header in request.Headers)
             {
-                var processedName = ResolveVariables(header.Key, fileVariables, environmentVariables);
-                var processedValue = ResolveVariables(header.Value, fileVariables, environmentVariables);
+                var processedName = ResolveVariables(header.Key, fileVariables, environmentVariables) ?? header.Key;
+                var processedValue = ResolveVariables(header.Value, fileVariables, environmentVariables) ?? header.Value;
                 processedRequest.Headers[processedName] = processedValue;
             }
 

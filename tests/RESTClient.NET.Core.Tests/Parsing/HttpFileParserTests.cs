@@ -88,14 +88,14 @@ DELETE http://localhost:5000/api/users/1";
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(3);
 
-            var getRequest = result.GetRequestById("get-users");
+            var getRequest = result.GetRequestByName("get-users");
             getRequest.Method.Should().Be("GET");
 
-            var postRequest = result.GetRequestById("create-user");
+            var postRequest = result.GetRequestByName("create-user");
             postRequest.Method.Should().Be("POST");
             postRequest.Headers["Content-Type"].Should().Be("application/json");
 
-            var deleteRequest = result.GetRequestById("delete-user");
+            var deleteRequest = result.GetRequestByName("delete-user");
             deleteRequest.Method.Should().Be("DELETE");
         }
 
@@ -159,7 +159,7 @@ GET http://localhost:5000/api/users";
         }
 
         [Fact]
-        public async Task ParseAsync_WithDuplicateRequestIds_ShouldThrowDuplicateRequestIdException()
+        public async Task ParseAsync_WithDuplicateRequestNames_ShouldThrowDuplicateRequestNameException()
         {
             // Arrange
             var content = @"### duplicate-id
@@ -177,7 +177,7 @@ POST http://localhost:5000/api/users";
         }
 
         [Fact]
-        public async Task ParseAsync_WithMissingRequestId_ShouldThrowMissingRequestIdException()
+        public async Task ParseAsync_WithMissingRequestName_ShouldThrowMissingRequestNameException()
         {
             // Arrange
             var content = @"###
@@ -195,7 +195,7 @@ GET http://localhost:5000/api/users";
         }
 
         [Fact]
-        public async Task ParseAsync_WithInvalidRequestId_ShouldThrowInvalidRequestIdException()
+        public async Task ParseAsync_WithInvalidRequestName_ShouldThrowInvalidRequestNameException()
         {
             // Arrange
             var content = @"### invalid request id with spaces
@@ -280,7 +280,7 @@ GET http://localhost:5000/api/users
 ### duplicate-id
 POST http://localhost:5000/api/users";
 
-            var options = new HttpParseOptions { ValidateRequestIds = false };
+            var options = new HttpParseOptions { ValidateRequestNames = false };
             var parser = new HttpFileParser();
 
             // Act

@@ -12,7 +12,7 @@ jobs:
     
     strategy:
       matrix:
-        dotnet-version: ['8.0.x']
+        dotnet-version: ['9.0.x']
     
     steps:
     - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
       run: dotnet restore vscode-restclient-dotnet.slnx
       
     - name: Build
-      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release --verbosity minimal
       
     - name: Test
       run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --verbosity normal --logger trx --results-directory TestResults
@@ -49,13 +49,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
         
     - name: Restore dependencies
       run: dotnet restore vscode-restclient-dotnet.slnx
       
     - name: Build
-      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release --verbosity minimal
       
     - name: Test with coverage
       run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
@@ -73,7 +73,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        dotnet-version: ['8.0.x']
+        dotnet-version: ['9.0.x']
     
     steps:
     - name: Checkout code
@@ -88,7 +88,7 @@ jobs:
       run: dotnet restore vscode-restclient-dotnet.slnx
       
     - name: Build
-      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release
+      run: dotnet build vscode-restclient-dotnet.slnx --no-restore --configuration Release --verbosity minimal
       
     - name: Test
       run: dotnet test vscode-restclient-dotnet.slnx --no-build --configuration Release --verbosity normal

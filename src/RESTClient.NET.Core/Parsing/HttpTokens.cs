@@ -67,12 +67,6 @@ namespace RESTClient.NET.Core.Parsing
         RequestName,
 
         /// <summary>
-        /// Request ID
-        /// </summary>
-        [Obsolete("Use RequestName instead. This value will be removed in a future version.")]
-        RequestId = RequestName,
-
-        /// <summary>
         /// HTTP method
         /// </summary>
         Method,
