@@ -7,7 +7,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>RESTClient.NET.Core</PackageId>
-    <PackageVersion>1.0.0-preview.1</PackageVersion>
+    <PackageVersion>1.0.0</PackageVersion>
     <Authors>Meir017</Authors>
     <Description>A C# library for parsing HTTP files compatible with VS Code REST Client format with enhanced request ID functionality</Description>
     <PackageTags>http;rest;parser;vscode;rest-client;api;testing</PackageTags>
@@ -32,3 +32,4 @@
   </ItemGroup>
 
 </Project>
+

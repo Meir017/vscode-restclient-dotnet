@@ -8,7 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>RESTClient.NET.Testing</PackageId>
-    <PackageVersion>1.0.0-preview.1</PackageVersion>
+    <PackageVersion>1.0.0</PackageVersion>
     <Authors>RESTClient.NET Contributors</Authors>
     <Description>ASP.NET Core integration testing framework for RESTClient.NET that uses HTTP files as test data sources</Description>
     <PackageProjectUrl>https://github.com/Meir017/vscode-restclient-dotnet</PackageProjectUrl>
@@ -31,3 +31,4 @@
   </ItemGroup>
 
 </Project>
+
