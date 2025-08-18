@@ -2,7 +2,8 @@
     "chat.tools.terminal.autoApprove": {
         "dotnet": true,
         "git": true,
-        "gh": true
+        "gh": true,
+        "ls": true
     },
     "github.copilot.chat.agent.thinkingTool": true,
     "chat.tools.autoApprove": true,
