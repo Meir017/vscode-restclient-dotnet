@@ -18,10 +18,10 @@ A comprehensive C# library for parsing HTTP files with full [VS Code REST Client
 
 ## 📦 Packages
 
-| Package | Status | Description |
-|---------|--------|-------------|
-| **RESTClient.NET.Core** | ✅ v1.0.0 | Core HTTP file parsing library |
-| **RESTClient.NET.Testing** | ✅ v1.0.0 | ASP.NET Core integration testing framework |
+| Package | Version | Description |
+|---------|---------|-------------|
+| **RESTClient.NET.Core** | [![NuGet](https://img.shields.io/nuget/v/RESTClient.NET.Core.svg)](https://www.nuget.org/packages/RESTClient.NET.Core/) | Core HTTP file parsing library |
+| **RESTClient.NET.Testing** | [![NuGet](https://img.shields.io/nuget/v/RESTClient.NET.Testing.svg)](https://www.nuget.org/packages/RESTClient.NET.Testing/) | ASP.NET Core integration testing framework |
 
 ## 🚀 Quick Start
 
@@ -55,7 +55,53 @@ foreach (var expectation in loginRequest.Metadata.Expectations)
 }
 ```
 
+### ASP.NET Core Integration Testing
+
+```csharp
+using RESTClient.NET.Testing;
+using RESTClient.NET.Testing.Assertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit;
+
+public class ApiIntegrationTests : HttpFileTestBase<Program>
+{
+    public ApiIntegrationTests(WebApplicationFactory<Program> factory) : base(factory) { }
+
+    protected override string GetHttpFilePath() => "HttpFiles/api-requests.http";
+
+    [Theory]
+    [MemberData(nameof(HttpFileTestData))]
+    public async Task ExecuteRequest_ShouldMeetExpectations(HttpTestCase testCase)
+    {
+        // Arrange
+        var client = Factory.CreateClient();
+        var requestMessage = testCase.ToHttpRequestMessage();
+
+        // Act
+        var response = await client.SendAsync(requestMessage);
+
+        // Assert - Framework automatically validates expectations
+        await HttpResponseAssertion.AssertResponse(response, testCase.ExpectedResponse);
+    }
+
+    [Fact]
+    public async Task GetSpecificRequest_ShouldWork()
+    {
+        // Arrange
+        var client = Factory.CreateClient();
+        var testCase = GetTestCase("login");
+
+        // Act
+        var response = await client.SendAsync(testCase.ToHttpRequestMessage());
+
+        // Assert
+        Assert.Equal(200, (int)response.StatusCode);
+    }
+}
+```
+
 ### HTTP File Example
+
 ```http
 @baseUrl = https://api.example.com
 
@@ -77,16 +123,19 @@ X-Request-ID: {{$guid}}
 ## 📖 Documentation
 
 ### Getting Started
+
 - **[📖 Getting Started Guide](docs/GETTING_STARTED.md)** - Complete introduction and setup
 - **[🧪 Integration Testing Guide](docs/INTEGRATION_TESTING.md)** - ASP.NET Core testing patterns
 - **[📚 API Reference](docs/API_REFERENCE.md)** - Complete API documentation
 
 ### Reference
+
 - **[📝 HTTP File Reference](docs/HTTP_FILE_REFERENCE.md)** - Complete syntax reference
 - **[🔧 Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[💼 Sample Projects](samples/)** - Working examples and templates
 
 ### Additional Resources
+
 - **[📋 Implementation Status](docs/IMPLEMENTATION_STATUS.md)** - Current development status
 - **[🔬 Integration Testing Details](docs/INTEGRATION_TESTING_DETAILED.md)** - Comprehensive testing specifications
 - **[📄 Product Requirements (PRD)](PRD.md)** - Detailed project specifications
