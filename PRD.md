@@ -832,7 +832,7 @@ var testRequests = httpFile.Requests
 
 **Optional Dependencies:**
 
-- FluentAssertions (for enhanced assertions)
+- AwesomeAssertions (for enhanced assertions)
 - Bogus (for test data generation)
 - Microsoft.Extensions.Configuration (for configuration support)
 

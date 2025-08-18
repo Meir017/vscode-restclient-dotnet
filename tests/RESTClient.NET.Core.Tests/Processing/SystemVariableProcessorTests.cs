@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using FluentAssertions;
+using AwesomeAssertions;
 using RESTClient.NET.Core.Processing;
 using Xunit;
 

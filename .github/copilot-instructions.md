@@ -70,7 +70,7 @@ Content-Type: application/json
 - **Missing Requests**: `KeyNotFoundException` from `GetRequestByName()`
 
 ### Test Patterns
-- **FluentAssertions**: Primary assertion library (`result.Should().NotBeNull()`)
+- **AwesomeAssertions**: Primary assertion library (`result.Should().NotBeNull()`)
 - **xUnit Theory**: Data-driven tests with `[MemberData]` for HTTP file scenarios
 - **Arrange-Act-Assert**: Consistent test structure across all test files
 

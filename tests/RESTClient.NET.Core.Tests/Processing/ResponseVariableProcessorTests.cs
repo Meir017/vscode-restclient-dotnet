@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using FluentAssertions;
+using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
 using RESTClient.NET.Core.Processing;
 using Xunit;
