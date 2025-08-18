@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using RESTClient.NET.Core.Exceptions;
 using RESTClient.NET.Core.Parsing;
 using Xunit;

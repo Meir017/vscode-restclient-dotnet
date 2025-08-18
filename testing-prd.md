@@ -542,7 +542,7 @@ Authorization: Bearer {{customerToken}}
 <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
 <PackageReference Include="xunit" Version="2.4.2" />
 <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
-<PackageReference Include="FluentAssertions" Version="6.12.0" />
+<PackageReference Include="AwesomeAssertions" Version="9.1.0" />
 <PackageReference Include="Bogus" Version="34.0.2" />
 <PackageReference Include="RESTClient.NET.Core" />
 <PackageReference Include="RESTClient.NET.Testing" />
