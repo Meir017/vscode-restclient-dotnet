@@ -3,7 +3,8 @@
         "dotnet": true,
         "git": true,
         "gh": true,
-        "ls": true
+        "ls": true,
+        "Get-ChildItem": true
     },
     "github.copilot.chat.agent.thinkingTool": true,
     "chat.tools.autoApprove": true,
