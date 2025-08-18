@@ -1,7 +1,7 @@
 {
-    "github.copilot.chat.agent.terminal.allowList": {
+    "chat.tools.terminal.autoApprove": {
         "dotnet": true,
-        "/^git status\\b.*$/": true
+        "git": true
     },
     "github.copilot.chat.agent.thinkingTool": true,
     "chat.tools.autoApprove": true,
