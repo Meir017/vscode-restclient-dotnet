@@ -1,6 +1,11 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using AwesomeAssertions;
+using Microsoft.Extensions.Logging;
 using RESTClient.NET.Core.Exceptions;
 using RESTClient.NET.Core.Parsing;
+using RESTClient.NET.Core.Validation;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Parsing
@@ -315,6 +320,360 @@ POST http://localhost:5000/api/users";
             var request = result.Requests.First();
             request.Method.Should().Be(method);
             request.Url.Should().Be(url);
+        }
+
+        [Fact]
+        public void Parse_WithStream_ShouldParseCorrectly()
+        {
+            // Arrange
+            var content = @"# @name get-users
+GET http://localhost:5000/api/users";
+            
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Parse(stream);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(1);
+            result.Requests.First().Name.Should().Be("get-users");
+        }
+
+        [Fact]
+        public void Parse_WithStreamAndOptions_ShouldParseCorrectly()
+        {
+            // Arrange
+            var content = @"# @name test-request
+POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{""name"": ""John""}";
+            
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+            var options = new HttpParseOptions { ValidateRequestNames = true };
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Parse(stream, options);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(1);
+            result.Requests.First().Name.Should().Be("test-request");
+            result.Requests.First().Body.Should().Contain("John");
+        }
+
+        [Fact]
+        public void Parse_WithNullStream_ShouldThrowArgumentNullException()
+        {
+            // Arrange
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            Action act = () => parser.Parse((Stream)null!);
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("stream");
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithValidFile_ShouldParseCorrectly()
+        {
+            // Arrange
+            var tempFile = Path.GetTempFileName();
+            var content = @"# @name test-file-request
+GET http://localhost:5000/api/test";
+            
+            try
+            {
+                await File.WriteAllTextAsync(tempFile, content);
+                var parser = new HttpFileParser();
+
+                // Act
+                var result = await parser.ParseFileAsync(tempFile);
+
+                // Assert
+                result.Should().NotBeNull();
+                result.Requests.Should().HaveCount(1);
+                result.Requests.First().Name.Should().Be("test-file-request");
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                    File.Delete(tempFile);
+            }
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithValidFileAndOptions_ShouldParseCorrectly()
+        {
+            // Arrange
+            var tempFile = Path.GetTempFileName();
+            var content = @"@baseUrl = http://localhost:5000
+
+# @name test-file-request
+# @expect status 200
+GET {{baseUrl}}/api/test";
+            
+            try
+            {
+                await File.WriteAllTextAsync(tempFile, content);
+                var options = new HttpParseOptions { ValidateRequestNames = true };
+                var parser = new HttpFileParser();
+
+                // Act
+                var result = await parser.ParseFileAsync(tempFile, options);
+
+                // Assert
+                result.Should().NotBeNull();
+                result.Requests.Should().HaveCount(1);
+                result.FileVariables.Should().ContainKey("baseUrl");
+                result.Requests.First().Metadata.Expectations.Should().HaveCount(1);
+            }
+            finally
+            {
+                if (File.Exists(tempFile))
+                    File.Delete(tempFile);
+            }
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithNullPath_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            await FluentActions.Invoking(() => parser.ParseFileAsync(null!))
+                .Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*filePath*");
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithEmptyPath_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            await FluentActions.Invoking(() => parser.ParseFileAsync(""))
+                .Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*filePath*");
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithWhitespacePath_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            await FluentActions.Invoking(() => parser.ParseFileAsync("   "))
+                .Should().ThrowAsync<ArgumentException>()
+                .WithMessage("*filePath*");
+        }
+
+        [Fact]
+        public async Task ParseFileAsync_WithNonExistentFile_ShouldThrowFileNotFoundException()
+        {
+            // Arrange
+            var parser = new HttpFileParser();
+            var nonExistentPath = "non-existent-file-" + Guid.NewGuid() + ".http";
+
+            // Act & Assert
+            await FluentActions.Invoking(() => parser.ParseFileAsync(nonExistentPath))
+                .Should().ThrowAsync<FileNotFoundException>()
+                .WithMessage($"*{nonExistentPath}*");
+        }
+
+        [Fact]
+        public void Validate_WithValidContent_ShouldReturnValidResult()
+        {
+            // Arrange
+            var content = @"# @name test-request
+GET http://localhost:5000/api/users";
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Validate(content);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.IsValid.Should().BeTrue();
+            result.Errors.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Validate_WithValidContentAndOptions_ShouldReturnValidResult()
+        {
+            // Arrange
+            var content = @"@baseUrl = http://localhost:5000
+
+# @name get-users
+# @expect status 200
+GET {{baseUrl}}/api/users";
+            var options = new HttpParseOptions { ValidateRequestNames = true };
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Validate(content, options);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.IsValid.Should().BeTrue();
+            result.Errors.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Validate_WithParsingError_ShouldReturnInvalidResult()
+        {
+            // Arrange
+            var content = @"# @name test-request
+INVALID_HTTP_LINE";
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Validate(content);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void Parse_WithStrictModeAndValidationFailure_ShouldThrowDuplicateRequestNameException()
+        {
+            // Arrange
+            var content = @"### duplicate-name
+GET http://localhost:5000/api/users
+
+### duplicate-name
+POST http://localhost:5000/api/users";
+            
+            var options = new HttpParseOptions 
+            { 
+                StrictMode = true,
+                ValidateRequestNames = true
+            };
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            Action act = () => parser.Parse(content, options);
+            act.Should().Throw<DuplicateRequestNameException>()
+                .WithMessage("*duplicate-name*");
+        }
+
+        [Fact]
+        public void Parse_WithValidationDisabledAndDuplicateNames_ShouldNotThrow()
+        {
+            // Arrange
+            var content = @"### duplicate-name
+GET http://localhost:5000/api/users
+
+### duplicate-name
+POST http://localhost:5000/api/users";
+            
+            var options = new HttpParseOptions 
+            { 
+                StrictMode = false,
+                ValidateRequestNames = false
+            };
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Parse(content, options);
+
+            // Assert - should not throw, duplicates are allowed
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void Parse_WithStrictModeAndPostParsingValidationFailure_ShouldThrowHttpParseException()
+        {
+            // Arrange - content that parses fine but has validation issues
+            var content = @"### very-long-request-name-that-exceeds-the-fifty-character-limit-for-request-names
+GET http://localhost:5000/api/users";
+            
+            var options = new HttpParseOptions 
+            { 
+                StrictMode = true,
+                ValidateRequestNames = false // Allow parsing, but validate after
+            };
+            var parser = new HttpFileParser();
+
+            // Act & Assert
+            Action act = () => parser.Parse(content, options);
+            act.Should().Throw<HttpParseException>()
+                .WithMessage("*Validation failed*");
+        }
+
+        [Fact]
+        public void Parse_WithValidationEnabledButNotStrictMode_ShouldLogWarningButNotThrow()
+        {
+            // Arrange - content with validation warnings but not errors
+            var content = @"### test-request
+GET http://localhost:5000/api users with spaces";
+            
+            var options = new HttpParseOptions 
+            { 
+                StrictMode = false,
+                ValidateRequestNames = false // Allow parsing to succeed
+            };
+            var parser = new HttpFileParser();
+
+            // Act
+            var result = parser.Parse(content, options);
+
+            // Assert - should not throw, warnings are ignored in non-strict mode
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void Constructor_WithCustomDependencies_ShouldInitializeCorrectly()
+        {
+            // Arrange
+            var mockTokenizer = new HttpTokenizer();
+            var mockSyntaxParser = new HttpSyntaxParser();
+            var mockValidator = new HttpFileValidator();
+            using var loggerFactory = LoggerFactory.Create(builder => { });
+            var logger = loggerFactory.CreateLogger<HttpFileParser>();
+
+            // Act
+            var parser = new HttpFileParser(mockTokenizer, mockSyntaxParser, mockValidator, logger);
+
+            // Assert
+            parser.Should().NotBeNull();
+            
+            // Test that it works with custom dependencies
+            var content = @"# @name test
+GET http://localhost:5000";
+            var result = parser.Parse(content);
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public void Parse_WithLoggerEnabled_ShouldParseSuccessfully()
+        {
+            // Arrange
+            var content = @"# @name test-with-logger
+GET http://localhost:5000/api/test";
+            
+            using var loggerFactory = LoggerFactory.Create(builder => { });
+            var logger = loggerFactory.CreateLogger<HttpFileParser>();
+            var parser = new HttpFileParser(logger: logger);
+
+            // Act
+            var result = parser.Parse(content);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Requests.Should().HaveCount(1);
+            result.Requests.First().Name.Should().Be("test-with-logger");
         }
     }
 }
