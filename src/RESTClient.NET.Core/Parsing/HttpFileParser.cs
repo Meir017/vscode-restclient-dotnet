@@ -8,8 +8,45 @@ using RESTClient.NET.Core.Validation;
 namespace RESTClient.NET.Core.Parsing
 {
     /// <summary>
-    /// Main entry point for parsing HTTP files
+    /// Main entry point for parsing HTTP files into structured objects.
+    /// Provides comprehensive parsing of VS Code REST Client (.http) files with enhanced metadata support.
     /// </summary>
+    /// <remarks>
+    /// <para>The HttpFileParser orchestrates the parsing pipeline:</para>
+    /// <list type="number">
+    /// <item>Tokenization: Breaks content into structured tokens</item>
+    /// <item>Syntax parsing: Applies VS Code REST Client syntax rules</item>
+    /// <item>Validation: Ensures request names are unique and valid</item>
+    /// <item>Processing: Resolves variables and metadata</item>
+    /// </list>
+    /// <para>Supports enhanced metadata comments like <c># @name</c>, <c># @expect-status</c>, and <c># @expect-header</c>.</para>
+    /// <para>Compatible with traditional <c>###</c> separators and modern <c># @name</c> identification.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var parser = new HttpFileParser();
+    /// 
+    /// var content = @"
+    /// @baseUrl = https://api.example.com
+    /// 
+    /// # @name get-users
+    /// # @expect status 200
+    /// GET {{baseUrl}}/users HTTP/1.1
+    /// Authorization: Bearer {{token}}
+    /// 
+    /// # @name create-user
+    /// # @expect status 201
+    /// POST {{baseUrl}}/users HTTP/1.1
+    /// Content-Type: application/json
+    /// 
+    /// {""name"": ""John Doe""}";
+    /// 
+    /// var httpFile = parser.Parse(content);
+    /// var getUsersRequest = httpFile.GetRequestByName("get-users");
+    /// Console.WriteLine($"Method: {getUsersRequest.Method}");
+    /// Console.WriteLine($"URL: {getUsersRequest.Url}");
+    /// </code>
+    /// </example>
     public class HttpFileParser
     {
         private readonly IHttpTokenizer _tokenizer;

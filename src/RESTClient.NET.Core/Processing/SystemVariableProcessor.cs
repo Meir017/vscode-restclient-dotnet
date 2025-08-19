@@ -7,9 +7,58 @@ using System.Text.RegularExpressions;
 namespace RESTClient.NET.Core.Processing
 {
     /// <summary>
-    /// Processes built-in system variables ({{$variableName}})
-    /// Compatible with VS Code REST Client system variables
+    /// Processes built-in system variables ({{$variableName}}) that provide dynamic values.
+    /// Compatible with VS Code REST Client system variables.
     /// </summary>
+    /// <remarks>
+    /// <para>Supported system variables:</para>
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Variable</term>
+    /// <description>Description</description>
+    /// </listheader>
+    /// <item>
+    /// <term><c>{{$guid}}</c></term>
+    /// <description>Generates a RFC 4122 v4 UUID</description>
+    /// </item>
+    /// <item>
+    /// <term><c>{{$randomInt min max}}</c></term>
+    /// <description>Random integer between min (inclusive) and max (exclusive)</description>
+    /// </item>
+    /// <item>
+    /// <term><c>{{$timestamp [offset]}}</c></term>
+    /// <description>UTC timestamp in seconds, with optional time offset</description>
+    /// </item>
+    /// <item>
+    /// <term><c>{{$datetime format [offset]}}</c></term>
+    /// <description>Formatted datetime string (iso8601, rfc1123, or custom format)</description>
+    /// </item>
+    /// <item>
+    /// <term><c>{{$localDatetime format [offset]}}</c></term>
+    /// <description>Local timezone datetime string</description>
+    /// </item>
+    /// </list>
+    /// <para>Time offsets support: y (year), M (month), w (week), d (day), h (hour), m (minute), s (second), ms (millisecond)</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var content = @"
+    /// POST /api/users HTTP/1.1
+    /// X-Request-ID: {{$guid}}
+    /// Content-Type: application/json
+    /// 
+    /// {
+    ///   ""id"": ""{{$guid}}"",
+    ///   ""timestamp"": {{$timestamp}},
+    ///   ""score"": {{$randomInt 1 100}},
+    ///   ""created"": ""{{$datetime iso8601}}"",
+    ///   ""expires"": ""{{$datetime iso8601 1 d}}""
+    /// }";
+    /// 
+    /// var resolved = SystemVariableProcessor.ResolveSystemVariables(content);
+    /// // All {{$...}} variables will be replaced with actual values
+    /// </code>
+    /// </example>
     public static class SystemVariableProcessor
     {
         private static readonly Regex SystemVariableRegex = new Regex(

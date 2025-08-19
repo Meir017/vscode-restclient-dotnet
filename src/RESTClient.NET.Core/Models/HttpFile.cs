@@ -5,8 +5,47 @@ using System.Linq;
 namespace RESTClient.NET.Core.Models
 {
     /// <summary>
-    /// Represents an HTTP file containing multiple HTTP requests with enhanced request ID functionality
+    /// Represents an HTTP file containing multiple HTTP requests with enhanced metadata and name-based lookup.
+    /// Provides the primary container for parsed VS Code REST Client (.http) files.
     /// </summary>
+    /// <remarks>
+    /// <para>HttpFile serves as the root container for parsed HTTP files with the following features:</para>
+    /// <list type="bullet">
+    /// <item>Name-based request lookup via <see cref="GetRequestByName"/> and <see cref="TryGetRequestByName"/></item>
+    /// <item>File-level variable storage and resolution</item>
+    /// <item>Request metadata preservation (expect comments, custom headers)</item>
+    /// <item>First-occurrence-wins policy for duplicate request names</item>
+    /// </list>
+    /// <para>Request names are case-sensitive and must follow the pattern: <c>^[a-zA-Z0-9_-]+$</c></para>
+    /// <para>File variables are processed before individual requests and available for variable substitution.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Parse an HTTP file
+    /// var parser = new HttpFileParser();
+    /// var httpFile = parser.Parse(httpFileContent);
+    /// 
+    /// // Access requests by name
+    /// var loginRequest = httpFile.GetRequestByName("login-user");
+    /// var profileRequest = httpFile.GetRequestByName("get-profile");
+    /// 
+    /// // Check if request exists
+    /// if (httpFile.TryGetRequestByName("optional-request", out var request))
+    /// {
+    ///     Console.WriteLine($"Found request: {request.Method} {request.Url}");
+    /// }
+    /// 
+    /// // Access file variables
+    /// var baseUrl = httpFile.FileVariables["baseUrl"];
+    /// Console.WriteLine($"API base URL: {baseUrl}");
+    /// 
+    /// // Iterate all requests
+    /// foreach (var req in httpFile.Requests)
+    /// {
+    ///     Console.WriteLine($"{req.Name}: {req.Method} {req.Url}");
+    /// }
+    /// </code>
+    /// </example>
     public class HttpFile
     {
         /// <summary>
