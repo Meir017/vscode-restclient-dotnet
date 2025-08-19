@@ -14,6 +14,7 @@ namespace RESTClient.NET.Core.Parsing
         private static readonly Regex MetadataCommentRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
         private static readonly Regex CommentRegex = new Regex(@"^(?:#|\/{2})(.*)$", RegexOptions.Compiled);
         private static readonly Regex HttpMethodRegex = new Regex(@"^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|LOCK|UNLOCK|PROPFIND|PROPPATCH|COPY|MOVE|MKCOL|MKCALENDAR|ACL|SEARCH)\s+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex FileBodyRegex = new Regex(@"^<(@\s*([a-zA-Z0-9-]+)?\s*)?(.+)$", RegexOptions.Compiled);
 
         /// <inheritdoc />
         public IEnumerable<HttpToken> Tokenize(string content)
@@ -45,9 +46,10 @@ namespace RESTClient.NET.Core.Parsing
                             var nextLine = lines[j].Trim();
                             if (!string.IsNullOrWhiteSpace(nextLine))
                             {
-                                // If it starts with {, [, or other body-like content, we're in body
+                                // If it starts with {, [, <@ (file body with variables), < (file body), or other body-like content, we're in body
                                 if (nextLine.StartsWith("{") || nextLine.StartsWith("[") || 
-                                    nextLine.StartsWith("<") || !nextLine.Contains(":"))
+                                    nextLine.StartsWith("<@") || nextLine.StartsWith("<") ||
+                                    !nextLine.Contains(":"))
                                 {
                                     isInBodySection = true;
                                 }
@@ -109,9 +111,36 @@ namespace RESTClient.NET.Core.Parsing
                     continue;
                 }
 
-                // If we're in body section, everything is body content
+                // If we're in body section, check for file body references first
                 if (isInBodySection)
                 {
+                    // Check for file body reference (< filepath, <@ filepath, <@encoding filepath)
+                    var fileBodyMatch = FileBodyRegex.Match(trimmedLine);
+                    if (fileBodyMatch.Success)
+                    {
+                        var atPart = fileBodyMatch.Groups[1].Value; // The "@..." part including optional encoding
+                        var encodingPart = fileBodyMatch.Groups[2].Value; // The encoding part after @
+                        var filePath = fileBodyMatch.Groups[3].Value.Trim(); // The file path
+                        
+                        if (string.IsNullOrEmpty(atPart))
+                        {
+                            // Raw file body: < filepath
+                            yield return new HttpToken(HttpTokenType.FileBody, filePath, lineNumber, 1);
+                        }
+                        else if (string.IsNullOrEmpty(encodingPart))
+                        {
+                            // File body with variables: <@ filepath
+                            yield return new HttpToken(HttpTokenType.FileBodyWithVariables, filePath, lineNumber, 1);
+                        }
+                        else
+                        {
+                            // File body with encoding: <@encoding filepath
+                            yield return new HttpToken(HttpTokenType.FileBodyWithEncoding, $"{encodingPart}|{filePath}", lineNumber, 1);
+                        }
+                        continue;
+                    }
+                    
+                    // Everything else is regular body content
                     yield return new HttpToken(HttpTokenType.Body, line, lineNumber, 1);
                     continue;
                 }

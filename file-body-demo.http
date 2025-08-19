@@ -1,0 +1,47 @@
+# RESTClient.NET File Body Demo
+# This file demonstrates the new file body functionality
+
+@baseUrl = https://api.example.com
+@token = your-auth-token-here
+
+# @name upload-raw-xml
+# @expect status 201
+# @expect header Location
+POST {{baseUrl}}/upload/xml
+Content-Type: application/xml
+Authorization: Bearer {{token}}
+
+< ./sample-data.xml
+
+# @name upload-template-json
+# @expect status 200
+# @expect body-contains "processed"
+POST {{baseUrl}}/process/template
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+<@ ./request-template.json
+
+# @name upload-latin1-text
+# @expect status 202
+POST {{baseUrl}}/upload/text
+Content-Type: text/plain; charset=iso-8859-1
+Authorization: Bearer {{token}}
+
+<@latin1 ./legacy-data.txt
+
+# @name upload-utf8-with-encoding
+# @expect status 200
+POST {{baseUrl}}/upload/utf8
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{token}}
+
+<@utf8 ./unicode-data.json
+
+# @name upload-windows-encoding
+# @expect status 200
+POST {{baseUrl}}/upload/windows
+Content-Type: text/plain; charset=windows-1252
+Authorization: Bearer {{token}}
+
+<@windows1252 ./windows-data.txt

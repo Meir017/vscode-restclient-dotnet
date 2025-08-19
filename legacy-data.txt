@@ -1,0 +1,6 @@
+Thîs ïs a légacy têxt fîlë wîth ISO-8859-1 ëncödïng.
+Ït cöntaïns spëcïal chäractërs thät nëëd të bë häandlëd cörrëctly.
+
+Variäblës will bë pröcëssëd: {{baseUrl}} and {{token}}
+
+Spëcïal chäractërs: àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ

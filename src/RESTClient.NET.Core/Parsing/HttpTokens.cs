@@ -97,6 +97,21 @@ namespace RESTClient.NET.Core.Parsing
         Body,
 
         /// <summary>
+        /// File body reference without variable processing (&lt; filepath)
+        /// </summary>
+        FileBody,
+
+        /// <summary>
+        /// File body reference with variable processing (&lt;@ filepath)
+        /// </summary>
+        FileBodyWithVariables,
+
+        /// <summary>
+        /// File body reference with encoding and variable processing (&lt;@encoding filepath)
+        /// </summary>
+        FileBodyWithEncoding,
+
+        /// <summary>
         /// Comment line
         /// </summary>
         Comment,

@@ -71,6 +71,16 @@ namespace RESTClient.NET.Core.Models
         public string? Body { get; set; }
 
         /// <summary>
+        /// Gets or sets the file body reference for external body content
+        /// </summary>
+        /// <remarks>
+        /// When this property is set, the Body property should be null.
+        /// File body references allow loading request body content from external files
+        /// with optional variable processing and custom encoding support.
+        /// </remarks>
+        public FileBodyReference? FileBodyReference { get; set; }
+
+        /// <summary>
         /// Gets the request metadata and settings
         /// </summary>
         public HttpRequestMetadata Metadata { get; }

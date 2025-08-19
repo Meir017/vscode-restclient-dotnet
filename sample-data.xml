@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <item id="1">
+        <name>Sample Item</name>
+        <description>This is a raw XML file loaded without variable processing</description>
+        <value>42</value>
+    </item>
+    <item id="2">
+        <name>Another Item</name>
+        <description>Static content from external file</description>
+        <value>123</value>
+    </item>
+</data>
