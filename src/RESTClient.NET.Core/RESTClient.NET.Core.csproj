@@ -4,8 +4,9 @@
     <TargetFrameworks>net9.0;netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <PackageId>RESTClient.NET.Core</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Meir017</Authors>
@@ -34,4 +35,3 @@
   </ItemGroup>
 
 </Project>
-

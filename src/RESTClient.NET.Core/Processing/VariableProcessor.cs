@@ -7,8 +7,41 @@ using RESTClient.NET.Core.Models;
 namespace RESTClient.NET.Core.Processing
 {
     /// <summary>
-    /// Processes and resolves variables in HTTP files
+    /// Processes and resolves variables in HTTP files using a three-pass approach.
     /// </summary>
+    /// <remarks>
+    /// <para>Variable Resolution Order:</para>
+    /// <list type="number">
+    /// <item><description>File variables: <c>{{variable}}</c> defined as <c>@variable = value</c></description></item>
+    /// <item><description>Environment variables: <c>${variable}</c> from environment or provided dictionary</description></item>
+    /// <item><description>System variables: <c>{{$variable}}</c> for dynamic values like GUIDs and timestamps</description></item>
+    /// </list>
+    /// <para>Supported system variables:</para>
+    /// <list type="bullet">
+    /// <item><description><c>{{$guid}}</c> - RFC 4122 v4 UUID</description></item>
+    /// <item><description><c>{{$randomInt min max}}</c> - Random integer</description></item>
+    /// <item><description><c>{{$timestamp [offset option]}}</c> - UTC timestamp</description></item>
+    /// <item><description><c>{{$datetime format [offset option]}}</c> - Formatted datetime</description></item>
+    /// </list>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var fileVariables = new Dictionary&lt;string, string&gt;
+    /// {
+    ///     ["baseUrl"] = "https://api.example.com",
+    ///     ["version"] = "v1"
+    /// };
+    /// 
+    /// var envVariables = new Dictionary&lt;string, string&gt;
+    /// {
+    ///     ["API_KEY"] = "secret-key"
+    /// };
+    /// 
+    /// var content = "{{baseUrl}}/{{version}}/users?key=${API_KEY}&amp;id={{$guid}}";
+    /// var resolved = VariableProcessor.ResolveVariables(content, fileVariables, envVariables);
+    /// // Result: "https://api.example.com/v1/users?key=secret-key&amp;id=123e4567-e89b-12d3-a456-426614174000"
+    /// </code>
+    /// </example>
     public static class VariableProcessor
     {
         private static readonly Regex VariableReferenceRegex = new Regex(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
@@ -21,9 +54,18 @@ namespace RESTClient.NET.Core.Processing
         /// 3. System variables ({{$variable}})
         /// </summary>
         /// <param name="content">The content to process</param>
-        /// <param name="fileVariables">File-level variables</param>
-        /// <param name="environmentVariables">Environment variables</param>
-        /// <returns>Content with variables resolved</returns>
+        /// <param name="fileVariables">File-level variables defined in the HTTP file</param>
+        /// <param name="environmentVariables">Environment variables for resolution</param>
+        /// <returns>Content with variables resolved, or the original content if null/empty</returns>
+        /// <example>
+        /// <code>
+        /// var content = "GET {{baseUrl}}/api/users/{{userId}}";
+        /// var fileVars = new Dictionary&lt;string, string&gt; { ["baseUrl"] = "https://api.com" };
+        /// var envVars = new Dictionary&lt;string, string&gt; { ["userId"] = "123" };
+        /// var result = VariableProcessor.ResolveVariables(content, fileVars, envVars);
+        /// // Result: "GET https://api.com/api/users/123"
+        /// </code>
+        /// </example>
         public static string? ResolveVariables(
             string? content, 
             IReadOnlyDictionary<string, string>? fileVariables = null,

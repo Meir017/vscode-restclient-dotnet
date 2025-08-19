@@ -11,8 +11,46 @@ using RESTClient.NET.Core.Validation;
 namespace RESTClient.NET.Core
 {
     /// <summary>
-    /// Main facade for parsing and processing HTTP files
+    /// Main facade for parsing and processing HTTP files with comprehensive variable resolution and validation.
+    /// Provides the primary entry point for all HTTP file operations in RESTClient.NET.
     /// </summary>
+    /// <remarks>
+    /// <para>HttpFileProcessor serves as the main orchestrator for HTTP file processing:</para>
+    /// <list type="number">
+    /// <item>File parsing: Reads and parses .http files from disk or content strings</item>
+    /// <item>Variable resolution: Processes file variables and system variables</item>
+    /// <item>Validation: Ensures request names and syntax compliance</item>
+    /// <item>Error handling: Provides detailed parsing and validation error information</item>
+    /// </list>
+    /// <para>Supports both synchronous and asynchronous operations for different usage scenarios.</para>
+    /// <para>Integrates with Microsoft.Extensions.Logging for comprehensive operation tracking.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Basic usage with file path
+    /// var processor = new HttpFileProcessor();
+    /// var httpFile = await processor.ParseFileAsync("api-tests.http");
+    /// 
+    /// // With logging and custom validation
+    /// var logger = serviceProvider.GetService&lt;ILogger&lt;HttpFileProcessor&gt;&gt;();
+    /// var validator = new CustomHttpFileValidator();
+    /// var processor = new HttpFileProcessor(logger, validator);
+    /// 
+    /// // Parse from content string
+    /// var content = @"
+    /// @baseUrl = https://api.example.com
+    /// 
+    /// # @name health-check
+    /// GET {{baseUrl}}/health HTTP/1.1";
+    /// 
+    /// var httpFile = processor.ParseContent(content);
+    /// var healthCheck = httpFile.GetRequestByName("health-check");
+    /// 
+    /// // Process with variable resolution
+    /// var processedFile = await processor.ProcessFileAsync("complex-api.http", 
+    ///     new HttpParseOptions { ResolveVariables = true });
+    /// </code>
+    /// </example>
     public class HttpFileProcessor
     {
         private readonly HttpFileParser _parser;

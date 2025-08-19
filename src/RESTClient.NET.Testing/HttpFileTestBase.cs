@@ -16,9 +16,53 @@ using Xunit;
 namespace RESTClient.NET.Testing
 {
     /// <summary>
-    /// Abstract base class for HTTP file-driven integration tests with ASP.NET Core
+    /// Abstract base class for HTTP file-driven integration tests with ASP.NET Core.
+    /// Provides comprehensive integration testing capabilities using VS Code REST Client files.
     /// </summary>
-    /// <typeparam name="TProgram">The program type for the ASP.NET Core application</typeparam>
+    /// <typeparam name="TProgram">The program type for the ASP.NET Core application under test</typeparam>
+    /// <remarks>
+    /// <para>HttpFileTestBase enables data-driven integration testing using HTTP files:</para>
+    /// <list type="bullet">
+    /// <item>Automatic HTTP file parsing and request execution</item>
+    /// <item>Built-in expectation validation (status codes, headers, body content)</item>
+    /// <item>xUnit integration with <see cref="HttpFileTestData"/> for parameterized tests</item>
+    /// <item>WebApplicationFactory integration for ASP.NET Core testing</item>
+    /// <item>Comprehensive assertion methods for response validation</item>
+    /// </list>
+    /// <para>Override <see cref="GetHttpFilePath"/> to specify your HTTP file location.</para>
+    /// <para>Use <c>[MemberData(nameof(HttpFileTestData))]</c> to run tests for each named request.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// public class ApiIntegrationTests : HttpFileTestBase&lt;Program&gt;
+    /// {
+    ///     public ApiIntegrationTests(WebApplicationFactory&lt;Program&gt; factory) : base(factory) { }
+    /// 
+    ///     protected override string GetHttpFilePath() =&gt; "HttpFiles/api-tests.http";
+    /// 
+    ///     [Theory]
+    ///     [MemberData(nameof(HttpFileTestData))]
+    ///     public async Task ExecuteHttpFileTest(string requestName, HttpRequest request)
+    ///     {
+    ///         // Execute the request and validate expectations
+    ///         var result = await ExecuteRequestAsync(requestName);
+    ///         
+    ///         // Additional custom assertions
+    ///         Assert.True(result.IsSuccess);
+    ///         Assert.NotNull(result.Response);
+    ///     }
+    /// 
+    ///     [Fact]
+    ///     public async Task SpecificEndpointTest()
+    ///     {
+    ///         var result = await ExecuteRequestAsync("get-users");
+    ///         
+    ///         result.Response.Should().HaveStatusCode(200);
+    ///         result.Response.Should().HaveHeader("Content-Type", "application/json");
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     public abstract class HttpFileTestBase<TProgram> : IClassFixture<WebApplicationFactory<TProgram>>, IDisposable
         where TProgram : class
     {
