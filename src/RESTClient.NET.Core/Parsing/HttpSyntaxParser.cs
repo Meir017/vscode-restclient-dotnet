@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using RESTClient.NET.Core.Exceptions;
 using RESTClient.NET.Core.Models;
@@ -127,6 +128,9 @@ namespace RESTClient.NET.Core.Parsing
                     case HttpTokenType.HeaderName:
                     case HttpTokenType.HeaderValue:
                     case HttpTokenType.Body:
+                    case HttpTokenType.FileBody:
+                    case HttpTokenType.FileBodyWithVariables:
+                    case HttpTokenType.FileBodyWithEncoding:
                         if (isParsingRequest)
                         {
                             currentRequestTokens.Add(token);
@@ -284,6 +288,7 @@ namespace RESTClient.NET.Core.Parsing
             var url = string.Empty;
             var headers = new Dictionary<string, string>();
             var bodyLines = new List<string>();
+            var fileBodyReference = (FileBodyReference?)null;
             var isInBody = false;
             var lineNumber = tokens.FirstOrDefault()?.LineNumber ?? 0;
 
@@ -332,6 +337,34 @@ namespace RESTClient.NET.Core.Parsing
                         bodyLines.Add(token.Value);
                         break;
 
+                    case HttpTokenType.FileBody:
+                        isInBody = true;
+                        fileBodyReference = FileBodyReference.Raw(token.Value, token.LineNumber);
+                        break;
+
+                    case HttpTokenType.FileBodyWithVariables:
+                        isInBody = true;
+                        fileBodyReference = FileBodyReference.WithVariables(token.Value, token.LineNumber);
+                        break;
+
+                    case HttpTokenType.FileBodyWithEncoding:
+                        isInBody = true;
+                        var parts = token.Value.Split(new[] { '|' }, 2);
+                        var encodingName = parts.Length > 0 ? parts[0] : "utf-8";
+                        var filePath = parts.Length > 1 ? parts[1] : token.Value;
+                        
+                        try
+                        {
+                            var encoding = GetEncodingByName(encodingName);
+                            fileBodyReference = FileBodyReference.WithVariablesAndEncoding(filePath, encoding, token.LineNumber);
+                        }
+                        catch (ArgumentException)
+                        {
+                            // If encoding is not recognized, fall back to UTF-8
+                            fileBodyReference = FileBodyReference.WithVariables(filePath, token.LineNumber);
+                        }
+                        break;
+
                     case HttpTokenType.LineBreak:
                         if (isInBody)
                         {
@@ -368,6 +401,7 @@ namespace RESTClient.NET.Core.Parsing
                 Method = method,
                 Url = url,
                 Body = body,
+                FileBodyReference = fileBodyReference,
                 LineNumber = lineNumber
             };
 
@@ -384,6 +418,42 @@ namespace RESTClient.NET.Core.Parsing
             }
 
             return request;
+        }
+
+        /// <summary>
+        /// Gets an encoding by name, supporting common encoding names used in VS Code REST Client
+        /// </summary>
+        /// <param name="encodingName">The encoding name (e.g., "utf8", "latin1", "ascii")</param>
+        /// <returns>The corresponding Encoding instance</returns>
+        /// <exception cref="ArgumentException">Thrown when the encoding name is not recognized</exception>
+        private static Encoding GetEncodingByName(string encodingName)
+        {
+            var normalizedName = encodingName.ToLowerInvariant().Replace("-", "").Replace("_", "");
+
+            switch (normalizedName)
+            {
+                case "utf8":
+                case "utf-8":
+                    return Encoding.UTF8;
+                case "utf16":
+                case "utf-16":
+                    return Encoding.Unicode;
+                case "utf32":
+                case "utf-32":
+                    return Encoding.UTF32;
+                case "ascii":
+                case "us-ascii":
+                    return Encoding.ASCII;
+                case "latin1":
+                case "iso-8859-1":
+                case "iso88591":
+                    return Encoding.GetEncoding("ISO-8859-1");
+                case "windows1252":
+                case "cp1252":
+                    return Encoding.GetEncoding("windows-1252");
+                default:
+                    throw new ArgumentException($"Unsupported encoding: {encodingName}", nameof(encodingName));
+            }
         }
     }
 }

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "timestamp": "{{$timestamp}}",
+    "base_url": "{{baseUrl}}",
+    "auth_token": "{{token}}"
+  },
+  "data": {
+    "message": "This template will have variables processed",
+    "user_agent": "RESTClient.NET/{{$randomInt}}",
+    "environment": "{{$env}}"
+  },
+  "metadata": {
+    "request_id": "{{$guid}}",
+    "processing_enabled": true
+  }
+}
