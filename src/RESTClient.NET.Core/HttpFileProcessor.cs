@@ -30,24 +30,24 @@ namespace RESTClient.NET.Core
     /// // Basic usage with file path
     /// var processor = new HttpFileProcessor();
     /// var httpFile = await processor.ParseFileAsync("api-tests.http");
-    /// 
+    ///
     /// // With logging and custom validation
     /// var logger = serviceProvider.GetService&lt;ILogger&lt;HttpFileProcessor&gt;&gt;();
     /// var validator = new CustomHttpFileValidator();
     /// var processor = new HttpFileProcessor(logger, validator);
-    /// 
+    ///
     /// // Parse from content string
     /// var content = @"
     /// @baseUrl = https://api.example.com
-    /// 
+    ///
     /// # @name health-check
     /// GET {{baseUrl}}/health HTTP/1.1";
-    /// 
+    ///
     /// var httpFile = processor.ParseContent(content);
     /// var healthCheck = httpFile.GetRequestByName("health-check");
-    /// 
+    ///
     /// // Process with variable resolution
-    /// var processedFile = await processor.ProcessFileAsync("complex-api.http", 
+    /// var processedFile = await processor.ProcessFileAsync("complex-api.http",
     ///     new HttpParseOptions { ResolveVariables = true });
     /// </code>
     /// </example>

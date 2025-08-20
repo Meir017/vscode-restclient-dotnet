@@ -53,7 +53,7 @@ namespace RESTClient.NET.Core.Parsing
                         // Extract request name from ### <name> pattern
                         var separatorLine = token.Value.Trim();
                         var separatorParts = separatorLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                        
+
                         if (separatorParts.Length > 1)
                         {
                             currentRequestName = string.Join("-", separatorParts.Skip(1)).Trim();
@@ -84,7 +84,7 @@ namespace RESTClient.NET.Core.Parsing
 
                     case HttpTokenType.Metadata:
                         ParseMetadata(token.Value, currentMetadata);
-                        
+
                         // Check if this is a @name declaration - start of new request
                         var nameMatch = _metadataRegex.Match(token.Value);
                         if (nameMatch.Success && nameMatch.Groups[1].Value.ToLowerInvariant() == "name")
@@ -101,7 +101,7 @@ namespace RESTClient.NET.Core.Parsing
 
                             // Start new request
                             currentRequestName = nameMatch.Groups[2].Value.Trim();
-                            
+
                             // Validate duplicate names if enabled
                             if (options.ValidateRequestNames && !string.IsNullOrEmpty(currentRequestName))
                             {
@@ -114,7 +114,7 @@ namespace RESTClient.NET.Core.Parsing
                                 }
                                 requestNamePositions[currentRequestName] = token.LineNumber;
                             }
-                            
+
                             currentRequestTokens.Clear();
                             currentMetadata = new HttpRequestMetadata();
                             ParseMetadata(token.Value, currentMetadata); // Re-parse to capture the name
@@ -238,10 +238,10 @@ namespace RESTClient.NET.Core.Parsing
             if (string.IsNullOrWhiteSpace(expectationValue)) return;
 
             // Support both formats: "status 200" and "status: 200"
-            var parts = expectationValue.Contains(':') 
+            var parts = expectationValue.Contains(':')
                 ? expectationValue.Split(new[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries)
                 : expectationValue.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                
+
             if (parts.Length != 2) return;
 
             var expectationType = parts[0].Trim().ToLowerInvariant();
@@ -336,7 +336,7 @@ namespace RESTClient.NET.Core.Parsing
                         var parts = token.Value.Split(new[] { '|' }, 2);
                         var encodingName = parts.Length > 0 ? parts[0] : "utf-8";
                         var filePath = parts.Length > 1 ? parts[1] : token.Value;
-                        
+
                         try
                         {
                             var encoding = GetEncodingByName(encodingName);
@@ -359,9 +359,9 @@ namespace RESTClient.NET.Core.Parsing
                             // Check if this is the transition to body
                             var nextNonWhitespaceToken = tokens.Skip(i + 1)
                                 .FirstOrDefault(t => t.Type != HttpTokenType.Whitespace && t.Type != HttpTokenType.LineBreak);
-                            
+
                             if (nextNonWhitespaceToken?.Type == HttpTokenType.Body ||
-                                (nextNonWhitespaceToken != null && 
+                                (nextNonWhitespaceToken != null &&
                                  nextNonWhitespaceToken.Type != HttpTokenType.HeaderName &&
                                  nextNonWhitespaceToken.Type != HttpTokenType.Method &&
                                  nextNonWhitespaceToken.Type != HttpTokenType.Url))

@@ -25,22 +25,22 @@ namespace RESTClient.NET.Core.Parsing
     /// <example>
     /// <code>
     /// var parser = new HttpFileParser();
-    /// 
+    ///
     /// var content = @"
     /// @baseUrl = https://api.example.com
-    /// 
+    ///
     /// # @name get-users
     /// # @expect status 200
     /// GET {{baseUrl}}/users HTTP/1.1
     /// Authorization: Bearer {{token}}
-    /// 
+    ///
     /// # @name create-user
     /// # @expect status 201
     /// POST {{baseUrl}}/users HTTP/1.1
     /// Content-Type: application/json
-    /// 
+    ///
     /// {""name"": ""John Doe""}";
-    /// 
+    ///
     /// var httpFile = parser.Parse(content);
     /// var getUsersRequest = httpFile.GetRequestByName("get-users");
     /// Console.WriteLine($"Method: {getUsersRequest.Method}");
