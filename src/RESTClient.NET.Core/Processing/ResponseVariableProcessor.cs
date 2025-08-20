@@ -12,32 +12,32 @@ namespace RESTClient.NET.Core.Processing
     public static class ResponseVariableProcessor
     {
         // Matches {{requestName.response.body.$.jsonPath}} pattern
-        private static readonly Regex __responseBodyJsonPathRegex = new Regex(
+        private static readonly Regex _responseBodyJsonPathRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.body\.\$\.([^}]+)\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.body}} pattern (full body)
-        private static readonly Regex __responseBodyRegex = new Regex(
+        private static readonly Regex _responseBodyRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.body\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.header.HeaderName}} pattern
-        private static readonly Regex __responseHeaderRegex = new Regex(
+        private static readonly Regex _responseHeaderRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.header\.([^}]+)\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.status}} pattern
-        private static readonly Regex __responseStatusRegex = new Regex(
+        private static readonly Regex _responseStatusRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.status\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.contentType}} pattern
-        private static readonly Regex __responseContentTypeRegex = new Regex(
+        private static readonly Regex _responseContentTypeRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.contentType\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.responseTime}} pattern
-        private static readonly Regex __responseTimeRegex = new Regex(
+        private static readonly Regex _responseTimeRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.responseTime\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
