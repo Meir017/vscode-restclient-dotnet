@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using RESTClient.NET.Testing;
 using Xunit;
 
 namespace RESTClient.NET.Testing.Tests.Playground;
