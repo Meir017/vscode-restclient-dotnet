@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using RESTClient.NET.Core.Models;
 using RESTClient.NET.Core.Processing;
 using RESTClient.NET.Testing.Models;
@@ -13,6 +15,10 @@ namespace RESTClient.NET.Testing.Extensions
     /// </summary>
     public static class HttpFileExtensions
     {
+        /// <summary>
+        /// Cache for compiled wildcard regex patterns to improve performance
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, Regex> _wildcardRegexCache = new();
         /// <summary>
         /// Converts HTTP file requests into xUnit theory test data
         /// </summary>
@@ -133,10 +139,11 @@ namespace RESTClient.NET.Testing.Extensions
                 return name.Contains(pattern, StringComparison.OrdinalIgnoreCase);
             }
 
-            // Handle wildcard patterns
-            // Convert to regex pattern: * becomes .*
-            var regexPattern = "^" + System.Text.RegularExpressions.Regex.Escape(pattern).Replace("\\*", ".*") + "$";
-            return System.Text.RegularExpressions.Regex.IsMatch(name, regexPattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            // Handle wildcard patterns with cached regex for efficiency
+            var regexPattern = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
+            var regex = _wildcardRegexCache.GetOrAdd(regexPattern, 
+                pat => new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+            return regex.IsMatch(name);
         }
 
         /// <summary>

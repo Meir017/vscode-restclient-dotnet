@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using RESTClient.NET.Testing.Extensions;
 using RESTClient.NET.Testing.Models;
+using RESTClient.NET.Testing.Tests.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,6 +22,7 @@ namespace RESTClient.NET.Testing.Tests.Playground;
 public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly ITestOutputHelper _output;
+    private static readonly Lazy<IEnumerable<object[]>> _staticTestData = new(GetStaticTestDataInternal);
 
     public HttpFileTestBasePlaygroundTests(WebApplicationFactory<Program> factory, ITestOutputHelper output) 
         : base(factory)
@@ -47,11 +50,20 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     /// <returns>Test data for xUnit [MemberData]</returns>
     public static IEnumerable<object[]> GetHttpFileTestDataStatic()
     {
+        // Use cached static test data to avoid resource leaks and inefficiency
+        return _staticTestData.Value;
+    }
+
+    /// <summary>
+    /// Internal method to generate static test data once using a temporary instance
+    /// </summary>
+    private static IEnumerable<object[]> GetStaticTestDataInternal()
+    {
         // This is a workaround since xUnit requires static member data
-        // We'll create a temporary instance to get the test data
+        // We'll create a temporary instance to get the test data (done only once)
         using var factory = new WebApplicationFactory<Program>();
         using var tempInstance = new HttpFileTestBasePlaygroundTests(factory, new SimpleTestOutputHelper());
-        return tempInstance.GetHttpFileTestData();
+        return tempInstance.GetHttpFileTestData().ToList(); // ToList() to materialize the data before disposal
     }
 
     [Theory]
@@ -82,7 +94,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         foreach (var header in processedRequest.Headers)
         {
             // Handle content headers separately
-            if (IsContentHeader(header.Key))
+            if (TestHttpUtils.IsContentHeader(header.Key))
             {
                 continue; // Will be added when we set content
             }
@@ -98,12 +110,12 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
                 : "text/plain";
             
             // Create StringContent with proper content type to avoid HTTP 415 errors
-            request.Content = new StringContent(processedRequest.Body, System.Text.Encoding.UTF8, contentType);
+            request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body, contentType);
             
             // Add other content headers (excluding Content-Type which is already set)
             foreach (var header in processedRequest.Headers)
             {
-                if (IsContentHeader(header.Key) && !header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+                if (TestHttpUtils.IsContentHeader(header.Key) && !header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
                 {
                     request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
@@ -157,7 +169,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         foreach (var header in processedRequest.Headers)
         {
             // Handle content headers separately
-            if (IsContentHeader(header.Key))
+            if (TestHttpUtils.IsContentHeader(header.Key))
             {
                 continue; // Will be added when we set content
             }
@@ -167,12 +179,12 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
-            request.Content = new StringContent(processedRequest.Body);
+            request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
             
             // Add content headers
             foreach (var header in processedRequest.Headers)
             {
-                if (IsContentHeader(header.Key))
+                if (TestHttpUtils.IsContentHeader(header.Key))
                 {
                     request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
@@ -214,7 +226,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         foreach (var header in processedRequest.Headers)
         {
             // Handle content headers separately
-            if (IsContentHeader(header.Key))
+            if (TestHttpUtils.IsContentHeader(header.Key))
             {
                 continue; // Will be added when we set content
             }
@@ -224,12 +236,12 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
-            request.Content = new StringContent(processedRequest.Body);
+            request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
             
             // Add content headers
             foreach (var header in processedRequest.Headers)
             {
-                if (IsContentHeader(header.Key))
+                if (TestHttpUtils.IsContentHeader(header.Key))
                 {
                     request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
@@ -272,7 +284,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         foreach (var header in processedRequest.Headers)
         {
             // Handle content headers separately
-            if (IsContentHeader(header.Key))
+            if (TestHttpUtils.IsContentHeader(header.Key))
             {
                 continue; // Will be added when we set content
             }
@@ -282,12 +294,12 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
-            request.Content = new StringContent(processedRequest.Body);
+            request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
             
             // Add content headers
             foreach (var header in processedRequest.Headers)
             {
-                if (IsContentHeader(header.Key))
+                if (TestHttpUtils.IsContentHeader(header.Key))
                 {
                     request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
@@ -359,19 +371,6 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         // Assert
         found.Should().BeFalse();
         testCase.Should().BeNull();
-    }
-    
-    private static bool IsContentHeader(string headerName)
-    {
-        return headerName.Equals("Content-Type", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-Length", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-Encoding", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-Language", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-Location", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-MD5", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Content-Range", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Expires", StringComparison.OrdinalIgnoreCase) ||
-               headerName.Equals("Last-Modified", StringComparison.OrdinalIgnoreCase);
     }
 }
 

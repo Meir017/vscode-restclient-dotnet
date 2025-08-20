@@ -81,6 +81,7 @@ namespace RESTClient.NET.Testing
         private readonly WebApplicationFactory<TProgram> _configuredFactory;
         private readonly HttpFile _httpFile;
         private readonly HttpFileProcessor _httpFileProcessor;
+        private readonly bool _ownsConfiguredFactory;
         private bool _disposed;
 
         /// <summary>
@@ -108,6 +109,7 @@ namespace RESTClient.NET.Testing
 
             // Configure the factory
             _configuredFactory = ConfigureFactory(_originalFactory);
+            _ownsConfiguredFactory = !ReferenceEquals(_configuredFactory, _originalFactory);
 
             // Get logger from the configured factory's services
             var loggerFactory = _configuredFactory.Services.GetService<ILoggerFactory>();
@@ -322,9 +324,8 @@ namespace RESTClient.NET.Testing
         {
             if (!_disposed && disposing)
             {
-                // Only dispose the configured factory, not the original one passed to constructor
-                // The original factory is owned by xUnit and should not be disposed by us
-                if (!ReferenceEquals(_configuredFactory, _originalFactory))
+                // Only dispose the configured factory if this instance owns it
+                if (_ownsConfiguredFactory)
                 {
                     _configuredFactory?.Dispose();
                 }

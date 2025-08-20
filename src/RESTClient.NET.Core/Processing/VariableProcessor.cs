@@ -85,7 +85,7 @@ namespace RESTClient.NET.Core.Processing
                 // Check environment variables first (they override file variables)
                 if (environmentVariables?.TryGetValue(variableName, out var envValue) == true)
                 {
-                    return envValue ?? string.Empty;
+                    return envValue;
                 }
                 
                 // Fall back to file variables
