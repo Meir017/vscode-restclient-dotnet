@@ -1,0 +1,189 @@
+<Project>
+
+  <!-- 
+    Directory.Build.props - Global MSBuild properties for RESTClient.NET
+    
+    This file is automatically imported by MSBuild for all projects in this directory and subdirectories.
+    It provides consistent build settings across the entire solution and honors EditorConfig rules.
+    
+    For more information: https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory
+  -->
+
+  <PropertyGroup Label="Repository Information">
+    <RepositoryUrl>https://github.com/Meir017/vscode-restclient-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Meir017</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build Configuration">
+    <!-- Language and Framework Settings -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFramework Condition="'$(TargetFramework)' == '' AND '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
+    
+    <!-- Code Quality Settings -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors />
+    <NoWarn />
+    
+    <!-- Deterministic Builds -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    
+    <!-- Output and Intermediate Directories -->
+    <UseCommonOutputDirectory>false</UseCommonOutputDirectory>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Code Analysis and EditorConfig Integration">
+    <!-- Enable .NET Code Analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+    
+    <!-- Enable EditorConfig Code Style Analysis at Build Time -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    
+    <!-- Code Style Analysis Categories -->
+    <AnalysisModeStyle>Recommended</AnalysisModeStyle>
+    <AnalysisModeDesign>Recommended</AnalysisModeDesign>
+    <AnalysisModeDocumentation>None</AnalysisModeDocumentation>
+    <AnalysisModeGlobalization>Recommended</AnalysisModeGlobalization>
+    <AnalysisModeInteroperability>Recommended</AnalysisModeInteroperability>
+    <AnalysisModeMaintainability>Recommended</AnalysisModeMaintainability>
+    <AnalysisModeNaming>Recommended</AnalysisModeNaming>
+    <AnalysisModePerformance>Recommended</AnalysisModePerformance>
+    <AnalysisModeSingleFile>None</AnalysisModeSingleFile>
+    <AnalysisModeReliability>Recommended</AnalysisModeReliability>
+    <AnalysisModeSecurity>Recommended</AnalysisModeSecurity>
+    <AnalysisModeUsage>Recommended</AnalysisModeUsage>
+    
+    <!-- Exclude Generated Code from Analysis -->
+    <CodeAnalysisExcludeGeneratedCode>true</CodeAnalysisExcludeGeneratedCode>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Documentation Generation">
+    <!-- Generate XML Documentation for packable projects only -->
+    <GenerateDocumentationFile Condition="'$(IsPackable)' != 'false'">true</GenerateDocumentationFile>
+    <DocumentationFile Condition="'$(IsPackable)' != 'false'">bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    
+    <!-- Disable XML documentation for test projects -->
+    <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
+    
+    <!-- Documentation Analysis -->
+    <ReportAnalyzer>false</ReportAnalyzer>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package Generation" Condition="'$(IsPackable)' != 'false'">
+    <!-- Enable Package Generation -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Source Link Integration -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Testing Configuration" Condition="'$(IsTestProject)' == 'true'">
+    <!-- Test Project Settings -->
+    <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    
+    <!-- Suppress documentation warnings for test projects -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    
+    <!-- Improve Test Performance -->
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    
+    <!-- Test Coverage -->
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>opencover</CoverletOutputFormat>
+    <CoverletOutput>$(MSBuildProjectDirectory)/TestResults/</CoverletOutput>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Runtime Configuration">
+    <!-- Runtime Settings -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <!-- Assembly Metadata Items -->
+  <ItemGroup Label="Assembly Metadata">
+    <AssemblyMetadata Include="BuildMachine" Value="$(COMPUTERNAME)" />
+    <AssemblyMetadata Include="BuildDate" Value="$([System.DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ'))" />
+    <AssemblyMetadata Include="BuildUser" Value="$(USERNAME)" />
+  </ItemGroup>
+
+  <!-- Global PackageReference Items -->
+  <ItemGroup Label="Source Link Support" Condition="'$(IsPackable)' != 'false'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Global Directory Items -->
+  <ItemGroup Label="Global Items">
+    <!-- Include README.md in all packable projects -->
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Condition="'$(IsPackable)' != 'false'" />
+    
+    <!-- Include LICENSE in all packable projects -->
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Condition="'$(IsPackable)' != 'false' AND Exists('$(MSBuildThisFileDirectory)LICENSE')" />
+  </ItemGroup>
+
+  <!-- Code Analysis Rule Overrides (Honoring EditorConfig) -->
+  <PropertyGroup Label="Code Analysis Rules">
+    <!-- Severity overrides that complement .editorconfig settings -->
+    
+    <!-- IDE Rules - Code Style (already configured in .editorconfig) -->
+    <!-- These are set to 'default' to honor .editorconfig settings -->
+    
+    <!-- CA Rules - Design and Performance -->
+    <!-- CA1001: Types that own disposable fields should be disposable -->
+    <WarningsAsErrors Condition="'$(Configuration)' == 'Release'">$(WarningsAsErrors);CA1001</WarningsAsErrors>
+    
+    <!-- CA1063: Implement IDisposable Correctly - Keep as warning but allow in current codebase -->
+  </PropertyGroup>
+
+  <!-- MSBuild Performance Optimizations -->
+  <PropertyGroup Label="Performance Optimizations">
+    <!-- Improve build performance -->
+    <UseSharedCompilation>true</UseSharedCompilation>
+    <BuildInParallel>true</BuildInParallel>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    
+    <!-- Faster package restore -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
+
+  <!-- Development Environment Specific Settings -->
+  <PropertyGroup Label="Development Settings" Condition="'$(Configuration)' == 'Debug'">
+    <!-- Debug Configuration -->
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Release Settings" Condition="'$(Configuration)' == 'Release'">
+    <!-- Release Configuration -->
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    
+    <!-- Additional Release Optimizations -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>false</PublishReadyToRun>
+  </PropertyGroup>
+
+  <!-- Import custom targets if they exist -->
+  <Import Project="$(MSBuildThisFileDirectory)Directory.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.targets')" />
+
+</Project>
