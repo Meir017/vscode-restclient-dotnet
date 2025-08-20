@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -30,7 +31,24 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         _output = output;
     }
 
-    protected override string GetHttpFilePath() => "playground-api-tests.http";
+    protected override string GetHttpFilePath()
+    {
+        // Get the solution root directory by walking up from the test assembly location
+        var assemblyLocation = GetType().Assembly.Location;
+        var directory = new DirectoryInfo(Path.GetDirectoryName(assemblyLocation)!);
+        
+        // Walk up until we find the solution file
+        while (directory != null && !directory.GetFiles("*.slnx").Any())
+        {
+            directory = directory.Parent;
+        }
+        
+        if (directory == null)
+            throw new InvalidOperationException("Could not find solution root directory");
+            
+        var httpFilePath = Path.Combine(directory.FullName, "playground", "MinimalWebApi", "playground-api-tests.http");
+        return httpFilePath;
+    }
 
     [Fact]
     public void Constructor_ShouldInitializeCorrectly()
