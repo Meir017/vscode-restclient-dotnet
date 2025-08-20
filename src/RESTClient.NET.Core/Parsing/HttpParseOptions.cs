@@ -1,5 +1,3 @@
-using System;
-
 namespace RESTClient.NET.Core.Parsing
 {
     /// <summary>

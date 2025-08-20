@@ -46,7 +46,7 @@ namespace RESTClient.NET.Core.Processing
     /// POST /api/users HTTP/1.1
     /// X-Request-ID: {{$guid}}
     /// Content-Type: application/json
-    /// 
+    ///
     /// {
     ///   ""id"": ""{{$guid}}"",
     ///   ""timestamp"": {{$timestamp}},
@@ -54,18 +54,18 @@ namespace RESTClient.NET.Core.Processing
     ///   ""created"": ""{{$datetime iso8601}}"",
     ///   ""expires"": ""{{$datetime iso8601 1 d}}""
     /// }";
-    /// 
+    ///
     /// var resolved = SystemVariableProcessor.ResolveSystemVariables(content);
     /// // All {{$...}} variables will be replaced with actual values
     /// </code>
     /// </example>
     public static class SystemVariableProcessor
     {
-        private static readonly Regex __systemVariableRegex = new Regex(
-            @"\{\{\$([a-zA-Z]+)(?:\s+([^}]+))?\}\}", 
+        private static readonly Regex _systemVariableRegex = new Regex(
+            @"\{\{\$([a-zA-Z]+)(?:\s+([^}]+))?\}\}",
             RegexOptions.Compiled);
 
-        private static readonly Random __randomGenerator = new Random();
+        private static readonly Random _randomGenerator = new Random();
 
         /// <summary>
         /// Resolves all system variables in the given content
@@ -131,7 +131,7 @@ namespace RESTClient.NET.Core.Processing
             if (min >= max)
                 throw new ArgumentException("randomInt min parameter must be less than max parameter");
 
-            return _randomGenerator.Next(min, max).ToString();
+            return _randomGenerator.Next(min, max).ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace RESTClient.NET.Core.Processing
                 baseTime = ApplyTimeOffset(baseTime, parameters);
             }
 
-            return baseTime.ToUnixTimeSeconds().ToString();
+            return baseTime.ToUnixTimeSeconds().ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace RESTClient.NET.Core.Processing
             if (!string.IsNullOrEmpty(parameters))
             {
                 var parts = SplitParametersRespectingQuotes(parameters);
-                
+
                 if (parts.Length > 0)
                 {
                     format = parts[0];

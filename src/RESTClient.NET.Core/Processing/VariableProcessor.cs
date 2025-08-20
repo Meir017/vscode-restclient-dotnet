@@ -31,12 +31,12 @@ namespace RESTClient.NET.Core.Processing
     ///     ["baseUrl"] = "https://api.example.com",
     ///     ["version"] = "v1"
     /// };
-    /// 
+    ///
     /// var envVariables = new Dictionary&lt;string, string&gt;
     /// {
     ///     ["API_KEY"] = "secret-key"
     /// };
-    /// 
+    ///
     /// var content = "{{baseUrl}}/{{version}}/users?key=${API_KEY}&amp;id={{$guid}}";
     /// var resolved = VariableProcessor.ResolveVariables(content, fileVariables, envVariables);
     /// // Result: "https://api.example.com/v1/users?key=secret-key&amp;id=123e4567-e89b-12d3-a456-426614174000"
@@ -44,8 +44,8 @@ namespace RESTClient.NET.Core.Processing
     /// </example>
     public static class VariableProcessor
     {
-        private static readonly Regex __variableReferenceRegex = new Regex(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
-        private static readonly Regex __environmentVariableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.Compiled);
+        private static readonly Regex _variableReferenceRegex = new Regex(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
+        private static readonly Regex _environmentVariableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.Compiled);
 
         /// <summary>
         /// Resolves variables in content using a three-pass approach:
@@ -67,7 +67,7 @@ namespace RESTClient.NET.Core.Processing
         /// </code>
         /// </example>
         public static string? ResolveVariables(
-            string? content, 
+            string? content,
             IReadOnlyDictionary<string, string>? fileVariables = null,
             IDictionary<string, string>? environmentVariables = null)
         {
@@ -81,13 +81,13 @@ namespace RESTClient.NET.Core.Processing
             result = _variableReferenceRegex.Replace(result, match =>
             {
                 var variableName = match.Groups[1].Value.Trim();
-                
+
                 // Check environment variables first (they override file variables)
                 if (environmentVariables?.TryGetValue(variableName, out var envValue) == true)
                 {
                     return envValue;
                 }
-                
+
                 // Fall back to file variables
                 if (fileVariables?.TryGetValue(variableName, out var fileValue) == true)
                 {
@@ -105,7 +105,7 @@ namespace RESTClient.NET.Core.Processing
                 result = _environmentVariableRegex.Replace(result, match =>
                 {
                     var variableName = match.Groups[1].Value.Trim();
-                    
+
                     if (environmentVariables.TryGetValue(variableName, out var value))
                     {
                         return value ?? string.Empty;
@@ -350,8 +350,8 @@ namespace RESTClient.NET.Core.Processing
         }
 
         private static bool HasCircularReference(
-            string currentVariable, 
-            string value, 
+            string currentVariable,
+            string value,
             IReadOnlyDictionary<string, string> allVariables,
             HashSet<string> visitedVariables)
         {
@@ -369,7 +369,7 @@ namespace RESTClient.NET.Core.Processing
 
                 // Extract variable name from {{variableName}} format
                 var variableName = referencedVar.Trim('{', '}');
-                
+
                 if (allVariables.TryGetValue(variableName, out var referencedValue))
                 {
                     if (HasCircularReference(variableName, referencedValue, allVariables, new HashSet<string>(visitedVariables)))

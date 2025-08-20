@@ -59,7 +59,7 @@ namespace RESTClient.NET.Core.Processing
             {
                 var requestName = match.Groups[1].Value;
                 var jsonPath = match.Groups[2].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
@@ -72,7 +72,7 @@ namespace RESTClient.NET.Core.Processing
             result = _responseBodyRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
@@ -85,7 +85,7 @@ namespace RESTClient.NET.Core.Processing
             {
                 var requestName = match.Groups[1].Value;
                 var headerName = match.Groups[2].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
@@ -98,19 +98,19 @@ namespace RESTClient.NET.Core.Processing
             result = _responseStatusRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
 
-                return ((int)response.StatusCode).ToString();
+                return ((int)response.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture);
             });
 
             // Process content type references: {{requestName.response.contentType}}
             result = _responseContentTypeRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
@@ -122,12 +122,12 @@ namespace RESTClient.NET.Core.Processing
             result = _responseTimeRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
-                
+
                 var response = responseContext.GetResponse(requestName);
                 if (response == null)
                     return match.Value; // Keep original if response not found
 
-                return response.ResponseTimeMs.ToString("F2");
+                return response.ResponseTimeMs.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             });
 
             return result;

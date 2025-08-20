@@ -24,21 +24,21 @@ namespace RESTClient.NET.Core.Models
     /// // Parse an HTTP file
     /// var parser = new HttpFileParser();
     /// var httpFile = parser.Parse(httpFileContent);
-    /// 
+    ///
     /// // Access requests by name
     /// var loginRequest = httpFile.GetRequestByName("login-user");
     /// var profileRequest = httpFile.GetRequestByName("get-profile");
-    /// 
+    ///
     /// // Check if request exists
     /// if (httpFile.TryGetRequestByName("optional-request", out var request))
     /// {
     ///     Console.WriteLine($"Found request: {request.Method} {request.Url}");
     /// }
-    /// 
+    ///
     /// // Access file variables
     /// var baseUrl = httpFile.FileVariables["baseUrl"];
     /// Console.WriteLine($"API base URL: {baseUrl}");
-    /// 
+    ///
     /// // Iterate all requests
     /// foreach (var req in httpFile.Requests)
     /// {
@@ -74,11 +74,11 @@ namespace RESTClient.NET.Core.Models
         {
             if (requests == null)
                 throw new ArgumentNullException(nameof(requests));
-                
+
             var requestList = requests.ToList();
             Requests = requestList.AsReadOnly();
             FileVariables = fileVariables ?? new Dictionary<string, string>();
-            
+
             // Build request lookup dictionary - keep first occurrence for duplicates
             _requestsByName = new Dictionary<string, HttpRequest>();
             foreach (var request in requestList)
@@ -105,7 +105,7 @@ namespace RESTClient.NET.Core.Models
             {
                 return request!;
             }
-            
+
             throw new KeyNotFoundException($"Request with name '{name}' not found");
         }
 
@@ -120,7 +120,7 @@ namespace RESTClient.NET.Core.Models
             request = null;
             if (string.IsNullOrEmpty(name))
                 return false;
-                
+
             return _requestsByName.TryGetValue(name, out request);
         }
 

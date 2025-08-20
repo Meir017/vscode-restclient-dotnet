@@ -1,11 +1,11 @@
 <Project>
 
-  <!-- 
+  <!--
     Directory.Build.props - Global MSBuild properties for RESTClient.NET
-    
+
     This file is automatically imported by MSBuild for all projects in this directory and subdirectories.
     It provides consistent build settings across the entire solution and honors EditorConfig rules.
-    
+
     For more information: https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory
   -->
 
@@ -25,17 +25,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework Condition="'$(TargetFramework)' == '' AND '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
-    
+
     <!-- Code Quality Settings - Zero Warnings Policy -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <WarningsNotAsErrors />
     <NoWarn />
-    
+
     <!-- Deterministic Builds -->
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
-    
+
     <!-- Output and Intermediate Directories -->
     <UseCommonOutputDirectory>false</UseCommonOutputDirectory>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
@@ -46,10 +46,10 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>Recommended</AnalysisMode>
     <AnalysisLevel>latest</AnalysisLevel>
-    
+
     <!-- Enable EditorConfig Code Style Analysis at Build Time -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    
+
     <!-- Code Style Analysis Categories -->
     <AnalysisModeStyle>Recommended</AnalysisModeStyle>
     <AnalysisModeDesign>Recommended</AnalysisModeDesign>
@@ -63,7 +63,7 @@
     <AnalysisModeReliability>Recommended</AnalysisModeReliability>
     <AnalysisModeSecurity>Recommended</AnalysisModeSecurity>
     <AnalysisModeUsage>Recommended</AnalysisModeUsage>
-    
+
     <!-- Exclude Generated Code from Analysis -->
     <CodeAnalysisExcludeGeneratedCode>true</CodeAnalysisExcludeGeneratedCode>
   </PropertyGroup>
@@ -72,10 +72,10 @@
     <!-- Generate XML Documentation for packable projects only -->
     <GenerateDocumentationFile Condition="'$(IsPackable)' != 'false'">true</GenerateDocumentationFile>
     <DocumentationFile Condition="'$(IsPackable)' != 'false'">bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    
+
     <!-- Disable XML documentation for test projects -->
     <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
-    
+
     <!-- Documentation Analysis -->
     <ReportAnalyzer>false</ReportAnalyzer>
   </PropertyGroup>
@@ -85,7 +85,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    
+
     <!-- Source Link Integration -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
@@ -96,10 +96,10 @@
     <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    
+
     <!-- Improve Test Performance -->
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-    
+
     <!-- Test Coverage -->
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutputFormat>opencover</CoverletOutputFormat>
@@ -128,7 +128,7 @@
   <ItemGroup Label="Global Items">
     <!-- Include README.md in all packable projects -->
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Condition="'$(IsPackable)' != 'false'" />
-    
+
     <!-- Include LICENSE in all packable projects -->
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Condition="'$(IsPackable)' != 'false' AND Exists('$(MSBuildThisFileDirectory)LICENSE')" />
   </ItemGroup>
@@ -136,14 +136,14 @@
   <!-- Code Analysis Rule Overrides (Honoring EditorConfig) -->
   <PropertyGroup Label="Code Analysis Rules">
     <!-- Severity overrides that complement .editorconfig settings -->
-    
+
     <!-- IDE Rules - Code Style (already configured in .editorconfig) -->
     <!-- These are set to 'default' to honor .editorconfig settings -->
-    
+
     <!-- CA Rules - Design and Performance -->
     <!-- CA1001: Types that own disposable fields should be disposable -->
     <WarningsAsErrors Condition="'$(Configuration)' == 'Release'">$(WarningsAsErrors);CA1001</WarningsAsErrors>
-    
+
     <!-- CA1063: Implement IDisposable Correctly - Keep as warning but allow in current codebase -->
   </PropertyGroup>
 
@@ -153,7 +153,7 @@
     <UseSharedCompilation>true</UseSharedCompilation>
     <BuildInParallel>true</BuildInParallel>
     <MultiProcessorCompilation>true</MultiProcessorCompilation>
-    
+
     <!-- Faster package restore - Disabled lock file temporarily to fix CI -->
     <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
@@ -174,7 +174,7 @@
     <DebugSymbols>true</DebugSymbols>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
-    
+
     <!-- Additional Release Optimizations -->
     <PublishTrimmed>false</PublishTrimmed>
     <PublishReadyToRun>false</PublishReadyToRun>

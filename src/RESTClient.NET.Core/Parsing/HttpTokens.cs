@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using RESTClient.NET.Core.Models;
 

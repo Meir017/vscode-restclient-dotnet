@@ -12,8 +12,8 @@ namespace RESTClient.NET.Core.Validation
     /// </summary>
     public class HttpFileValidator : IHttpFileValidator
     {
-        private static readonly Regex __requestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
-        private static readonly Regex __urlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex _requestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+        private static readonly Regex _urlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <inheritdoc />
         public ValidationResult Validate(HttpFile httpFile)
@@ -209,10 +209,10 @@ namespace RESTClient.NET.Core.Validation
         }
 
         private static void ValidateSpecificHeaders(
-            HttpRequest request, 
-            string headerName, 
-            string headerValue, 
-            List<ValidationError> errors, 
+            HttpRequest request,
+            string headerName,
+            string headerValue,
+            List<ValidationError> errors,
             List<ValidationWarning> warnings)
         {
             var lowerHeaderName = headerName.ToLowerInvariant();
@@ -262,7 +262,7 @@ namespace RESTClient.NET.Core.Validation
                         break;
 
                     case ExpectationType.MaxTime:
-                        if (!expectation.Value.EndsWith("ms") || 
+                        if (!expectation.Value.EndsWith("ms") ||
                             !int.TryParse(expectation.Value.Substring(0, expectation.Value.Length - 2), out var timeMs) ||
                             timeMs <= 0)
                         {

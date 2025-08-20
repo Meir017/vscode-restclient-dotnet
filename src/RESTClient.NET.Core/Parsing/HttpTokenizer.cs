@@ -27,16 +27,16 @@ namespace RESTClient.NET.Core.Parsing
 
             var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             var isInBodySection = false;
-            
+
             for (int i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
                 var lineNumber = i + 1;
-                
+
                 if (string.IsNullOrWhiteSpace(line))
                 {
                     yield return new HttpToken(HttpTokenType.LineBreak, line, lineNumber, 1);
-                    
+
                     // Check if this blank line indicates transition to body
                     if (!isInBodySection && i > 0)
                     {
@@ -47,7 +47,7 @@ namespace RESTClient.NET.Core.Parsing
                             if (!string.IsNullOrWhiteSpace(nextLine))
                             {
                                 // If it starts with {, [, <@ (file body with variables), < (file body), or other body-like content, we're in body
-                                if (nextLine.StartsWith("{") || nextLine.StartsWith("[") || 
+                                if (nextLine.StartsWith("{") || nextLine.StartsWith("[") ||
                                     nextLine.StartsWith("<@") || nextLine.StartsWith("<") ||
                                     !nextLine.Contains(":"))
                                 {
@@ -101,7 +101,7 @@ namespace RESTClient.NET.Core.Parsing
                 {
                     isInBodySection = false; // Reset for new request
                     yield return new HttpToken(HttpTokenType.Method, methodMatch.Groups[1].Value, lineNumber, 1);
-                    
+
                     // The rest of the line is the URL and possibly HTTP version
                     var remainder = trimmedLine.Substring(methodMatch.Length).Trim();
                     if (!string.IsNullOrEmpty(remainder))
@@ -112,7 +112,7 @@ namespace RESTClient.NET.Core.Parsing
                         {
                             remainder = remainder.Substring(0, httpVersionIndex).Trim();
                         }
-                        
+
                         if (!string.IsNullOrEmpty(remainder))
                         {
                             yield return new HttpToken(HttpTokenType.Url, remainder, lineNumber, methodMatch.Length + 1);
@@ -131,7 +131,7 @@ namespace RESTClient.NET.Core.Parsing
                         var atPart = fileBodyMatch.Groups[1].Value; // The "@..." part including optional encoding
                         var encodingPart = fileBodyMatch.Groups[2].Value; // The encoding part after @
                         var filePath = fileBodyMatch.Groups[3].Value.Trim(); // The file path
-                        
+
                         if (string.IsNullOrEmpty(atPart))
                         {
                             // Raw file body: < filepath
@@ -149,7 +149,7 @@ namespace RESTClient.NET.Core.Parsing
                         }
                         continue;
                     }
-                    
+
                     // Everything else is regular body content
                     yield return new HttpToken(HttpTokenType.Body, line, lineNumber, 1);
                     continue;
@@ -161,14 +161,14 @@ namespace RESTClient.NET.Core.Parsing
                 {
                     var headerName = trimmedLine.Substring(0, colonIndex).Trim();
                     var headerValue = trimmedLine.Substring(colonIndex + 1).Trim();
-                    
+
                     yield return new HttpToken(HttpTokenType.HeaderName, headerName, lineNumber, 1);
                     yield return new HttpToken(HttpTokenType.HeaderValue, headerValue, lineNumber, colonIndex + 2);
                     continue;
                 }
 
                 // Check if it might be a URL (starts with http/https or is just a path)
-                if (trimmedLine.StartsWith("http", StringComparison.OrdinalIgnoreCase) || 
+                if (trimmedLine.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
                     trimmedLine.StartsWith("/") ||
                     trimmedLine.StartsWith("{{"))
                 {

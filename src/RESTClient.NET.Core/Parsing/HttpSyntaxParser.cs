@@ -13,9 +13,9 @@ namespace RESTClient.NET.Core.Parsing
     /// </summary>
     public class HttpSyntaxParser : IHttpSyntaxParser
     {
-        private static readonly Regex RequestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
-        private static readonly Regex VariableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
-        private static readonly Regex MetadataRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
+        private static readonly Regex _requestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+        private static readonly Regex _variableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
+        private static readonly Regex _metadataRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
 
         /// <inheritdoc />
         public HttpFile Parse(IEnumerable<HttpToken> tokens, HttpParseOptions? options = null)
@@ -87,7 +87,7 @@ namespace RESTClient.NET.Core.Parsing
                         ParseMetadata(token.Value, currentMetadata);
                         
                         // Check if this is a @name declaration - start of new request
-                        var nameMatch = MetadataRegex.Match(token.Value);
+                        var nameMatch = _metadataRegex.Match(token.Value);
                         if (nameMatch.Success && nameMatch.Groups[1].Value.ToLowerInvariant() == "name")
                         {
                             // Finish previous request if any
@@ -171,7 +171,7 @@ namespace RESTClient.NET.Core.Parsing
                 throw new InvalidRequestNameException(requestName, lineNumber);
             }
 
-            if (!RequestNameValidationRegex.IsMatch(requestName))
+            if (!_requestNameValidationRegex.IsMatch(requestName))
             {
                 throw new InvalidRequestNameException(requestName, lineNumber);
             }
@@ -184,7 +184,7 @@ namespace RESTClient.NET.Core.Parsing
 
         private static void ParseFileVariable(string variableDefinition, Dictionary<string, string> fileVariables)
         {
-            var match = VariableDefinitionRegex.Match(variableDefinition);
+            var match = _variableDefinitionRegex.Match(variableDefinition);
             if (match.Success)
             {
                 var name = match.Groups[1].Value;
@@ -195,7 +195,7 @@ namespace RESTClient.NET.Core.Parsing
 
         private static void ParseMetadata(string metadataLine, HttpRequestMetadata metadata)
         {
-            var match = MetadataRegex.Match(metadataLine);
+            var match = _metadataRegex.Match(metadataLine);
             if (!match.Success) return;
 
             var key = match.Groups[1].Value.ToLowerInvariant();
