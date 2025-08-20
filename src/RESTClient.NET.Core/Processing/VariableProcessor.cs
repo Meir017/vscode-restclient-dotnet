@@ -44,8 +44,8 @@ namespace RESTClient.NET.Core.Processing
     /// </example>
     public static class VariableProcessor
     {
-        private static readonly Regex VariableReferenceRegex = new Regex(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
-        private static readonly Regex EnvironmentVariableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.Compiled);
+        private static readonly Regex __variableReferenceRegex = new Regex(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
+        private static readonly Regex __environmentVariableRegex = new Regex(@"\$\{([^}]+)\}", RegexOptions.Compiled);
 
         /// <summary>
         /// Resolves variables in content using a three-pass approach:
@@ -78,7 +78,7 @@ namespace RESTClient.NET.Core.Processing
 
             // First pass: resolve file variables ({{variable}})
             // Environment variables override file variables when both exist
-            result = VariableReferenceRegex.Replace(result, match =>
+            result = _variableReferenceRegex.Replace(result, match =>
             {
                 var variableName = match.Groups[1].Value.Trim();
                 
@@ -102,7 +102,7 @@ namespace RESTClient.NET.Core.Processing
             // Second pass: resolve environment variables (${variable})
             if (environmentVariables != null && environmentVariables.Count > 0)
             {
-                result = EnvironmentVariableRegex.Replace(result, match =>
+                result = _environmentVariableRegex.Replace(result, match =>
                 {
                     var variableName = match.Groups[1].Value.Trim();
                     
@@ -119,7 +119,7 @@ namespace RESTClient.NET.Core.Processing
             else
             {
                 // If no environment variables provided, try system environment variables
-                result = EnvironmentVariableRegex.Replace(result, match =>
+                result = _environmentVariableRegex.Replace(result, match =>
                 {
                     var variableName = match.Groups[1].Value.Trim();
                     var envValue = Environment.GetEnvironmentVariable(variableName);
@@ -205,7 +205,7 @@ namespace RESTClient.NET.Core.Processing
                 return variables;
 
             // Extract file variable references
-            var matches = VariableReferenceRegex.Matches(content);
+            var matches = _variableReferenceRegex.Matches(content);
             foreach (Match match in matches)
             {
                 var variableName = match.Groups[1].Value.Trim();
@@ -216,7 +216,7 @@ namespace RESTClient.NET.Core.Processing
             }
 
             // Extract environment variable references
-            var envMatches = EnvironmentVariableRegex.Matches(content);
+            var envMatches = _environmentVariableRegex.Matches(content);
             foreach (Match match in envMatches)
             {
                 var variableName = match.Groups[1].Value.Trim();
@@ -247,7 +247,7 @@ namespace RESTClient.NET.Core.Processing
                 return unresolvedVariables;
 
             // Check file variable references
-            var matches = VariableReferenceRegex.Matches(content);
+            var matches = _variableReferenceRegex.Matches(content);
             foreach (Match match in matches)
             {
                 var variableName = match.Groups[1].Value.Trim();
@@ -261,7 +261,7 @@ namespace RESTClient.NET.Core.Processing
             }
 
             // Check environment variable references
-            var envMatches = EnvironmentVariableRegex.Matches(content);
+            var envMatches = _environmentVariableRegex.Matches(content);
             foreach (Match match in envMatches)
             {
                 var variableName = match.Groups[1].Value.Trim();

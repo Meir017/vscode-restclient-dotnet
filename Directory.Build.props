@@ -26,8 +26,8 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework Condition="'$(TargetFramework)' == '' AND '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
     
-    <!-- Code Quality Settings -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Code Quality Settings - Zero Warnings Policy -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <WarningsNotAsErrors />
     <NoWarn />
@@ -96,9 +96,6 @@
     <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    
-    <!-- Suppress documentation warnings for test projects -->
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
     
     <!-- Improve Test Performance -->
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>

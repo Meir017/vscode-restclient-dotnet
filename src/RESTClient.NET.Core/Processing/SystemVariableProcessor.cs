@@ -61,11 +61,11 @@ namespace RESTClient.NET.Core.Processing
     /// </example>
     public static class SystemVariableProcessor
     {
-        private static readonly Regex SystemVariableRegex = new Regex(
+        private static readonly Regex __systemVariableRegex = new Regex(
             @"\{\{\$([a-zA-Z]+)(?:\s+([^}]+))?\}\}", 
             RegexOptions.Compiled);
 
-        private static readonly Random RandomGenerator = new Random();
+        private static readonly Random __randomGenerator = new Random();
 
         /// <summary>
         /// Resolves all system variables in the given content
@@ -77,7 +77,7 @@ namespace RESTClient.NET.Core.Processing
             if (string.IsNullOrEmpty(content))
                 return content;
 
-            return SystemVariableRegex.Replace(content, match =>
+            return _systemVariableRegex.Replace(content, match =>
             {
                 var variableName = match.Groups[1].Value.ToLowerInvariant();
                 var parameters = match.Groups[2].Success ? match.Groups[2].Value.Trim() : string.Empty;
@@ -131,7 +131,7 @@ namespace RESTClient.NET.Core.Processing
             if (min >= max)
                 throw new ArgumentException("randomInt min parameter must be less than max parameter");
 
-            return RandomGenerator.Next(min, max).ToString();
+            return _randomGenerator.Next(min, max).ToString();
         }
 
         /// <summary>

@@ -12,32 +12,32 @@ namespace RESTClient.NET.Core.Processing
     public static class ResponseVariableProcessor
     {
         // Matches {{requestName.response.body.$.jsonPath}} pattern
-        private static readonly Regex ResponseBodyJsonPathRegex = new Regex(
+        private static readonly Regex __responseBodyJsonPathRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.body\.\$\.([^}]+)\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.body}} pattern (full body)
-        private static readonly Regex ResponseBodyRegex = new Regex(
+        private static readonly Regex __responseBodyRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.body\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.header.HeaderName}} pattern
-        private static readonly Regex ResponseHeaderRegex = new Regex(
+        private static readonly Regex __responseHeaderRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.header\.([^}]+)\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.status}} pattern
-        private static readonly Regex ResponseStatusRegex = new Regex(
+        private static readonly Regex __responseStatusRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.status\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.contentType}} pattern
-        private static readonly Regex ResponseContentTypeRegex = new Regex(
+        private static readonly Regex __responseContentTypeRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.contentType\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Matches {{requestName.response.responseTime}} pattern
-        private static readonly Regex ResponseTimeRegex = new Regex(
+        private static readonly Regex __responseTimeRegex = new Regex(
             @"\{\{([a-zA-Z0-9_-]+)\.response\.responseTime\}\}",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -55,7 +55,7 @@ namespace RESTClient.NET.Core.Processing
             var result = content;
 
             // Process JSONPath body references: {{requestName.response.body.$.path}}
-            result = ResponseBodyJsonPathRegex.Replace(result, match =>
+            result = _responseBodyJsonPathRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 var jsonPath = match.Groups[2].Value;
@@ -69,7 +69,7 @@ namespace RESTClient.NET.Core.Processing
             });
 
             // Process full body references: {{requestName.response.body}}
-            result = ResponseBodyRegex.Replace(result, match =>
+            result = _responseBodyRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 
@@ -81,7 +81,7 @@ namespace RESTClient.NET.Core.Processing
             });
 
             // Process header references: {{requestName.response.header.HeaderName}}
-            result = ResponseHeaderRegex.Replace(result, match =>
+            result = _responseHeaderRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 var headerName = match.Groups[2].Value;
@@ -95,7 +95,7 @@ namespace RESTClient.NET.Core.Processing
             });
 
             // Process status code references: {{requestName.response.status}}
-            result = ResponseStatusRegex.Replace(result, match =>
+            result = _responseStatusRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 
@@ -107,7 +107,7 @@ namespace RESTClient.NET.Core.Processing
             });
 
             // Process content type references: {{requestName.response.contentType}}
-            result = ResponseContentTypeRegex.Replace(result, match =>
+            result = _responseContentTypeRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 
@@ -119,7 +119,7 @@ namespace RESTClient.NET.Core.Processing
             });
 
             // Process response time references: {{requestName.response.responseTime}}
-            result = ResponseTimeRegex.Replace(result, match =>
+            result = _responseTimeRegex.Replace(result, match =>
             {
                 var requestName = match.Groups[1].Value;
                 
@@ -143,12 +143,12 @@ namespace RESTClient.NET.Core.Processing
             if (string.IsNullOrEmpty(content))
                 return false;
 
-            return ResponseBodyJsonPathRegex.IsMatch(content) ||
-                   ResponseBodyRegex.IsMatch(content) ||
-                   ResponseHeaderRegex.IsMatch(content) ||
-                   ResponseStatusRegex.IsMatch(content) ||
-                   ResponseContentTypeRegex.IsMatch(content) ||
-                   ResponseTimeRegex.IsMatch(content);
+            return _responseBodyJsonPathRegex.IsMatch(content) ||
+                   _responseBodyRegex.IsMatch(content) ||
+                   _responseHeaderRegex.IsMatch(content) ||
+                   _responseStatusRegex.IsMatch(content) ||
+                   _responseContentTypeRegex.IsMatch(content) ||
+                   _responseTimeRegex.IsMatch(content);
         }
 
         /// <summary>
@@ -164,42 +164,42 @@ namespace RESTClient.NET.Core.Processing
             var requestNames = new System.Collections.Generic.HashSet<string>();
 
             // Extract from JSONPath body references
-            var jsonPathMatches = ResponseBodyJsonPathRegex.Matches(content);
+            var jsonPathMatches = _responseBodyJsonPathRegex.Matches(content);
             foreach (Match match in jsonPathMatches)
             {
                 requestNames.Add(match.Groups[1].Value);
             }
 
             // Extract from full body references
-            var bodyMatches = ResponseBodyRegex.Matches(content);
+            var bodyMatches = _responseBodyRegex.Matches(content);
             foreach (Match match in bodyMatches)
             {
                 requestNames.Add(match.Groups[1].Value);
             }
 
             // Extract from header references
-            var headerMatches = ResponseHeaderRegex.Matches(content);
+            var headerMatches = _responseHeaderRegex.Matches(content);
             foreach (Match match in headerMatches)
             {
                 requestNames.Add(match.Groups[1].Value);
             }
 
             // Extract from status references
-            var statusMatches = ResponseStatusRegex.Matches(content);
+            var statusMatches = _responseStatusRegex.Matches(content);
             foreach (Match match in statusMatches)
             {
                 requestNames.Add(match.Groups[1].Value);
             }
 
             // Extract from content type references
-            var contentTypeMatches = ResponseContentTypeRegex.Matches(content);
+            var contentTypeMatches = _responseContentTypeRegex.Matches(content);
             foreach (Match match in contentTypeMatches)
             {
                 requestNames.Add(match.Groups[1].Value);
             }
 
             // Extract from response time references
-            var responseTimeMatches = ResponseTimeRegex.Matches(content);
+            var responseTimeMatches = _responseTimeRegex.Matches(content);
             foreach (Match match in responseTimeMatches)
             {
                 requestNames.Add(match.Groups[1].Value);

@@ -12,8 +12,8 @@ namespace RESTClient.NET.Core.Validation
     /// </summary>
     public class HttpFileValidator : IHttpFileValidator
     {
-        private static readonly Regex RequestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
-        private static readonly Regex UrlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex __requestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+        private static readonly Regex __urlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <inheritdoc />
         public ValidationResult Validate(HttpFile httpFile)
@@ -56,7 +56,7 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Check request name format
-                if (!RequestNameValidationRegex.IsMatch(requestName))
+                if (!_requestNameValidationRegex.IsMatch(requestName))
                 {
                     errors.Add(new ValidationError(
                         request.LineNumber,
@@ -165,7 +165,7 @@ namespace RESTClient.NET.Core.Validation
             }
 
             // Basic URL format validation
-            if (!UrlValidationRegex.IsMatch(request.Url))
+            if (!_urlValidationRegex.IsMatch(request.Url))
             {
                 warnings.Add(new ValidationWarning(
                     request.LineNumber,

@@ -10,11 +10,11 @@ namespace RESTClient.NET.Core.Parsing
     /// </summary>
     public class HttpTokenizer : IHttpTokenizer
     {
-        private static readonly Regex VariableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
-        private static readonly Regex MetadataCommentRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
-        private static readonly Regex CommentRegex = new Regex(@"^(?:#|\/{2})(.*)$", RegexOptions.Compiled);
-        private static readonly Regex HttpMethodRegex = new Regex(@"^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|LOCK|UNLOCK|PROPFIND|PROPPATCH|COPY|MOVE|MKCOL|MKCALENDAR|ACL|SEARCH)\s+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex FileBodyRegex = new Regex(@"^<(@\s*([a-zA-Z0-9-]+)?\s*)?(.+)$", RegexOptions.Compiled);
+        private static readonly Regex _variableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
+        private static readonly Regex _metadataCommentRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
+        private static readonly Regex _commentRegex = new Regex(@"^(?:#|\/{2})(.*)$", RegexOptions.Compiled);
+        private static readonly Regex _httpMethodRegex = new Regex(@"^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|LOCK|UNLOCK|PROPFIND|PROPPATCH|COPY|MOVE|MKCOL|MKCALENDAR|ACL|SEARCH)\s+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex _fileBodyRegex = new Regex(@"^<(@\s*([a-zA-Z0-9-]+)?\s*)?(.+)$", RegexOptions.Compiled);
 
         /// <inheritdoc />
         public IEnumerable<HttpToken> Tokenize(string content)
@@ -63,7 +63,7 @@ namespace RESTClient.NET.Core.Parsing
                 var trimmedLine = line.Trim();
 
                 // Check for variable definition (@var = value)
-                var variableMatch = VariableDefinitionRegex.Match(trimmedLine);
+                var variableMatch = _variableDefinitionRegex.Match(trimmedLine);
                 if (variableMatch.Success)
                 {
                     yield return new HttpToken(HttpTokenType.Variable, trimmedLine, lineNumber, 1);
@@ -79,7 +79,7 @@ namespace RESTClient.NET.Core.Parsing
                 }
 
                 // Check for metadata comment (# @name, # @expect, etc.)
-                var metadataMatch = MetadataCommentRegex.Match(trimmedLine);
+                var metadataMatch = _metadataCommentRegex.Match(trimmedLine);
                 if (metadataMatch.Success)
                 {
                     isInBodySection = false; // Reset for new request
@@ -88,7 +88,7 @@ namespace RESTClient.NET.Core.Parsing
                 }
 
                 // Check for regular comment
-                var commentMatch = CommentRegex.Match(trimmedLine);
+                var commentMatch = _commentRegex.Match(trimmedLine);
                 if (commentMatch.Success)
                 {
                     yield return new HttpToken(HttpTokenType.Comment, trimmedLine, lineNumber, 1);
@@ -96,7 +96,7 @@ namespace RESTClient.NET.Core.Parsing
                 }
 
                 // Check for HTTP method at start of line
-                var methodMatch = HttpMethodRegex.Match(trimmedLine);
+                var methodMatch = _httpMethodRegex.Match(trimmedLine);
                 if (methodMatch.Success)
                 {
                     isInBodySection = false; // Reset for new request
@@ -125,7 +125,7 @@ namespace RESTClient.NET.Core.Parsing
                 if (isInBodySection)
                 {
                     // Check for file body reference (< filepath, <@ filepath, <@encoding filepath)
-                    var fileBodyMatch = FileBodyRegex.Match(trimmedLine);
+                    var fileBodyMatch = _fileBodyRegex.Match(trimmedLine);
                     if (fileBodyMatch.Success)
                     {
                         var atPart = fileBodyMatch.Groups[1].Value; // The "@..." part including optional encoding
