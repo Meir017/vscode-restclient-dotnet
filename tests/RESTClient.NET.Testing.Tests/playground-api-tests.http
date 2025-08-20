@@ -1,0 +1,93 @@
+# Playground API Tests for HttpFileTestBase
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+# Simple ping test
+# @name ping-test
+# @expect status 200
+# @expect body-contains pong
+GET {{baseUrl}}/ping
+
+###
+
+# Basic API test
+# @name get-test
+# @expect status 200
+# @expect header Content-Type application/json
+# @expect body-contains Hello, World!
+GET {{baseUrl}}/api/test
+Accept: {{contentType}}
+
+###
+
+# Test with path parameter
+# @name get-test-by-id
+# @expect status 200
+# @expect body-contains Test item 42
+GET {{baseUrl}}/api/test/42
+Accept: {{contentType}}
+
+###
+
+# POST test
+# @name create-test
+# @expect status 201
+# @expect body-contains Created
+POST {{baseUrl}}/api/test
+Content-Type: {{contentType}}
+
+{
+  "id": 1,
+  "name": "Test Item",
+  "description": "A test item for API testing"
+}
+
+###
+
+# PUT test
+# @name update-test
+# @expect status 200
+# @expect body-contains Updated
+PUT {{baseUrl}}/api/test/123
+Content-Type: {{contentType}}
+
+{
+  "id": 123,
+  "name": "Updated Test Item",
+  "description": "An updated test item"
+}
+
+###
+
+# DELETE test
+# @name delete-test
+# @expect status 204
+DELETE {{baseUrl}}/api/test/123
+
+###
+
+# Error test
+# @name error-test
+# @expect status 500
+# @expect body-contains "Internal server error"
+GET {{baseUrl}}/api/error
+Accept: {{contentType}}
+
+###
+
+# Not found test
+# @name notfound-test
+# @expect status 404
+GET {{baseUrl}}/api/notfound
+Accept: {{contentType}}
+
+###
+
+# Headers test
+# @name headers-test
+# @expect status 200
+# @expect header Content-Type application/json
+# @expect body-contains Headers test
+GET {{baseUrl}}/api/headers
+Accept: {{contentType}}
+Custom-Header: test-value

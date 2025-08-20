@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" />
     <ProjectReference Include="..\..\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" />
+    <ProjectReference Include="..\..\playground\MinimalWebApi\MinimalWebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +31,12 @@
 
   <ItemGroup>
     <None Update="test-requests.http">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Integration\test-integration.http">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="playground-api-tests.http">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

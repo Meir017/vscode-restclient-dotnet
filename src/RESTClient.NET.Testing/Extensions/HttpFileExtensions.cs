@@ -79,7 +79,7 @@ namespace RESTClient.NET.Testing.Extensions
         /// Filters test cases based on criteria
         /// </summary>
         /// <param name="testCases">The test cases to filter</param>
-        /// <param name="namePattern">Optional name pattern to match</param>
+        /// <param name="namePattern">Optional name pattern to match (supports * wildcard)</param>
         /// <param name="methods">Optional HTTP methods to include</param>
         /// <param name="hasExpectations">Optional filter for test cases with expectations</param>
         /// <returns>Filtered test cases</returns>
@@ -96,7 +96,7 @@ namespace RESTClient.NET.Testing.Extensions
 
             if (!string.IsNullOrWhiteSpace(namePattern))
             {
-                filtered = filtered.Where(tc => tc.Name.Contains(namePattern, StringComparison.OrdinalIgnoreCase));
+                filtered = filtered.Where(tc => MatchesPattern(tc.Name, namePattern));
             }
 
             if (methods != null)
@@ -117,11 +117,35 @@ namespace RESTClient.NET.Testing.Extensions
         }
 
         /// <summary>
+        /// Matches a name against a pattern that may contain wildcards
+        /// </summary>
+        /// <param name="name">The name to match</param>
+        /// <param name="pattern">The pattern with optional * wildcards</param>
+        /// <returns>True if the name matches the pattern</returns>
+        private static bool MatchesPattern(string name, string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern))
+                return true;
+
+            if (!pattern.Contains('*'))
+            {
+                // No wildcards, use substring matching (case insensitive)
+                return name.Contains(pattern, StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Handle wildcard patterns
+            // Convert to regex pattern: * becomes .*
+            var regexPattern = "^" + System.Text.RegularExpressions.Regex.Escape(pattern).Replace("\\*", ".*") + "$";
+            return System.Text.RegularExpressions.Regex.IsMatch(name, regexPattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
         /// Converts an HttpTestCase to an HttpRequestMessage
         /// </summary>
         /// <param name="testCase">The test case to convert</param>
+        /// <param name="fileVariables">Optional file variables for variable resolution</param>
         /// <returns>HttpRequestMessage ready for sending</returns>
-        public static HttpRequestMessage ToHttpRequestMessage(this HttpTestCase testCase)
+        public static HttpRequestMessage ToHttpRequestMessage(this HttpTestCase testCase, IReadOnlyDictionary<string, string>? fileVariables = null)
         {
             if (testCase == null)
                 throw new ArgumentNullException(nameof(testCase));
@@ -131,6 +155,11 @@ namespace RESTClient.NET.Testing.Extensions
             // Add headers
             foreach (var header in testCase.Headers)
             {
+                // Resolve variables in header value
+                var resolvedValue = fileVariables != null 
+                    ? VariableProcessor.ResolveVariables(header.Value, fileVariables) ?? header.Value
+                    : header.Value;
+
                 // Handle content headers separately
                 if (IsContentHeader(header.Key))
                 {
@@ -138,20 +167,30 @@ namespace RESTClient.NET.Testing.Extensions
                     continue;
                 }
 
-                request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                request.Headers.TryAddWithoutValidation(header.Key, resolvedValue);
             }
 
             // Add body content if present
             if (!string.IsNullOrEmpty(testCase.Body))
             {
-                request.Content = new StringContent(testCase.Body);
+                // Resolve variables in body
+                var resolvedBody = fileVariables != null 
+                    ? VariableProcessor.ResolveVariables(testCase.Body, fileVariables) ?? testCase.Body
+                    : testCase.Body;
+
+                request.Content = new StringContent(resolvedBody);
 
                 // Add content headers
                 foreach (var header in testCase.Headers)
                 {
                     if (IsContentHeader(header.Key))
                     {
-                        request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        // Resolve variables in header value
+                        var resolvedValue = fileVariables != null 
+                            ? VariableProcessor.ResolveVariables(header.Value, fileVariables) ?? header.Value
+                            : header.Value;
+
+                        request.Content.Headers.TryAddWithoutValidation(header.Key, resolvedValue);
                     }
                 }
             }

@@ -1,0 +1,316 @@
+Build started 8/20/2025 7:52:31 AM.
+     1>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" on node 1 (Restore target(s)).
+     1>_GetAllRestoreProjectPathItems:
+         Determining projects to restore...
+     1>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1) is building "D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj" (4:4) on node 2 (_GenerateProjectRestoreGraph target(s)).
+     4>AddPrunePackageReferences:
+         Loaded prune package data from framework packages
+         Loaded prune package data from framework packages
+     1>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (2:9) on node 1 (_GenerateProjectRestoreGraph target(s)).
+   2:9>Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (2:9) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (2:12) on node 1 (_GenerateProjectRestoreGraphPerFramework target(s)).
+     2>AddPrunePackageReferences:
+         Loaded prune package data from framework packages
+     4>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj" (_GenerateProjectRestoreGraph target(s)).
+     2>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (_GenerateProjectRestoreGraphPerFramework target(s)).
+     2>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (_GenerateProjectRestoreGraph target(s)).
+     1>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (3:6) on node 3 (_GenerateProjectRestoreGraph target(s)).
+   3:6>Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (3:6) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (3:8) on node 3 (_GenerateProjectRestoreGraphPerFramework target(s)).
+     3>AddPrunePackageReferences:
+         Loaded prune package data from framework packages
+     3>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (_GenerateProjectRestoreGraphPerFramework target(s)).
+     3>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (_GenerateProjectRestoreGraph target(s)).
+     1>Restore:
+         X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+         X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+         Assets file has not changed. Skipping assets file writing. Path: D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\obj\project.assets.json
+         Assets file has not changed. Skipping assets file writing. Path: D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\obj\project.assets.json
+         Assets file has not changed. Skipping assets file writing. Path: D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\obj\project.assets.json
+         Assets file has not changed. Skipping assets file writing. Path: D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\obj\project.assets.json
+         Restored D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj (in 95 ms).
+         Restored D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj (in 96 ms).
+         Restored D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj (in 96 ms).
+         Restored D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj (in 95 ms).
+         
+         NuGet Config files used:
+             C:\Users\USER\AppData\Roaming\NuGet\NuGet.Config
+         
+         Feeds used:
+             https://api.nuget.org/v3/index.json
+         All projects are up-to-date for restore.
+     1>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (Restore target(s)).
+   1:7>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" on node 2 (VSTest target(s)).
+     1>BuildProject:
+         Build started, please wait...
+   1:7>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1:7) is building "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1:8) on node 2 (default targets).
+     1>_CheckForNETCoreSdkIsPreview:
+       C:\Program Files\dotnet\sdk\10.0.100-preview.7.25380.108\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(345,5): message NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy [D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj]
+   1:8>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1:8) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (2:17) on node 3 (default targets).
+     2>_CheckForNETCoreSdkIsPreview:
+       C:\Program Files\dotnet\sdk\10.0.100-preview.7.25380.108\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(345,5): message NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy [D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj::TargetFramework=net9.0]
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       CoreGenerateAssemblyInfo:
+       Skipping target "CoreGenerateAssemblyInfo" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net9.0\RESTClient.NET.Core.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       GenerateBuildDependencyFile:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.deps.json already exists, checking hash.
+         Existing file hash: E4C8C51AFED950FB
+         New content hash: E4C8C51AFED950FB
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.deps.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.deps.json.tmp.
+       CopyFilesToOutputDirectory:
+         RESTClient.NET.Core -> D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.dll
+     2>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\RESTClient.NET.Core.csproj" (default targets).
+   1:8>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1:8) is building "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (3:11) on node 2 (default targets).
+     3>GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       CoreGenerateAssemblyInfo:
+       Skipping target "CoreGenerateAssemblyInfo" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net9.0\RESTClient.NET.Testing.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       _CopyOutOfDateSourceItemsToOutputDirectory:
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\obj\Debug\net9.0\MvcTestingAppManifest.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\MvcTestingAppManifest.json".
+       GenerateBuildDependencyFile:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.deps.json already exists, checking hash.
+         Existing file hash: 21D68ADD3F7ECA52
+         New content hash: 21D68ADD3F7ECA52
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.deps.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.deps.json.tmp.
+       GenerateBuildRuntimeConfigurationFiles:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.runtimeconfig.json already exists, checking hash.
+         Existing file hash: DDC4ED4D88E4DC5D
+         New content hash: DDC4ED4D88E4DC5D
+         File D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.runtimeconfig.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.runtimeconfig.json.tmp.
+       CopyFilesToOutputDirectory:
+         RESTClient.NET.Testing -> D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.dll
+       _MvcCopyDependencyFiles:
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.deps.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Core.deps.json".
+     3>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\RESTClient.NET.Testing.csproj" (default targets).
+   1:8>Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (1:8) is building "D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj" (4:6) on node 1 (default targets).
+     4>_CheckForNETCoreSdkIsPreview:
+       C:\Program Files\dotnet\sdk\10.0.100-preview.7.25380.108\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.RuntimeIdentifierInference.targets(345,5): message NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy [D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj]
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       CoreGenerateAssemblyInfo:
+       Skipping target "CoreGenerateAssemblyInfo" because all output files are up-to-date with respect to the input files.
+       _DiscoverMvcApplicationParts:
+       Skipping target "_DiscoverMvcApplicationParts" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net9.0\MinimalWebApi.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       _CreateAppHost:
+       Skipping target "_CreateAppHost" because all output files are up-to-date with respect to the input files.
+       _ProcessScopedCssFiles:
+       Skipping target "_ProcessScopedCssFiles" because it has no outputs.
+       _ProcessScopedCssFiles:
+       Skipping target "_ProcessScopedCssFiles" because it has no outputs.
+       _BuildCopyStaticWebAssetsPreserveNewest:
+       Skipping target "_BuildCopyStaticWebAssetsPreserveNewest" because it has no outputs.
+       _CopyOutOfDateSourceItemsToOutputDirectory:
+       Skipping target "_CopyOutOfDateSourceItemsToOutputDirectory" because all output files are up-to-date with respect to the input files.
+       GenerateBuildDependencyFile:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\bin\Debug\net9.0\MinimalWebApi.deps.json already exists, checking hash.
+         Existing file hash: 483CCCFB9CF3D6CD
+         New content hash: 483CCCFB9CF3D6CD
+         File D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\bin\Debug\net9.0\MinimalWebApi.deps.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\bin\Debug\net9.0\MinimalWebApi.deps.json.tmp.
+       GenerateBuildRuntimeConfigurationFiles:
+       Skipping target "GenerateBuildRuntimeConfigurationFiles" because all output files are up-to-date with respect to the input files.
+       CopyFilesToOutputDirectory:
+         MinimalWebApi -> D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\bin\Debug\net9.0\MinimalWebApi.dll
+     4>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\MinimalWebApi.csproj" (default targets).
+     1>GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       CoreGenerateAssemblyInfo:
+       Skipping target "CoreGenerateAssemblyInfo" because all output files are up-to-date with respect to the input files.
+       _GenerateSourceLinkFile:
+         Source Link file 'obj\Debug\net9.0\RESTClient.NET.Testing.Tests.sourcelink.json' is up-to-date.
+       CoreCompile:
+       Skipping target "CoreCompile" because all output files are up-to-date with respect to the input files.
+       _CopyOutOfDateSourceItemsToOutputDirectory:
+       Building target "_CopyOutOfDateSourceItemsToOutputDirectory" partially, because some output files are out of date with respect to their input files.
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\obj\Debug\net9.0\MvcTestingAppManifest.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\MvcTestingAppManifest.json".
+       GenerateBuildDependencyFile:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.deps.json already exists, checking hash.
+         Existing file hash: AE2DF4DEE95D3AF3
+         New content hash: AE2DF4DEE95D3AF3
+         File D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.deps.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.deps.json.tmp.
+       GenerateBuildRuntimeConfigurationFiles:
+         File D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.runtimeconfig.json already exists, checking hash.
+         Existing file hash: 25967740E9DF78AA
+         New content hash: 25967740E9DF78AA
+         File D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.runtimeconfig.json is unchanged, skipping write.
+         Deleting temporary file D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.runtimeconfig.json.tmp.
+       CopyFilesToOutputDirectory:
+         RESTClient.NET.Testing.Tests -> D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.dll
+       _MvcCopyDependencyFiles:
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\playground\MinimalWebApi\bin\Debug\net9.0\MinimalWebApi.deps.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\MinimalWebApi.deps.json".
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Core\bin\Debug\net9.0\RESTClient.NET.Core.deps.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Core.deps.json".
+         Copying file from "D:\Repos\Meir017\vscode-restclient-dotnet\src\RESTClient.NET.Testing\bin\Debug\net9.0\RESTClient.NET.Testing.deps.json" to "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.deps.json".
+     1>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (default targets).
+     1>BuildProject:
+         Build completed.
+         
+Test run for D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\bin\Debug\net9.0\RESTClient.NET.Testing.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.0-preview-25380-108 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 9.0.8)
+[xUnit.net 00:00:00.13]   Discovering: RESTClient.NET.Testing.Tests
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: Integration/test-integration.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 19 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+[xUnit.net 00:00:00.50]   Discovered:  RESTClient.NET.Testing.Tests
+[xUnit.net 00:00:00.54]   Starting:    RESTClient.NET.Testing.Tests
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+[xUnit.net 00:00:00.99]       Expected ((int)response.StatusCode) to be 201, but found 415 (difference of 214).
+[xUnit.net 00:00:00.99]       Stack Trace:
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.LateBoundTestFramework.Throw(String message)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+[xUnit.net 00:00:00.99]            at AwesomeAssertions.Numeric.NumericAssertionsBase`3.Be(T expected, String because, Object[] becauseArgs)
+[xUnit.net 00:00:00.99]         D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\Playground\HttpFileTestBasePlaygroundTests.cs(125,0): at RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(HttpTestCase testCase)
+[xUnit.net 00:00:00.99]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.99]       Output:
+[xUnit.net 00:00:00.99]         Testing: create-test - POST http://localhost:5000/api/test
+[xUnit.net 00:00:00.99]         Processed request headers:
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+[xUnit.net 00:00:00.99]           Content-Type: application/json
+[xUnit.net 00:00:00.99]         Response: 415 UnsupportedMediaType
+[xUnit.net 00:00:00.99]         Content: 
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+[xUnit.net 00:00:01.01]       Expected ((int)response.StatusCode) to be 200, but found 415 (difference of 215).
+[xUnit.net 00:00:01.01]       Stack Trace:
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.LateBoundTestFramework.Throw(String message)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+[xUnit.net 00:00:01.01]            at AwesomeAssertions.Numeric.NumericAssertionsBase`3.Be(T expected, String because, Object[] becauseArgs)
+[xUnit.net 00:00:01.01]         D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\Playground\HttpFileTestBasePlaygroundTests.cs(125,0): at RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(HttpTestCase testCase)
+[xUnit.net 00:00:01.01]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:01.01]       Output:
+[xUnit.net 00:00:01.01]         Testing: update-test - PUT http://localhost:5000/api/test/123
+[xUnit.net 00:00:01.01]         Processed request headers:
+[xUnit.net 00:00:01.01]           Content-Type: application/json
+[xUnit.net 00:00:01.01]         Response: 415 UnsupportedMediaType
+[xUnit.net 00:00:01.01]         Content: 
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loading HTTP file from: playground-api-tests.http
+info: RESTClient.NET.Core.HttpFileProcessor[0]
+      Loaded 17 requests from HTTP file
+[xUnit.net 00:00:01.20]   Finished:    RESTClient.NET.Testing.Tests
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "pong", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [], LineNumber = 9, Metadata = [], ┬╖┬╖┬╖ }) [198 ms]
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "Hello, World!", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Accept"] = "{{contentType}}"], LineNumber = 18, Metadata = [], ┬╖┬╖┬╖ }) [31 ms]
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "Test item 42", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Accept"] = "{{contentType}}"], LineNumber = 27, Metadata = [], ┬╖┬╖┬╖ }) [40 ms]
+  Failed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = "{\r\n  \"id\": 1,\r\n  \"name\": \"Test Item\",\r\"┬╖┬╖┬╖, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "Created", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Content-Type"] = "{{contentType}}"], LineNumber = 36, Metadata = [], ┬╖┬╖┬╖ }) [87 ms]
+  Error Message:
+   Expected ((int)response.StatusCode) to be 201, but found 415 (difference of 214).
+  Stack Trace:
+     at AwesomeAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at AwesomeAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at AwesomeAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at AwesomeAssertions.Numeric.NumericAssertionsBase`3.Be(T expected, String because, Object[] becauseArgs)
+   at RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(HttpTestCase testCase) in D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\Playground\HttpFileTestBasePlaygroundTests.cs:line 125
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ Testing: create-test - POST http://localhost:5000/api/test
+ Processed request headers:
+   Content-Type: application/json
+ Response: 415 UnsupportedMediaType
+ Content: 
+
+
+  Failed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = "{\r\n  \"id\": 123,\r\n  \"name\": \"Updated Test "┬╖┬╖┬╖, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "Updated", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Content-Type"] = "{{contentType}}"], LineNumber = 51, Metadata = [], ┬╖┬╖┬╖ }) [30 ms]
+  Error Message:
+   Expected ((int)response.StatusCode) to be 200, but found 415 (difference of 215).
+  Stack Trace:
+     at AwesomeAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at AwesomeAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at AwesomeAssertions.Execution.AssertionScope.AddPreFormattedFailure(String formattedFailureMessage)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(Func`1 getFailureReason)
+   at AwesomeAssertions.Execution.AssertionChain.FailWith(String message, Object[] args)
+   at AwesomeAssertions.Numeric.NumericAssertionsBase`3.Be(T expected, String because, Object[] becauseArgs)
+   at RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(HttpTestCase testCase) in D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\Playground\HttpFileTestBasePlaygroundTests.cs:line 125
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ Testing: update-test - PUT http://localhost:5000/api/test/123
+ Processed request headers:
+   Content-Type: application/json
+ Response: 415 UnsupportedMediaType
+ Content: 
+
+
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = null, ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [], LineNumber = 65, Metadata = [], ┬╖┬╖┬╖ }) [37 ms]
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "\"Internal server error\"", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Accept"] = "{{contentType}}"], LineNumber = 73, Metadata = [], ┬╖┬╖┬╖ }) [63 ms]
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = null, ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Accept"] = "{{contentType}}"], LineNumber = 81, Metadata = [], ┬╖┬╖┬╖ }) [29 ms]
+  Passed RESTClient.NET.Testing.Tests.Playground.HttpFileTestBasePlaygroundTests.ExecuteHttpFileTest_ShouldPassBasicValidation(testCase: HttpTestCase { Body = null, ExpectedResponse = HttpExpectedResponse { CustomExpectations = [┬╖┬╖┬╖], ExpectedBodyContains = "Headers test", ExpectedBodyPath = null, ExpectedHeaders = [┬╖┬╖┬╖], ExpectedSchemaPath = null, ┬╖┬╖┬╖ }, Headers = [["Accept"] = "{{contentType}}", ["Custom-Header"] = "test-value"], LineNumber = 91, Metadata = [], ┬╖┬╖┬╖ }) [35 ms]
+
+Total tests: 9
+     Passed: 7
+     Failed: 2
+ Total time: 2.2846 Seconds
+       _VSTestConsole:
+         MSB4181: The "VSTestTask" task returned false but did not log an error.
+     1>Done Building Project "D:\Repos\Meir017\vscode-restclient-dotnet\tests\RESTClient.NET.Testing.Tests\RESTClient.NET.Testing.Tests.csproj" (VSTest target(s)) -- FAILED.
+
+Build FAILED.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:08.93

@@ -1,0 +1,95 @@
+# Integration test HTTP file for HttpFileTestBase
+@baseUrl = http://localhost
+@contentType = application/json
+
+# Simple test endpoints
+# @name get-test
+# @expect status 200
+# @expect header Content-Type application/json
+# @expect body-contains "Hello, World!"
+GET {{baseUrl}}/api/test HTTP/1.1
+Accept: {{contentType}}
+
+###
+
+# Test with path parameter
+# @name get-test-by-id
+# @expect status 200
+# @expect body-contains "Test item 42"
+GET {{baseUrl}}/api/test/42 HTTP/1.1
+Accept: {{contentType}}
+
+###
+
+# POST request test
+# @name create-test
+# @expect status 201
+# @expect body-contains "Created"
+POST {{baseUrl}}/api/test HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "name": "Test Item",
+  "description": "A test item for integration testing"
+}
+
+###
+
+# PUT request test
+# @name update-test
+# @expect status 200
+# @expect body-contains "Updated"
+PUT {{baseUrl}}/api/test/123 HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "name": "Updated Test Item",
+  "description": "An updated test item"
+}
+
+###
+
+# DELETE request test
+# @name delete-test
+# @expect status 204
+DELETE {{baseUrl}}/api/test/123 HTTP/1.1
+
+###
+
+# Error response test
+# @name get-error
+# @expect status 500
+# @expect body-contains "Internal server error"
+GET {{baseUrl}}/api/error HTTP/1.1
+Accept: {{contentType}}
+
+###
+
+# Not found test
+# @name get-not-found
+# @expect status 404
+# @expect body-contains "Not found"
+GET {{baseUrl}}/api/notfound HTTP/1.1
+Accept: {{contentType}}
+
+###
+
+# Request without expectations (for filtering tests)
+# @name simple-get
+GET {{baseUrl}}/api/test HTTP/1.1
+
+###
+
+# Another request without expectations
+# @name another-simple-get  
+GET {{baseUrl}}/api/test/1 HTTP/1.1
+
+###
+
+# Headers test
+# @name get-headers
+# @expect status 200
+# @expect header X-Custom-Header test-value
+# @expect body-contains "Headers test"
+GET {{baseUrl}}/api/headers HTTP/1.1
+Accept: {{contentType}}

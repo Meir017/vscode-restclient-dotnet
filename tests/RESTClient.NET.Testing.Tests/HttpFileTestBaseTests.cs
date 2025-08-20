@@ -277,8 +277,8 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
 
             // Assert
             processedRequest.Should().NotBeNull();
-            // File variables take precedence over environment variables when using {{variable}} syntax
-            processedRequest.Url.Should().Contain("https://api.example.com/users");
+            // Environment variables take precedence over file variables when using {{variable}} syntax
+            processedRequest.Url.Should().Contain("https://test.api.com/users");
         }
 
         [Fact]

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,12 +26,12 @@ namespace RESTClient.NET.Testing
     /// <list type="bullet">
     /// <item>Automatic HTTP file parsing and request execution</item>
     /// <item>Built-in expectation validation (status codes, headers, body content)</item>
-    /// <item>xUnit integration with <see cref="HttpFileTestData"/> for parameterized tests</item>
+    /// <item>xUnit integration with instance-based test data for parameterized tests</item>
     /// <item>WebApplicationFactory integration for ASP.NET Core testing</item>
     /// <item>Comprehensive assertion methods for response validation</item>
     /// </list>
     /// <para>Override <see cref="GetHttpFilePath"/> to specify your HTTP file location.</para>
-    /// <para>Use <c>[MemberData(nameof(HttpFileTestData))]</c> to run tests for each named request.</para>
+    /// <para>Use <c>[MemberData(nameof(GetHttpFileTestData))]</c> to run tests for each named request.</para>
     /// </remarks>
     /// <example>
     /// <code>
@@ -41,24 +42,34 @@ namespace RESTClient.NET.Testing
     ///     protected override string GetHttpFilePath() =&gt; "HttpFiles/api-tests.http";
     /// 
     ///     [Theory]
-    ///     [MemberData(nameof(HttpFileTestData))]
-    ///     public async Task ExecuteHttpFileTest(string requestName, HttpRequest request)
+    ///     [MemberData(nameof(GetHttpFileTestData))]
+    ///     public async Task ExecuteHttpFileTest(HttpTestCase testCase)
     ///     {
-    ///         // Execute the request and validate expectations
-    ///         var result = await ExecuteRequestAsync(requestName);
+    ///         // Create HTTP client from factory
+    ///         using var client = Factory.CreateClient();
     ///         
-    ///         // Additional custom assertions
-    ///         Assert.True(result.IsSuccess);
-    ///         Assert.NotNull(result.Response);
+    ///         // Convert test case to HTTP request message
+    ///         using var request = testCase.ToHttpRequestMessage();
+    ///         
+    ///         // Execute request
+    ///         using var response = await client.SendAsync(request);
+    ///         
+    ///         // Validate expectations if present
+    ///         if (testCase.ExpectedResponse != null)
+    ///         {
+    ///             // Add your validation logic here
+    ///         }
     ///     }
     /// 
     ///     [Fact]
     ///     public async Task SpecificEndpointTest()
     ///     {
-    ///         var result = await ExecuteRequestAsync("get-users");
+    ///         var testCase = GetTestCase("get-users");
+    ///         using var client = Factory.CreateClient();
+    ///         using var request = testCase.ToHttpRequestMessage();
+    ///         using var response = await client.SendAsync(request);
     ///         
-    ///         result.Response.Should().HaveStatusCode(200);
-    ///         result.Response.Should().HaveHeader("Content-Type", "application/json");
+    ///         Assert.Equal(200, (int)response.StatusCode);
     ///     }
     /// }
     /// </code>
@@ -66,15 +77,21 @@ namespace RESTClient.NET.Testing
     public abstract class HttpFileTestBase<TProgram> : IClassFixture<WebApplicationFactory<TProgram>>, IDisposable
         where TProgram : class
     {
-        private readonly WebApplicationFactory<TProgram> _factory;
+        private readonly WebApplicationFactory<TProgram> _originalFactory;
+        private readonly WebApplicationFactory<TProgram> _configuredFactory;
         private readonly HttpFile _httpFile;
         private readonly HttpFileProcessor _httpFileProcessor;
         private bool _disposed;
 
         /// <summary>
-        /// Gets the WebApplicationFactory for creating test clients
+        /// Gets the original WebApplicationFactory passed to the constructor
         /// </summary>
-        protected WebApplicationFactory<TProgram> Factory => _factory;
+        protected WebApplicationFactory<TProgram> OriginalFactory => _originalFactory;
+
+        /// <summary>
+        /// Gets the configured WebApplicationFactory for creating test clients
+        /// </summary>
+        protected WebApplicationFactory<TProgram> Factory => _configuredFactory;
 
         /// <summary>
         /// Gets the parsed HTTP file
@@ -82,23 +99,18 @@ namespace RESTClient.NET.Testing
         protected HttpFile HttpFile => _httpFile;
 
         /// <summary>
-        /// Gets the test data for use with xUnit [MemberData]
-        /// </summary>
-        public static IEnumerable<object[]> HttpFileTestData => GetTestData();
-
-        /// <summary>
         /// Initializes a new instance of the HttpFileTestBase class
         /// </summary>
         /// <param name="factory">The WebApplicationFactory to use for testing</param>
         protected HttpFileTestBase(WebApplicationFactory<TProgram> factory)
         {
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _originalFactory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-            // Configure the factory if needed
-            _factory = ConfigureFactory(_factory);
+            // Configure the factory
+            _configuredFactory = ConfigureFactory(_originalFactory);
 
-            // Get logger from the factory's services (cast to compatible logger type)
-            var loggerFactory = _factory.Services.GetService<ILoggerFactory>();
+            // Get logger from the configured factory's services
+            var loggerFactory = _configuredFactory.Services.GetService<ILoggerFactory>();
             var processorLogger = loggerFactory?.CreateLogger<HttpFileProcessor>();
 
             // Initialize HTTP file processor
@@ -108,7 +120,7 @@ namespace RESTClient.NET.Testing
             var httpFilePath = GetHttpFilePath();
             processorLogger?.LogInformation("Loading HTTP file from: {FilePath}", httpFilePath);
 
-            _httpFile = LoadHttpFile(httpFilePath);
+            _httpFile = LoadHttpFileSync(httpFilePath);
             
             // Allow modification of the HTTP file before tests
             ModifyHttpFile(_httpFile);
@@ -160,25 +172,36 @@ namespace RESTClient.NET.Testing
         }
 
         /// <summary>
-        /// Gets test data for all requests in the HTTP file
+        /// Gets test data for all requests in the HTTP file for use with xUnit [MemberData]
         /// </summary>
         /// <returns>Test data for xUnit [MemberData]</returns>
-        protected static IEnumerable<object[]> GetTestData()
+        public IEnumerable<object[]> GetHttpFileTestData()
         {
-            // This is a static method that creates a temporary instance to get test data
-            // This is required by xUnit's [MemberData] attribute
-            try
-            {
-                using var tempFactory = new WebApplicationFactory<TProgram>();
-                var tempInstance = CreateTempInstance(tempFactory);
-                return tempInstance._httpFile.GetTestData();
-            }
-            catch
-            {
-                // If we can't load the HTTP file, return empty test data
-                // The actual error will be caught during test execution
-                return new List<object[]> { new object[] { new HttpTestCase { Name = "LoadError", Method = "GET", Url = "/error" } } };
-            }
+            return _httpFile.GetTestData();
+        }
+
+        /// <summary>
+        /// Creates and initializes a new instance asynchronously (alternative factory pattern)
+        /// </summary>
+        /// <param name="factory">The WebApplicationFactory to use for testing</param>
+        /// <param name="httpFilePath">The path to the HTTP file</param>
+        /// <returns>A fully initialized HttpFileTestBase instance</returns>
+        protected static async Task<TDerived> CreateAsync<TDerived>(WebApplicationFactory<TProgram> factory, string httpFilePath)
+            where TDerived : HttpFileTestBase<TProgram>, new()
+        {
+            var instance = new TDerived();
+            await instance.InitializeAsync(factory, httpFilePath);
+            return instance;
+        }
+
+        /// <summary>
+        /// Alternative async initialization method (for derived classes that need async initialization)
+        /// </summary>
+        protected virtual async Task InitializeAsync(WebApplicationFactory<TProgram> factory, string httpFilePath)
+        {
+            // This could be used by derived classes that need async initialization
+            // For now, we use the sync pattern in the constructor
+            await Task.CompletedTask;
         }
 
         /// <summary>
@@ -238,45 +261,58 @@ namespace RESTClient.NET.Testing
             return _httpFileProcessor.GetProcessedRequest(_httpFile, requestName, environmentVariables);
         }
 
-        /// <summary>
-        /// Creates a temporary instance for static test data generation
-        /// This is a factory method that derived classes must implement
-        /// </summary>
-        /// <param name="factory">The factory to use</param>
-        /// <returns>A temporary instance</returns>
-        private static HttpFileTestBase<TProgram> CreateTempInstance(WebApplicationFactory<TProgram> factory)
-        {
-            // This is a bit of a hack to get around xUnit's static [MemberData] requirement
-            // We need to use reflection to create a temporary instance
-            var derivedType = typeof(TProgram).Assembly
-                .GetTypes()
-                .FirstOrDefault(t => t.IsSubclassOf(typeof(HttpFileTestBase<TProgram>)) && !t.IsAbstract);
-
-            if (derivedType == null)
-                throw new InvalidOperationException($"Could not find a concrete implementation of HttpFileTestBase<{typeof(TProgram).Name}>");
-
-            return (HttpFileTestBase<TProgram>)Activator.CreateInstance(derivedType, factory)!;
-        }
-
-        private HttpFile LoadHttpFile(string httpFilePath)
+        private async Task<HttpFile> LoadHttpFileAsync(string httpFilePath)
         {
             if (string.IsNullOrWhiteSpace(httpFilePath))
                 throw new ArgumentException("HTTP file path cannot be null or empty", nameof(httpFilePath));
 
-            // Resolve relative paths
+            // Resolve relative paths relative to the test assembly, not the program assembly
             if (!Path.IsPathRooted(httpFilePath))
             {
-                // Try to resolve relative to the test assembly location
-                var assemblyLocation = typeof(TProgram).Assembly.Location;
-                var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-                httpFilePath = Path.Combine(assemblyDirectory!, httpFilePath);
+                var testAssemblyLocation = GetType().Assembly.Location;
+                if (!string.IsNullOrEmpty(testAssemblyLocation))
+                {
+                    var testAssemblyDirectory = Path.GetDirectoryName(testAssemblyLocation);
+                    if (!string.IsNullOrEmpty(testAssemblyDirectory))
+                    {
+                        httpFilePath = Path.Combine(testAssemblyDirectory, httpFilePath);
+                    }
+                }
             }
 
             if (!File.Exists(httpFilePath))
                 throw new FileNotFoundException($"HTTP file not found: {httpFilePath}");
 
             var parser = new HttpFileParser();
-            return parser.ParseFileAsync(httpFilePath).GetAwaiter().GetResult();
+            return await parser.ParseFileAsync(httpFilePath);
+        }
+
+        private HttpFile LoadHttpFileSync(string httpFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(httpFilePath))
+                throw new ArgumentException("HTTP file path cannot be null or empty", nameof(httpFilePath));
+
+            // Resolve relative paths relative to the test assembly, not the program assembly
+            if (!Path.IsPathRooted(httpFilePath))
+            {
+                var testAssemblyLocation = GetType().Assembly.Location;
+                if (!string.IsNullOrEmpty(testAssemblyLocation))
+                {
+                    var testAssemblyDirectory = Path.GetDirectoryName(testAssemblyLocation);
+                    if (!string.IsNullOrEmpty(testAssemblyDirectory))
+                    {
+                        httpFilePath = Path.Combine(testAssemblyDirectory, httpFilePath);
+                    }
+                }
+            }
+
+            if (!File.Exists(httpFilePath))
+                throw new FileNotFoundException($"HTTP file not found: {httpFilePath}");
+
+            var parser = new HttpFileParser();
+            // Use the synchronous Parse method instead of async to avoid deadlocks
+            var content = File.ReadAllText(httpFilePath);
+            return parser.Parse(content);
         }
 
         /// <summary>
@@ -286,7 +322,12 @@ namespace RESTClient.NET.Testing
         {
             if (!_disposed && disposing)
             {
-                _factory?.Dispose();
+                // Only dispose the configured factory, not the original one passed to constructor
+                // The original factory is owned by xUnit and should not be disposed by us
+                if (!ReferenceEquals(_configuredFactory, _originalFactory))
+                {
+                    _configuredFactory?.Dispose();
+                }
                 _disposed = true;
             }
         }
