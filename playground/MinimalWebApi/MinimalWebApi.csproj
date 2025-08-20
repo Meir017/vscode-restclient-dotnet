@@ -11,4 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="MinimalWebApi.http" />
+    <None Include="playground-api-tests.http" />
+  </ItemGroup>
+
 </Project>
