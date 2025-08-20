@@ -39,7 +39,7 @@ namespace RESTClient.NET.Core.Validation
         /// <param name="errors">The validation errors</param>
         /// <param name="warnings">The validation warnings</param>
         public ValidationResult(
-            IEnumerable<ValidationError>? errors = null, 
+            IEnumerable<ValidationError>? errors = null,
             IEnumerable<ValidationWarning>? warnings = null)
         {
             Errors = (errors ?? Enumerable.Empty<ValidationError>()).ToList().AsReadOnly();

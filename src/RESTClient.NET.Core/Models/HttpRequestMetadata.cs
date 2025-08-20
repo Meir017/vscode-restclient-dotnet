@@ -43,7 +43,7 @@ namespace RESTClient.NET.Core.Models
         public HttpRequestMetadata()
         {
             CustomMetadata = new Dictionary<string, string>();
-            Expectations = new List<TestExpectation>();
+            Expectations = [];
         }
 
         /// <summary>

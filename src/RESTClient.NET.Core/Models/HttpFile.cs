@@ -80,7 +80,7 @@ namespace RESTClient.NET.Core.Models
             FileVariables = fileVariables ?? new Dictionary<string, string>();
 
             // Build request lookup dictionary - keep first occurrence for duplicates
-            _requestsByName = new Dictionary<string, HttpRequest>();
+            _requestsByName = [];
             foreach (var request in requestList)
             {
                 if (!string.IsNullOrEmpty(request.Name))

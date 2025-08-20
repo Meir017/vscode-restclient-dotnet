@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using RESTClient.NET.Core.Models;
 
@@ -340,7 +339,7 @@ namespace RESTClient.NET.Core.Processing
 
             foreach (var variable in fileVariables)
             {
-                if (HasCircularReference(variable.Key, variable.Value, fileVariables, new HashSet<string>()))
+                if (HasCircularReference(variable.Key, variable.Value, fileVariables, []))
                 {
                     circularVariables.Add(variable.Key);
                 }
@@ -372,7 +371,7 @@ namespace RESTClient.NET.Core.Processing
 
                 if (allVariables.TryGetValue(variableName, out var referencedValue))
                 {
-                    if (HasCircularReference(variableName, referencedValue, allVariables, new HashSet<string>(visitedVariables)))
+                    if (HasCircularReference(variableName, referencedValue, allVariables, [.. visitedVariables]))
                     {
                         return true;
                     }

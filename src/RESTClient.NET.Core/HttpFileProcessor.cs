@@ -112,7 +112,7 @@ namespace RESTClient.NET.Core
         /// <param name="options">Parsing options</param>
         /// <returns>Processed HTTP file with variables resolved</returns>
         public async Task<HttpFile> ParseAndProcessFileAsync(
-            string filePath, 
+            string filePath,
             IDictionary<string, string>? environmentVariables = null,
             HttpParseOptions? options = null)
         {
@@ -192,8 +192,8 @@ namespace RESTClient.NET.Core
             foreach (var request in httpFile.Requests)
             {
                 var unresolvedVariables = VariableProcessor.ValidateRequestVariables(
-                    request, 
-                    httpFile.FileVariables, 
+                    request,
+                    httpFile.FileVariables,
                     environmentVariables);
 
                 foreach (var kvp in unresolvedVariables)

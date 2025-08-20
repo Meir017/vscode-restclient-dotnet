@@ -91,7 +91,7 @@ namespace RESTClient.NET.Core.Models
                     // Try to parse as JSON if content type indicates JSON or if content looks like JSON
                     var contentType = response.Content?.Headers?.ContentType?.MediaType;
                     var looksLikeJson = bodyContent.TrimStart().StartsWith("{") || bodyContent.TrimStart().StartsWith("[");
-                    
+
                     if (IsJsonContent(contentType) || looksLikeJson)
                     {
                         parsedBody = JToken.Parse(bodyContent);

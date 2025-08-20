@@ -242,6 +242,10 @@ namespace RESTClient.NET.Core.Validation
                         request.LineNumber,
                         "Content-Length header will be automatically calculated"));
                     break;
+
+                default:
+                    // No specific validation for other headers
+                    break;
             }
         }
 
@@ -291,6 +295,30 @@ namespace RESTClient.NET.Core.Validation
                                 "schema expectation cannot be empty",
                                 ValidationErrorType.InvalidExpectation));
                         }
+                        break;
+
+                    case ExpectationType.Header:
+                        if (string.IsNullOrWhiteSpace(expectation.Value))
+                        {
+                            errors.Add(new ValidationError(
+                                request.LineNumber,
+                                "header expectation cannot be empty",
+                                ValidationErrorType.InvalidExpectation));
+                        }
+                        break;
+
+                    case ExpectationType.BodyContains:
+                        if (string.IsNullOrWhiteSpace(expectation.Value))
+                        {
+                            errors.Add(new ValidationError(
+                                request.LineNumber,
+                                "body-contains expectation cannot be empty",
+                                ValidationErrorType.InvalidExpectation));
+                        }
+                        break;
+
+                    default:
+                        // Unknown expectation type
                         break;
                 }
             }

@@ -31,10 +31,10 @@ namespace RESTClient.NET.Core.Exceptions
         /// <param name="parsedContent">The content being parsed</param>
         /// <param name="innerException">The inner exception</param>
         public HttpParseException(
-            string message, 
-            int lineNumber = 0, 
-            int columnNumber = 0, 
-            string? parsedContent = null, 
+            string message,
+            int lineNumber = 0,
+            int columnNumber = 0,
+            string? parsedContent = null,
             Exception? innerException = null)
             : base(message, innerException)
         {
@@ -78,8 +78,8 @@ namespace RESTClient.NET.Core.Exceptions
         /// <param name="currentLineNumber">The line number of the duplicate occurrence</param>
         /// <param name="firstOccurrenceLineNumber">The line number of the first occurrence</param>
         public DuplicateRequestNameException(
-            string requestName, 
-            int currentLineNumber, 
+            string requestName,
+            int currentLineNumber,
             int firstOccurrenceLineNumber)
             : base($"Duplicate request name '{requestName}' found. First defined at line {firstOccurrenceLineNumber}", currentLineNumber)
         {
@@ -110,8 +110,8 @@ namespace RESTClient.NET.Core.Exceptions
         /// <param name="currentLineNumber">The line number of the duplicate occurrence</param>
         /// <param name="firstOccurrenceLineNumber">The line number of the first occurrence</param>
         public DuplicateRequestIdException(
-            string requestId, 
-            int currentLineNumber, 
+            string requestId,
+            int currentLineNumber,
             int firstOccurrenceLineNumber)
             : base($"Duplicate request ID '{requestId}' found. First defined at line {firstOccurrenceLineNumber}", currentLineNumber)
         {

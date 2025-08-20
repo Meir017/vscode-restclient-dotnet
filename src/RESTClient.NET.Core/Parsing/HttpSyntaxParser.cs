@@ -13,7 +13,6 @@ namespace RESTClient.NET.Core.Parsing
     /// </summary>
     public class HttpSyntaxParser : IHttpSyntaxParser
     {
-        private static readonly Regex _requestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
         private static readonly Regex _variableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
         private static readonly Regex _metadataRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
 
@@ -21,7 +20,7 @@ namespace RESTClient.NET.Core.Parsing
         public HttpFile Parse(IEnumerable<HttpToken> tokens, HttpParseOptions? options = null)
         {
             options ??= HttpParseOptions.Default();
-            
+
             var tokenList = tokens.ToList();
             var requests = new List<HttpRequest>();
             var fileVariables = new Dictionary<string, string>();
@@ -125,12 +124,15 @@ namespace RESTClient.NET.Core.Parsing
 
                     case HttpTokenType.Method:
                     case HttpTokenType.Url:
+                    case HttpTokenType.HttpVersion:
                     case HttpTokenType.HeaderName:
                     case HttpTokenType.HeaderValue:
                     case HttpTokenType.Body:
                     case HttpTokenType.FileBody:
                     case HttpTokenType.FileBodyWithVariables:
                     case HttpTokenType.FileBodyWithEncoding:
+                    case HttpTokenType.RequestName:
+                    case HttpTokenType.VariableReference:
                         if (isParsingRequest)
                         {
                             currentRequestTokens.Add(token);
@@ -162,24 +164,6 @@ namespace RESTClient.NET.Core.Parsing
             }
 
             return new HttpFile(requests, fileVariables);
-        }
-
-        private static void ValidateRequestName(string requestName, int lineNumber)
-        {
-            if (string.IsNullOrWhiteSpace(requestName))
-            {
-                throw new InvalidRequestNameException(requestName, lineNumber);
-            }
-
-            if (!_requestNameValidationRegex.IsMatch(requestName))
-            {
-                throw new InvalidRequestNameException(requestName, lineNumber);
-            }
-
-            if (requestName.Length > 50)
-            {
-                throw new InvalidRequestNameException(requestName, lineNumber);
-            }
         }
 
         private static void ParseFileVariable(string variableDefinition, Dictionary<string, string> fileVariables)
@@ -385,6 +369,19 @@ namespace RESTClient.NET.Core.Parsing
                                 isInBody = true;
                             }
                         }
+                        break;
+
+                    case HttpTokenType.HttpVersion:
+                    case HttpTokenType.HeaderValue:
+                    case HttpTokenType.Comment:
+                    case HttpTokenType.Variable:
+                    case HttpTokenType.VariableReference:
+                    case HttpTokenType.Metadata:
+                    case HttpTokenType.RequestSeparator:
+                    case HttpTokenType.RequestName:
+                    case HttpTokenType.Whitespace:
+                    case HttpTokenType.EndOfFile:
+                        // These tokens are handled in other contexts or can be ignored during request parsing
                         break;
                 }
             }

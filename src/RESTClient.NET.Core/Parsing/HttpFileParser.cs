@@ -105,7 +105,7 @@ namespace RESTClient.NET.Core.Parsing
                     if (!validationResult.IsValid)
                     {
                         _logger?.LogWarning("Validation failed with {ErrorCount} errors", validationResult.Errors.Count);
-                        
+
                         if (options.StrictMode)
                         {
                             var firstError = validationResult.Errors[0];
@@ -194,11 +194,11 @@ namespace RESTClient.NET.Core.Parsing
             catch (Exceptions.HttpParseException ex)
             {
                 var error = new ValidationError(
-                    ex.LineNumber, 
-                    ex.Message, 
-                    ValidationErrorType.InvalidHttpSyntax, 
+                    ex.LineNumber,
+                    ex.Message,
+                    ValidationErrorType.InvalidHttpSyntax,
                     ex.ParsedContent);
-                
+
                 return ValidationResult.Failure(new[] { error });
             }
         }
