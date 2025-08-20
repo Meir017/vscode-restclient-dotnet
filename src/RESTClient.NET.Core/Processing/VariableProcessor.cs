@@ -49,7 +49,7 @@ namespace RESTClient.NET.Core.Processing
 
         /// <summary>
         /// Resolves variables in content using a three-pass approach:
-        /// 1. File variables ({{variable}})
+        /// 1. File variables ({{variable}}) - environment variables override file variables when both exist
         /// 2. Environment variables (${variable})
         /// 3. System variables ({{$variable}})
         /// </summary>
@@ -77,22 +77,27 @@ namespace RESTClient.NET.Core.Processing
             var result = content;
 
             // First pass: resolve file variables ({{variable}})
-            if (fileVariables != null && fileVariables.Count > 0)
+            // Environment variables override file variables when both exist
+            result = VariableReferenceRegex.Replace(result, match =>
             {
-                result = VariableReferenceRegex.Replace(result, match =>
+                var variableName = match.Groups[1].Value.Trim();
+                
+                // Check environment variables first (they override file variables)
+                if (environmentVariables?.TryGetValue(variableName, out var envValue) == true)
                 {
-                    var variableName = match.Groups[1].Value.Trim();
-                    
-                    if (fileVariables.TryGetValue(variableName, out var value))
-                    {
-                        // Recursively resolve variables in the value
-                        return ResolveVariables(value, fileVariables, environmentVariables) ?? string.Empty;
-                    }
+                    return envValue;
+                }
+                
+                // Fall back to file variables
+                if (fileVariables?.TryGetValue(variableName, out var fileValue) == true)
+                {
+                    // Recursively resolve variables in the value
+                    return ResolveVariables(fileValue, fileVariables, environmentVariables) ?? string.Empty;
+                }
 
-                    // Return original if variable not found
-                    return match.Value;
-                });
-            }
+                // Return original if variable not found
+                return match.Value;
+            });
 
             // Second pass: resolve environment variables (${variable})
             if (environmentVariables != null && environmentVariables.Count > 0)

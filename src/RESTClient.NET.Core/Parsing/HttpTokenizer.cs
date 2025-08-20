@@ -102,11 +102,21 @@ namespace RESTClient.NET.Core.Parsing
                     isInBodySection = false; // Reset for new request
                     yield return new HttpToken(HttpTokenType.Method, methodMatch.Groups[1].Value, lineNumber, 1);
                     
-                    // The rest of the line is likely the URL
+                    // The rest of the line is the URL and possibly HTTP version
                     var remainder = trimmedLine.Substring(methodMatch.Length).Trim();
                     if (!string.IsNullOrEmpty(remainder))
                     {
-                        yield return new HttpToken(HttpTokenType.Url, remainder, lineNumber, methodMatch.Length + 1);
+                        // Remove HTTP version from URL if present (e.g., "HTTP/1.1", "HTTP/2.0")
+                        var httpVersionIndex = remainder.LastIndexOf(" HTTP/", StringComparison.OrdinalIgnoreCase);
+                        if (httpVersionIndex > 0)
+                        {
+                            remainder = remainder.Substring(0, httpVersionIndex).Trim();
+                        }
+                        
+                        if (!string.IsNullOrEmpty(remainder))
+                        {
+                            yield return new HttpToken(HttpTokenType.Url, remainder, lineNumber, methodMatch.Length + 1);
+                        }
                     }
                     continue;
                 }

@@ -1,0 +1,56 @@
+Summary
+  Generated on: 8/19/2025 - 9:42:20 PM
+  Coverage date: 8/19/2025 - 12:57:33 PM - 8/19/2025 - 9:42:07 PM
+  Parser: MultiReport (22x Cobertura)
+  Assemblies: 2
+  Classes: 34
+  Files: 24
+  Line coverage: 87.4%
+  Covered lines: 1845
+  Uncovered lines: 265
+  Coverable lines: 2110
+  Total lines: 4985
+  Branch coverage: 79.7% (864 of 1084)
+  Covered branches: 864
+  Total branches: 1084
+  Method coverage: 90.2% (221 of 245)
+  Covered methods: 221
+  Total methods: 245
+
+RESTClient.NET.Core                                              91.6%
+  RESTClient.NET.Core.Exceptions.DuplicateRequestIdException    100.0%
+  RESTClient.NET.Core.Exceptions.DuplicateRequestNameException  100.0%
+  RESTClient.NET.Core.Exceptions.HttpParseException             100.0%
+  RESTClient.NET.Core.Exceptions.InvalidRequestIdException      100.0%
+  RESTClient.NET.Core.Exceptions.InvalidRequestNameException    100.0%
+  RESTClient.NET.Core.Exceptions.MissingRequestIdException      100.0%
+  RESTClient.NET.Core.Exceptions.MissingRequestNameException    100.0%
+  RESTClient.NET.Core.HttpFileProcessor                          88.5%
+  RESTClient.NET.Core.Models.FileBodyReference                  100.0%
+  RESTClient.NET.Core.Models.HttpFile                            82.5%
+  RESTClient.NET.Core.Models.HttpRequest                        100.0%
+  RESTClient.NET.Core.Models.HttpRequestMetadata                100.0%
+  RESTClient.NET.Core.Models.HttpResponseData                    96.2%
+  RESTClient.NET.Core.Models.ResponseContext                     94.4%
+  RESTClient.NET.Core.Models.TestExpectation                    100.0%
+  RESTClient.NET.Core.Models.VariableDefinition                 100.0%
+  RESTClient.NET.Core.Parsing.HttpFileParser                     85.1%
+  RESTClient.NET.Core.Parsing.HttpParseOptions                  100.0%
+  RESTClient.NET.Core.Parsing.HttpSyntaxParser                   85.0%
+  RESTClient.NET.Core.Parsing.HttpToken                          71.4%
+  RESTClient.NET.Core.Parsing.HttpTokenizer                     100.0%
+  RESTClient.NET.Core.Processing.ResponseVariableProcessor       85.8%
+  RESTClient.NET.Core.Processing.SystemVariableProcessor         97.9%
+  RESTClient.NET.Core.Processing.VariableProcessor               82.6%
+  RESTClient.NET.Core.Validation.HttpFileValidator               98.6%
+  RESTClient.NET.Core.Validation.ValidationError                100.0%
+  RESTClient.NET.Core.Validation.ValidationResult               100.0%
+  RESTClient.NET.Core.Validation.ValidationWarning              100.0%
+
+RESTClient.NET.Testing                                           69.8%
+  RESTClient.NET.Testing.Assertions.AssertionException           50.0%
+  RESTClient.NET.Testing.Assertions.HttpResponseAssertion        85.2%
+  RESTClient.NET.Testing.Extensions.HttpFileExtensions           92.0%
+  RESTClient.NET.Testing.HttpFileTestBase<T>                      0.0%
+  RESTClient.NET.Testing.Models.HttpExpectedResponse            100.0%
+  RESTClient.NET.Testing.Models.HttpTestCase                    100.0%

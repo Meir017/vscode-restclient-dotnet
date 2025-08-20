@@ -10,6 +10,7 @@ using RESTClient.NET.Core.Parsing;
 using RESTClient.NET.Testing.Extensions;
 using RESTClient.NET.Testing.Models;
 using RESTClient.NET.Testing.Assertions;
+using RESTClient.NET.Testing.Tests.Shared;
 using Xunit;
 
 namespace RESTClient.NET.Testing.Tests;
