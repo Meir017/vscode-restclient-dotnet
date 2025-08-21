@@ -1,6 +1,5 @@
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
-using System.Linq;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Models
@@ -26,13 +25,14 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Properties_ShouldBeSettableAndGettable()
         {
             // Arrange
-            var metadata = new HttpRequestMetadata();
-
-            // Act
-            metadata.Name = "test-request";
-            metadata.Note = "This is a test request";
-            metadata.NoRedirect = true;
-            metadata.NoCookieJar = true;
+            var metadata = new HttpRequestMetadata
+            {
+                // Act
+                Name = "test-request",
+                Note = "This is a test request",
+                NoRedirect = true,
+                NoCookieJar = true
+            };
 
             // Assert
             metadata.Name.Should().Be("test-request");
@@ -103,7 +103,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var statusExpectation1 = new TestExpectation(ExpectationType.StatusCode, "200");
             var statusExpectation2 = new TestExpectation(ExpectationType.StatusCode, "201");
             var headerExpectation = new TestExpectation(ExpectationType.Header, "application/json", "Content-Type");
-            
+
             metadata.AddExpectation(statusExpectation1);
             metadata.AddExpectation(headerExpectation);
             metadata.AddExpectation(statusExpectation2);
@@ -140,7 +140,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var metadata = new HttpRequestMetadata();
 
             // Act
-            var result = metadata.HasExpectations();
+            bool result = metadata.HasExpectations();
 
             // Assert
             result.Should().BeFalse();
@@ -155,7 +155,7 @@ namespace RESTClient.NET.Core.Tests.Models
             metadata.AddExpectation(expectation);
 
             // Act
-            var result = metadata.HasExpectations();
+            bool result = metadata.HasExpectations();
 
             // Assert
             result.Should().BeTrue();
@@ -187,10 +187,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Name_ShouldAcceptNullAndStringValues()
         {
             // Arrange
-            var metadata = new HttpRequestMetadata();
-
-            // Act & Assert - null value
-            metadata.Name = null;
+            var metadata = new HttpRequestMetadata
+            {
+                // Act & Assert - null value
+                Name = null
+            };
             metadata.Name.Should().BeNull();
 
             // Act & Assert - string value
@@ -206,10 +207,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Note_ShouldAcceptNullAndStringValues()
         {
             // Arrange
-            var metadata = new HttpRequestMetadata();
-
-            // Act & Assert - null value
-            metadata.Note = null;
+            var metadata = new HttpRequestMetadata
+            {
+                // Act & Assert - null value
+                Note = null
+            };
             metadata.Note.Should().BeNull();
 
             // Act & Assert - string value

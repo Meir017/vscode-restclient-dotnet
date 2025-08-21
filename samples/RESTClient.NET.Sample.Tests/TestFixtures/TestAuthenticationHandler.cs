@@ -21,9 +21,9 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
         // Extract role information from the request headers if available
         // This allows tests to specify different user roles
-        var userRole = "Customer"; // Default role
-        var userId = "123"; // Default user ID
-        var username = "testuser"; // Default username
+        string userRole = "Customer"; // Default role
+        string userId = "123"; // Default user ID
+        string username = "testuser"; // Default username
 
         if (Request.Headers.ContainsKey("X-Test-User-Role"))
         {
@@ -41,7 +41,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
         }
 
         // Create test claims based on the request
-        var claims = new[]
+        Claim[] claims = new[]
         {
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.NameIdentifier, userId),

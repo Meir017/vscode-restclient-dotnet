@@ -74,7 +74,7 @@ public class UserService : IUserService
 
     public async Task DeleteAsync(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        User? user = await _context.Users.FindAsync(id);
         if (user != null)
         {
             _context.Users.Remove(user);

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
 using Xunit;
@@ -16,7 +13,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Headers.Add("Custom-Header", "test-value");
-            var bodyContent = """{"id": 123, "name": "Test"}""";
+            string bodyContent = """{"id": 123, "name": "Test"}""";
 
             // Act
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent, 150.5);
@@ -34,7 +31,7 @@ namespace RESTClient.NET.Core.Tests.Models
         public void FromHttpResponse_WithNullResponse_ThrowsArgumentNullException()
         {
             // Act & Assert
-            var act = () => HttpResponseData.FromHttpResponse(null!, "content");
+            Func<HttpResponseData> act = () => HttpResponseData.FromHttpResponse(null!, "content");
             act.Should().Throw<ArgumentNullException>().WithParameterName("response");
         }
 
@@ -43,7 +40,7 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = "Plain text content";
+            string bodyContent = "Plain text content";
 
             // Act
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
@@ -57,9 +54,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void FromHttpResponse_WithInvalidJson_DoesNotParseBody()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent("invalid json", System.Text.Encoding.UTF8, "application/json");
-            var bodyContent = "invalid json";
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("invalid json", System.Text.Encoding.UTF8, "application/json")
+            };
+            string bodyContent = "invalid json";
 
             // Act
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
@@ -74,13 +73,13 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = """{"user": {"id": 42, "name": "John"}, "token": "abc123"}""";
+            string bodyContent = """{"user": {"id": 42, "name": "John"}, "token": "abc123"}""";
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
 
             // Act
-            var userId = responseData.GetJsonPathValue("$.user.id");
-            var token = responseData.GetJsonPathValue("$.token");
-            var name = responseData.GetJsonPathValue("$.user.name");
+            string? userId = responseData.GetJsonPathValue("$.user.id");
+            string? token = responseData.GetJsonPathValue("$.token");
+            string? name = responseData.GetJsonPathValue("$.user.name");
 
             // Assert
             userId.Should().Be("42");
@@ -93,11 +92,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = """{"user": {"id": 42}}""";
+            string bodyContent = """{"user": {"id": 42}}""";
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
 
             // Act
-            var result = responseData.GetJsonPathValue("$.nonexistent");
+            string? result = responseData.GetJsonPathValue("$.nonexistent");
 
             // Assert
             result.Should().BeNull();
@@ -108,12 +107,12 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = """{"user": {"id": 42}}""";
+            string bodyContent = """{"user": {"id": 42}}""";
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
 
             // Act
-            var nullResult = responseData.GetJsonPathValue(null!);
-            var emptyResult = responseData.GetJsonPathValue("");
+            string? nullResult = responseData.GetJsonPathValue(null!);
+            string? emptyResult = responseData.GetJsonPathValue("");
 
             // Assert
             nullResult.Should().BeNull();
@@ -125,11 +124,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = "Plain text";
+            string bodyContent = "Plain text";
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);
 
             // Act
-            var result = responseData.GetJsonPathValue("$.anything");
+            string? result = responseData.GetJsonPathValue("$.anything");
 
             // Assert
             result.Should().BeNull();
@@ -145,8 +144,8 @@ namespace RESTClient.NET.Core.Tests.Models
             var responseData = HttpResponseData.FromHttpResponse(response, "content");
 
             // Act
-            var auth = responseData.GetHeaderValue("Authorization");
-            var server = responseData.GetHeaderValue("Server");
+            string? auth = responseData.GetHeaderValue("Authorization");
+            string? server = responseData.GetHeaderValue("Server");
 
             // Assert
             auth.Should().Be("Bearer token123");
@@ -157,14 +156,16 @@ namespace RESTClient.NET.Core.Tests.Models
         public void GetHeaderValue_WithCaseInsensitiveName_ReturnsValue()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent("content", System.Text.Encoding.UTF8, "application/json");
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("content", System.Text.Encoding.UTF8, "application/json")
+            };
             var responseData = HttpResponseData.FromHttpResponse(response, "content");
 
             // Act
-            var lowerCase = responseData.GetHeaderValue("content-type");
-            var upperCase = responseData.GetHeaderValue("CONTENT-TYPE");
-            var mixedCase = responseData.GetHeaderValue("Content-Type");
+            string? lowerCase = responseData.GetHeaderValue("content-type");
+            string? upperCase = responseData.GetHeaderValue("CONTENT-TYPE");
+            string? mixedCase = responseData.GetHeaderValue("Content-Type");
 
             // Assert
             lowerCase.Should().Be("application/json; charset=utf-8");
@@ -180,7 +181,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var responseData = HttpResponseData.FromHttpResponse(response, "content");
 
             // Act
-            var result = responseData.GetHeaderValue("Non-Existent-Header");
+            string? result = responseData.GetHeaderValue("Non-Existent-Header");
 
             // Assert
             result.Should().BeNull();
@@ -194,8 +195,8 @@ namespace RESTClient.NET.Core.Tests.Models
             var responseData = HttpResponseData.FromHttpResponse(response, "content");
 
             // Act
-            var nullResult = responseData.GetHeaderValue(null!);
-            var emptyResult = responseData.GetHeaderValue("");
+            string? nullResult = responseData.GetHeaderValue(null!);
+            string? emptyResult = responseData.GetHeaderValue("");
 
             // Assert
             nullResult.Should().BeNull();
@@ -206,10 +207,12 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Properties_SetCorrectly()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.Created);
-            response.Content = new StringContent("content", System.Text.Encoding.UTF8, "application/json");
-            var bodyContent = """{"result": "success"}""";
-            var responseTimeMs = 250.75;
+            var response = new HttpResponseMessage(HttpStatusCode.Created)
+            {
+                Content = new StringContent("content", System.Text.Encoding.UTF8, "application/json")
+            };
+            string bodyContent = """{"result": "success"}""";
+            double responseTimeMs = 250.75;
 
             // Act
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent, responseTimeMs);
@@ -247,7 +250,7 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var bodyContent = """[{"id": 1, "name": "First"}, {"id": 2, "name": "Second"}]""";
+            string bodyContent = """[{"id": 1, "name": "First"}, {"id": 2, "name": "Second"}]""";
 
             // Act
             var responseData = HttpResponseData.FromHttpResponse(response, bodyContent);

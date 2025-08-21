@@ -19,10 +19,10 @@ namespace RESTClient.NET.Core.Models
     /// <code>
     /// // Raw file content
     /// var rawRef = new FileBodyReference("./data.json", false, null);
-    /// 
+    ///
     /// // With variable processing
     /// var processedRef = new FileBodyReference("./template.xml", true, Encoding.UTF8);
-    /// 
+    ///
     /// // With custom encoding
     /// var latinRef = new FileBodyReference("./data.txt", true, Encoding.Latin1);
     /// </code>
@@ -75,7 +75,9 @@ namespace RESTClient.NET.Core.Models
         public FileBodyReference(string filePath, bool processVariables, Encoding? encoding, int lineNumber = 0)
         {
             if (string.IsNullOrWhiteSpace(filePath))
+            {
                 throw new ArgumentException("File path cannot be null or whitespace", nameof(filePath));
+            }
 
             FilePath = filePath.Trim();
             ProcessVariables = processVariables;
@@ -120,7 +122,7 @@ namespace RESTClient.NET.Core.Models
         /// <inheritdoc />
         public override string ToString()
         {
-            var prefix = ProcessVariables ? (Encoding?.EncodingName != "Unicode (UTF-8)" && Encoding != null ? $"<@{Encoding.WebName}" : "<@") : "<";
+            string prefix = ProcessVariables ? (Encoding?.EncodingName != "Unicode (UTF-8)" && Encoding != null ? $"<@{Encoding.WebName}" : "<@") : "<";
             return $"{prefix} {FilePath}";
         }
 
@@ -138,7 +140,7 @@ namespace RESTClient.NET.Core.Models
         {
             unchecked
             {
-                var hash = 17;
+                int hash = 17;
                 hash = hash * 23 + (FilePath?.GetHashCode() ?? 0);
                 hash = hash * 23 + ProcessVariables.GetHashCode();
                 hash = hash * 23 + (Encoding?.WebName?.GetHashCode() ?? 0);

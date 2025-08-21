@@ -20,10 +20,10 @@ public class BasicApiTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetProducts_ShouldReturnOk()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        HttpClient client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/products");
+        HttpResponseMessage response = await client.GetAsync("/api/products");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -33,10 +33,10 @@ public class BasicApiTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetProductById_ShouldReturnOk()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        HttpClient client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/products/1");
+        HttpResponseMessage response = await client.GetAsync("/api/products/1");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -46,8 +46,8 @@ public class BasicApiTests : IClassFixture<WebApplicationFactory<Program>>
     public void ApiIsRunning_ShouldReturnSuccess()
     {
         // This basic test just checks if the test setup works
-        var client = _factory.CreateClient();
-        
+        HttpClient client = _factory.CreateClient();
+
         // Act & Assert - just verify we can create a client
         Assert.NotNull(client);
         Assert.NotNull(client.BaseAddress);

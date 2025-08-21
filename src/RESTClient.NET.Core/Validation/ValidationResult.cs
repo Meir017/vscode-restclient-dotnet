@@ -42,8 +42,8 @@ namespace RESTClient.NET.Core.Validation
             IEnumerable<ValidationError>? errors = null,
             IEnumerable<ValidationWarning>? warnings = null)
         {
-            Errors = (errors ?? Enumerable.Empty<ValidationError>()).ToList().AsReadOnly();
-            Warnings = (warnings ?? Enumerable.Empty<ValidationWarning>()).ToList().AsReadOnly();
+            Errors = (errors ?? []).ToList().AsReadOnly();
+            Warnings = (warnings ?? []).ToList().AsReadOnly();
         }
 
         /// <summary>

@@ -14,14 +14,16 @@ namespace RESTClient.NET.Testing.Tests.Extensions
 {
     public class HttpFileExtensionsTests
     {
+        private static readonly string[] _getPostMethods = { "GET", "POST" };
+
         [Fact]
         public void GetTestData_WithValidHttpFile_ShouldReturnTestData()
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testData = httpFile.GetTestData().ToList();
@@ -50,9 +52,9 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
@@ -68,7 +70,7 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"@baseUrl = http://localhost:5000
+            string content = @"@baseUrl = http://localhost:5000
 
 # @name get-users
 # @expect status 200
@@ -81,21 +83,21 @@ POST {{baseUrl}}/api/users
 Content-Type: application/json
 
 {""name"": ""John""}";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
 
             // Assert
             testCases.Should().HaveCount(2);
-            
-            var getUsersCase = testCases.First(tc => tc.Name == "get-users");
+
+            HttpTestCase getUsersCase = testCases.First(tc => tc.Name == "get-users");
             getUsersCase.Method.Should().Be("GET");
             getUsersCase.Url.Should().Be("http://localhost:5000/api/users");
             getUsersCase.ExpectedResponse.Should().NotBeNull();
             getUsersCase.ExpectedResponse!.ExpectedStatusCode.Should().Be(200);
 
-            var createUserCase = testCases.First(tc => tc.Name == "create-user");
+            HttpTestCase createUserCase = testCases.First(tc => tc.Name == "create-user");
             createUserCase.Method.Should().Be("POST");
             createUserCase.Body.Should().Contain("John");
             createUserCase.ExpectedResponse!.ExpectedStatusCode.Should().Be(201);
@@ -106,12 +108,12 @@ Content-Type: application/json
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"### user-endpoint
+            string content = @"### user-endpoint
 GET http://localhost:5000/api/users
 
 ###
 GET http://localhost:5000/api/products";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
@@ -126,12 +128,12 @@ GET http://localhost:5000/api/products";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name valid-request
+            string content = @"# @name valid-request
 GET http://localhost:5000/api/users
 
 # @name invalid-request
 ";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
@@ -184,7 +186,7 @@ GET http://localhost:5000/api/users
             };
 
             // Act
-            var filtered = testCases.Filter(methods: new[] { "GET", "POST" }).ToList();
+            var filtered = testCases.Filter(methods: _getPostMethods).ToList();
 
             // Assert
             filtered.Should().HaveCount(2);
@@ -209,7 +211,7 @@ GET http://localhost:5000/api/users
             // Assert
             withExpectations.Should().HaveCount(1);
             withExpectations[0].Name.Should().Be("test2");
-            
+
             withoutExpectations.Should().HaveCount(2);
             withoutExpectations.Should().Contain(tc => tc.Name == "test1");
             withoutExpectations.Should().Contain(tc => tc.Name == "test3");
@@ -278,10 +280,10 @@ GET http://localhost:5000/api/users
             requestMessage.Should().NotBeNull();
             requestMessage.Method.Should().Be(HttpMethod.Post);
             requestMessage.Content.Should().NotBeNull();
-            
-            var content = await requestMessage.Content!.ReadAsStringAsync();
+
+            string content = await requestMessage.Content!.ReadAsStringAsync();
             content.Should().Contain("John Doe");
-            
+
             // Content-Type should be on the content headers, not request headers
             requestMessage.Content.Headers.Should().Contain(h => h.Key == "Content-Type");
             requestMessage.Headers.Should().Contain(h => h.Key == "Authorization");
@@ -291,7 +293,7 @@ GET http://localhost:5000/api/users
         public void ToHttpRequestMessage_WithDifferentHttpMethods_ShouldCreateCorrectMethods()
         {
             // Arrange
-            var testCases = new[]
+            HttpTestCase[] testCases = new[]
             {
                 new HttpTestCase { Name = "get", Method = "GET", Url = "http://localhost/get" },
                 new HttpTestCase { Name = "post", Method = "POST", Url = "http://localhost/post" },
@@ -300,7 +302,7 @@ GET http://localhost:5000/api/users
                 new HttpTestCase { Name = "patch", Method = "PATCH", Url = "http://localhost/patch" }
             };
 
-            foreach (var testCase in testCases)
+            foreach (HttpTestCase? testCase in testCases)
             {
                 // Act
                 var requestMessage = testCase.ToHttpRequestMessage();
@@ -315,7 +317,7 @@ GET http://localhost:5000/api/users
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name comprehensive-test
+            string content = @"# @name comprehensive-test
 # @expect status 200
 # @expect header Content-Type application/json
 # @expect body-contains success
@@ -323,18 +325,18 @@ GET http://localhost:5000/api/users
 # @expect schema /schemas/user.json
 # @expect max-time 5000ms
 GET http://localhost:5000/api/users";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
 
             // Assert
             testCases.Should().HaveCount(1);
-            var testCase = testCases[0];
-            
+            HttpTestCase testCase = testCases[0];
+
             testCase.ExpectedResponse.Should().NotBeNull();
-            var response = testCase.ExpectedResponse!;
-            
+            HttpExpectedResponse response = testCase.ExpectedResponse!;
+
             response.ExpectedStatusCode.Should().Be(200);
             response.ExpectedHeaders.Should().ContainKey("Content-Type");
             response.ExpectedHeaders["Content-Type"].Should().Be("application/json");
@@ -349,25 +351,25 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-ms
+            string content = @"# @name test-ms
 # @expect max-time 1500ms
 GET http://localhost:5000/api/test1
 
 # @name test-s
 # @expect max-time 5s
 GET http://localhost:5000/api/test2";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
 
             // Assert
             testCases.Should().HaveCount(2);
-            
-            var msTest = testCases.First(tc => tc.Name == "test-ms");
+
+            HttpTestCase msTest = testCases.First(tc => tc.Name == "test-ms");
             msTest.ExpectedResponse!.MaxResponseTime.Should().Be(TimeSpan.FromMilliseconds(1500));
-            
-            var sTest = testCases.First(tc => tc.Name == "test-s");
+
+            HttpTestCase sTest = testCases.First(tc => tc.Name == "test-s");
             sTest.ExpectedResponse!.MaxResponseTime.Should().Be(TimeSpan.FromSeconds(5));
         }
 
@@ -376,17 +378,17 @@ GET http://localhost:5000/api/test2";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-with-metadata
+            string content = @"# @name test-with-metadata
 GET http://localhost:5000/api/test";
-            var httpFile = parser.Parse(content);
+            HttpFile httpFile = parser.Parse(content);
 
             // Act
             var testCases = httpFile.GetTestCases().ToList();
 
             // Assert
             testCases.Should().HaveCount(1);
-            var testCase = testCases[0];
-            
+            HttpTestCase testCase = testCases[0];
+
             testCase.Name.Should().Be("test-with-metadata");
             testCase.Metadata.Should().NotBeNull();
             // The metadata dictionary should be empty for this simple case

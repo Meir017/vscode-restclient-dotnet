@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace RESTClient.NET.Testing.Models

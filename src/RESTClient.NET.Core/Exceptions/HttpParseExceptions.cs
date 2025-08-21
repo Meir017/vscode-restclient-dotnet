@@ -46,7 +46,7 @@ namespace RESTClient.NET.Core.Exceptions
         /// <inheritdoc />
         public override string ToString()
         {
-            var location = LineNumber > 0 ? $" at line {LineNumber}" : string.Empty;
+            string location = LineNumber > 0 ? $" at line {LineNumber}" : string.Empty;
             if (ColumnNumber > 0)
             {
                 location += $", column {ColumnNumber}";

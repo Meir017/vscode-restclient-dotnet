@@ -30,13 +30,18 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var products = await _productService.GetAllAsync();
+            IEnumerable<Product> products = await _productService.GetAllAsync();
             return Ok(products);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error retrieving products");
             return StatusCode(500, "Internal server error");
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Invalid argument retrieving products");
+            return BadRequest("Invalid argument");
         }
     }
 
@@ -50,17 +55,22 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var product = await _productService.GetByIdAsync(id);
+            Product? product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound($"Product with ID {id} not found");
             }
             return Ok(product);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error retrieving product {ProductId}", id);
             return StatusCode(500, "Internal server error");
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Invalid argument retrieving product {ProductId}", id);
+            return BadRequest("Invalid argument");
         }
     }
 
@@ -80,13 +90,18 @@ public class ProductsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var createdProduct = await _productService.CreateAsync(product);
+            Product createdProduct = await _productService.CreateAsync(product);
             return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error creating product");
             return StatusCode(500, "Internal server error");
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Invalid argument creating product");
+            return BadRequest("Invalid argument");
         }
     }
 
@@ -112,19 +127,24 @@ public class ProductsController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var existingProduct = await _productService.GetByIdAsync(id);
+            Product? existingProduct = await _productService.GetByIdAsync(id);
             if (existingProduct == null)
             {
                 return NotFound($"Product with ID {id} not found");
             }
 
-            var updatedProduct = await _productService.UpdateAsync(product);
+            Product updatedProduct = await _productService.UpdateAsync(product);
             return Ok(updatedProduct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error updating product {ProductId}", id);
             return StatusCode(500, "Internal server error");
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Invalid argument updating product {ProductId}", id);
+            return BadRequest("Invalid argument");
         }
     }
 
@@ -139,7 +159,7 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var product = await _productService.GetByIdAsync(id);
+            Product? product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound($"Product with ID {id} not found");
@@ -148,10 +168,15 @@ public class ProductsController : ControllerBase
             await _productService.DeleteAsync(id);
             return NoContent();
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
             return StatusCode(500, "Internal server error");
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Invalid argument deleting product {ProductId}", id);
+            return BadRequest("Invalid argument");
         }
     }
 }

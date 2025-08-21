@@ -4,13 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AwesomeAssertions;
-using RESTClient.NET.Core;
-using RESTClient.NET.Core.Models;
 using RESTClient.NET.Core.Parsing;
 using RESTClient.NET.Testing.Extensions;
 using RESTClient.NET.Testing.Models;
 using RESTClient.NET.Testing.Assertions;
-using RESTClient.NET.Testing.Tests.Shared;
 using Xunit;
 
 namespace RESTClient.NET.Testing.Tests;
@@ -34,7 +31,7 @@ public class HttpFileTestingDemoTests
     public void HttpFile_ShouldLoadCorrectly()
     {
         // Arrange & Act
-        var httpFile = _parser.Parse(_httpFileContent);
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
 
         // Assert
         httpFile.Should().NotBeNull();
@@ -46,7 +43,7 @@ public class HttpFileTestingDemoTests
     public void GetTestCases_ShouldReturnCorrectTestCases()
     {
         // Arrange
-        var httpFile = _parser.Parse(_httpFileContent);
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
 
         // Act
         var testCases = httpFile.GetTestCases().ToList();
@@ -62,7 +59,7 @@ public class HttpFileTestingDemoTests
     public void GetTestData_ShouldReturnXUnitCompatibleData()
     {
         // Arrange
-        var httpFile = _parser.Parse(_httpFileContent);
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
 
         // Act
         var testData = httpFile.GetTestData().ToList();
@@ -77,7 +74,7 @@ public class HttpFileTestingDemoTests
     public void FilterTestCases_ShouldWorkCorrectly()
     {
         // Arrange
-        var httpFile = _parser.Parse(_httpFileContent);
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
         var allTestCases = httpFile.GetTestCases().ToList();
 
         // Act
@@ -94,7 +91,7 @@ public class HttpFileTestingDemoTests
     public void FilterTestCases_ByExpectations_ShouldWorkCorrectly()
     {
         // Arrange
-        var httpFile = _parser.Parse(_httpFileContent);
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
         var testCases = httpFile.GetTestCases().ToList();
 
         // Act
@@ -123,8 +120,8 @@ public class HttpFileTestingDemoTests
     public void ToHttpRequestMessage_ShouldCreateValidRequest()
     {
         // Arrange
-        var httpFile = _parser.Parse(_httpFileContent);
-        var testCase = httpFile.GetTestCases().First();
+        Core.Models.HttpFile httpFile = _parser.Parse(_httpFileContent);
+        HttpTestCase testCase = httpFile.GetTestCases().First();
 
         // Act
         var requestMessage = testCase.ToHttpRequestMessage();
@@ -138,8 +135,8 @@ public class HttpFileTestingDemoTests
     public static IEnumerable<object[]> GetHttpFileTestData()
     {
         var parser = new HttpFileParser();
-        var content = File.ReadAllText("test-requests.http");
-        var httpFile = parser.Parse(content);
+        string content = File.ReadAllText("test-requests.http");
+        Core.Models.HttpFile httpFile = parser.Parse(content);
         return httpFile.GetTestData();
     }
 }
@@ -186,7 +183,7 @@ public class TestingFrameworkUnitTests
         var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
 
         // Act & Assert
-        var action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
+        System.Action action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
         action.Should().NotThrow();
     }
 
@@ -197,7 +194,7 @@ public class TestingFrameworkUnitTests
         var response = new HttpResponseMessage(System.Net.HttpStatusCode.NotFound);
 
         // Act & Assert
-        var action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
+        System.Action action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
         action.Should().Throw<AssertionException>()
             .WithMessage("Expected status code 200, but got 404 (NotFound)");
     }
@@ -212,7 +209,7 @@ public class TestingFrameworkUnitTests
         };
 
         // Act & Assert
-        var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "World");
+        System.Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "World");
         await action.Should().NotThrowAsync();
     }
 
@@ -226,7 +223,7 @@ public class TestingFrameworkUnitTests
         };
 
         // Act & Assert
-        var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "Universe");
+        System.Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "Universe");
         await action.Should().ThrowAsync<AssertionException>()
             .Where(ex => ex.Message.Contains("Expected response body to contain 'Universe'"));
     }

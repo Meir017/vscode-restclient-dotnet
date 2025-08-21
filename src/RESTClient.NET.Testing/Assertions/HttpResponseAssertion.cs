@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using RESTClient.NET.Testing.Models;
@@ -19,11 +18,12 @@ namespace RESTClient.NET.Testing.Assertions
         /// <returns>A task representing the assertion operation</returns>
         public static async Task AssertResponse(HttpResponseMessage response, HttpExpectedResponse? expected)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (expected == null || !expected.HasExpectations)
+            {
                 return; // No assertions to perform
+            }
 
             // Assert status code
             if (expected.ExpectedStatusCode.HasValue)
@@ -32,7 +32,7 @@ namespace RESTClient.NET.Testing.Assertions
             }
 
             // Assert headers
-            foreach (var expectedHeader in expected.ExpectedHeaders)
+            foreach (System.Collections.Generic.KeyValuePair<string, string> expectedHeader in expected.ExpectedHeaders)
             {
                 AssertHeader(response, expectedHeader.Key, expectedHeader.Value);
             }
@@ -56,7 +56,7 @@ namespace RESTClient.NET.Testing.Assertions
             }
 
             // Custom expectations can be handled by derived implementations
-            foreach (var customExpectation in expected.CustomExpectations)
+            foreach (System.Collections.Generic.KeyValuePair<string, object> customExpectation in expected.CustomExpectations)
             {
                 await AssertCustomExpectation(response, customExpectation.Key, customExpectation.Value);
             }
@@ -69,10 +69,9 @@ namespace RESTClient.NET.Testing.Assertions
         /// <param name="expectedStatusCode">The expected status code</param>
         public static void AssertStatusCode(HttpResponseMessage response, int expectedStatusCode)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
-            var actualStatusCode = (int)response.StatusCode;
+            int actualStatusCode = (int)response.StatusCode;
             if (actualStatusCode != expectedStatusCode)
             {
                 throw new AssertionException(
@@ -88,16 +87,17 @@ namespace RESTClient.NET.Testing.Assertions
         /// <param name="expectedValue">The expected header value</param>
         public static void AssertHeader(HttpResponseMessage response, string headerName, string expectedValue)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (string.IsNullOrWhiteSpace(headerName))
+            {
                 throw new ArgumentException("Header name cannot be null or empty", nameof(headerName));
+            }
 
             // Check in response headers first
-            if (response.Headers.TryGetValues(headerName, out var headerValues))
+            if (response.Headers.TryGetValues(headerName, out System.Collections.Generic.IEnumerable<string>? headerValues))
             {
-                var actualValue = string.Join(", ", headerValues);
+                string actualValue = string.Join(", ", headerValues);
                 if (!actualValue.Equals(expectedValue, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new AssertionException(
@@ -107,9 +107,9 @@ namespace RESTClient.NET.Testing.Assertions
             }
 
             // Check in content headers if it's a content header
-            if (response.Content?.Headers.TryGetValues(headerName, out var contentHeaderValues) == true)
+            if (response.Content?.Headers.TryGetValues(headerName, out System.Collections.Generic.IEnumerable<string>? contentHeaderValues) == true)
             {
-                var actualValue = string.Join(", ", contentHeaderValues);
+                string actualValue = string.Join(", ", contentHeaderValues);
                 if (!actualValue.Equals(expectedValue, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new AssertionException(
@@ -129,18 +129,19 @@ namespace RESTClient.NET.Testing.Assertions
         /// <returns>A task representing the assertion operation</returns>
         public static async Task AssertBodyContains(HttpResponseMessage response, string expectedContent)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (string.IsNullOrEmpty(expectedContent))
+            {
                 throw new ArgumentException("Expected content cannot be null or empty", nameof(expectedContent));
+            }
 
             if (response.Content == null)
             {
                 throw new AssertionException("Response has no content, but expected content was specified");
             }
 
-            var actualContent = await response.Content.ReadAsStringAsync();
+            string actualContent = await response.Content.ReadAsStringAsync();
             if (!actualContent.Contains(expectedContent, StringComparison.OrdinalIgnoreCase))
             {
                 throw new AssertionException(
@@ -157,25 +158,26 @@ namespace RESTClient.NET.Testing.Assertions
         /// <returns>A task representing the assertion operation</returns>
         public static async Task AssertJsonPath(HttpResponseMessage response, string jsonPath)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (string.IsNullOrWhiteSpace(jsonPath))
+            {
                 throw new ArgumentException("JSONPath cannot be null or empty", nameof(jsonPath));
+            }
 
             if (response.Content == null)
             {
                 throw new AssertionException("Response has no content, but JSONPath was specified");
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            
+            string content = await response.Content.ReadAsStringAsync();
+
             // This is a placeholder implementation
             // In a full implementation, you would use a JSONPath library like Newtonsoft.Json.JsonPath
             // For now, we'll do a basic check
             try
             {
-                var parsedJsonPath = ParseJsonPath(jsonPath);
+                string parsedJsonPath = ParseJsonPath(jsonPath);
                 ValidateJsonPathAgainstContent(content, parsedJsonPath);
             }
             catch (Exception ex)
@@ -192,19 +194,20 @@ namespace RESTClient.NET.Testing.Assertions
         /// <returns>A task representing the assertion operation</returns>
         public static async Task AssertSchema(HttpResponseMessage response, string schemaPath)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             if (string.IsNullOrWhiteSpace(schemaPath))
+            {
                 throw new ArgumentException("Schema path cannot be null or empty", nameof(schemaPath));
+            }
 
             if (response.Content == null)
             {
                 throw new AssertionException("Response has no content, but schema validation was specified");
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            
+            string content = await response.Content.ReadAsStringAsync();
+
             // This is a placeholder implementation
             // In a full implementation, you would use a JSON schema validation library
             // For now, we'll just check that the content is valid JSON
@@ -240,10 +243,14 @@ namespace RESTClient.NET.Testing.Assertions
         private static string TruncateContent(string content, int maxLength = 500)
         {
             if (string.IsNullOrEmpty(content))
+            {
                 return "(empty)";
+            }
 
             if (content.Length <= maxLength)
+            {
                 return content;
+            }
 
             return content.Substring(0, maxLength) + "... (truncated)";
         }

@@ -12,12 +12,10 @@ namespace RESTClient.NET.Sample.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IUserService userService, ILogger<UsersController> logger)
+    public UsersController(IUserService userService)
     {
         _userService = userService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -26,8 +24,8 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
     {
-        var users = await _userService.GetAllAsync();
-        var userDtos = users.Select(u => new UserDto
+        IEnumerable<User> users = await _userService.GetAllAsync();
+        IEnumerable<UserDto> userDtos = users.Select(u => new UserDto
         {
             Id = u.Id,
             Username = u.Username,
@@ -49,7 +47,7 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetUserProfile(int id)
     {
-        var user = await _userService.GetByIdAsync(id);
+        User? user = await _userService.GetByIdAsync(id);
         if (user == null)
         {
             return NotFound();
@@ -77,7 +75,7 @@ public class UsersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<UserDto>> UpdateUser(int id, [FromBody] UpdateUserRequest request)
     {
-        var user = await _userService.GetByIdAsync(id);
+        User? user = await _userService.GetByIdAsync(id);
         if (user == null)
         {
             return NotFound();
@@ -85,12 +83,16 @@ public class UsersController : ControllerBase
 
         // Update fields if provided
         if (!string.IsNullOrEmpty(request.FirstName))
+        {
             user.FirstName = request.FirstName;
-        
-        if (!string.IsNullOrEmpty(request.LastName))
-            user.LastName = request.LastName;
+        }
 
-        var updatedUser = await _userService.UpdateAsync(user);
+        if (!string.IsNullOrEmpty(request.LastName))
+        {
+            user.LastName = request.LastName;
+        }
+
+        User updatedUser = await _userService.UpdateAsync(user);
 
         var userDto = new UserDto
         {
@@ -114,7 +116,7 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var user = await _userService.GetByIdAsync(id);
+        User? user = await _userService.GetByIdAsync(id);
         if (user == null)
         {
             return NotFound();

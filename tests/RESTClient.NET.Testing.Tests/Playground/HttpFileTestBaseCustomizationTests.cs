@@ -59,7 +59,7 @@ public class HttpFileTestBaseCustomizationTests
         testBase.ConfigureFactoryCalled.Should().BeTrue();
         testBase.ConfigureTestServicesCalled.Should().BeTrue();
         testBase.ModifyHttpFileCalled.Should().BeTrue();
-        
+
         // Verify the HTTP file has been processed
         testBase.HttpFile.FileVariables.Should().ContainKey("baseUrl");
         testBase.HttpFile.FileVariables.Should().ContainKey("contentType");
@@ -73,14 +73,14 @@ public class HttpFileTestBaseCustomizationTests
         using var testBase = new FullCustomizationTestBase(factory);
 
         // Act
-        var testData = testBase.GetHttpFileTestData();
+        IEnumerable<object[]> testData = testBase.GetHttpFileTestData();
 
         // Assert
         testData.Should().NotBeEmpty();
     }
 
     // Test implementations for customization scenarios
-    private class CustomConfigurationTestBase : HttpFileTestBase<Program>
+    private sealed class CustomConfigurationTestBase : HttpFileTestBase<Program>
     {
         public bool ConfigureFactoryCalled { get; private set; }
         public new WebApplicationFactory<Program> Factory => base.Factory;
@@ -96,7 +96,7 @@ public class HttpFileTestBaseCustomizationTests
         }
     }
 
-    private class CustomServicesTestBase : HttpFileTestBase<Program>
+    private sealed class CustomServicesTestBase : HttpFileTestBase<Program>
     {
         public bool ConfigureTestServicesCalled { get; private set; }
 
@@ -112,7 +112,7 @@ public class HttpFileTestBaseCustomizationTests
         }
     }
 
-    private class CustomModificationTestBase : HttpFileTestBase<Program>
+    private sealed class CustomModificationTestBase : HttpFileTestBase<Program>
     {
         public bool ModifyHttpFileCalled { get; private set; }
         public new HttpFile HttpFile => base.HttpFile;
@@ -128,7 +128,7 @@ public class HttpFileTestBaseCustomizationTests
         }
     }
 
-    private class FullCustomizationTestBase : HttpFileTestBase<Program>
+    private sealed class FullCustomizationTestBase : HttpFileTestBase<Program>
     {
         public bool ConfigureFactoryCalled { get; private set; }
         public bool ConfigureTestServicesCalled { get; private set; }

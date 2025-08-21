@@ -6,19 +6,20 @@ namespace RESTClient.NET.Sample.Api.Models;
 public class Order
 {
     public int Id { get; set; }
-    
+
     public int UserId { get; set; }
-    
+
     public virtual User User { get; set; } = null!;
-    
-    public virtual ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
-    
+
+    // Simplified collection initialization using shorthand syntax to resolve IDE0028
+    public virtual List<OrderItem> Items { get; } = [];
+
     public decimal TotalAmount { get; set; }
-    
+
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
-    
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
     public DateTime? CompletedAt { get; set; }
 }
 
@@ -28,17 +29,17 @@ public class Order
 public class OrderItem
 {
     public int Id { get; set; }
-    
+
     public int OrderId { get; set; }
-    
+
     public virtual Order Order { get; set; } = null!;
-    
+
     public int ProductId { get; set; }
-    
+
     public virtual Product Product { get; set; } = null!;
-    
+
     public int Quantity { get; set; }
-    
+
     public decimal UnitPrice { get; set; }
 }
 

@@ -1,9 +1,6 @@
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
 using RESTClient.NET.Core.Validation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Validation
@@ -30,10 +27,10 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Validate_WithEmptyHttpFile_ShouldReturnSuccess()
         {
             // Arrange
-            var httpFile = new HttpFile(new List<HttpRequest>());
+            var httpFile = new HttpFile([]);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -47,8 +44,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -58,7 +54,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -73,8 +69,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "",
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -84,7 +79,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -101,8 +96,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "   \t  ",
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -112,7 +106,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -150,8 +144,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = invalidName,
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -161,7 +154,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -190,8 +183,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = validName,
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -201,7 +193,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -211,11 +203,10 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Validate_WithTooLongRequestName_ShouldReturnInvalidRequestNameError()
         {
             // Arrange
-            var longName = new string('a', 51); // 51 characters, exceeding the 50 character limit
+            string longName = new('a', 51); // 51 characters, exceeding the 50 character limit
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = longName,
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -225,7 +216,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -240,11 +231,10 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Validate_WithExactly50CharacterRequestName_ShouldPass()
         {
             // Arrange
-            var exactName = new string('a', 50); // Exactly 50 characters
+            string exactName = new('a', 50); // Exactly 50 characters
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = exactName,
                     Method = "GET",
                     Url = "https://api.example.com/users",
@@ -254,7 +244,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -266,15 +256,13 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "duplicate-name",
                     Method = "GET",
                     Url = "https://api.example.com/users",
                     LineNumber = 1
                 },
-                new HttpRequest
-                {
+                new() {
                     Name = "duplicate-name",
                     Method = "POST",
                     Url = "https://api.example.com/users",
@@ -284,7 +272,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -301,16 +289,16 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "duplicate-1", Method = "GET", Url = "https://example.com", LineNumber = 1 },
-                new HttpRequest { Name = "duplicate-1", Method = "POST", Url = "https://example.com", LineNumber = 5 },
-                new HttpRequest { Name = "duplicate-1", Method = "PUT", Url = "https://example.com", LineNumber = 10 },
-                new HttpRequest { Name = "duplicate-2", Method = "GET", Url = "https://example.com", LineNumber = 15 },
-                new HttpRequest { Name = "duplicate-2", Method = "DELETE", Url = "https://example.com", LineNumber = 20 }
+                new() { Name = "duplicate-1", Method = "GET", Url = "https://example.com", LineNumber = 1 },
+                new() { Name = "duplicate-1", Method = "POST", Url = "https://example.com", LineNumber = 5 },
+                new() { Name = "duplicate-1", Method = "PUT", Url = "https://example.com", LineNumber = 10 },
+                new() { Name = "duplicate-2", Method = "GET", Url = "https://example.com", LineNumber = 15 },
+                new() { Name = "duplicate-2", Method = "DELETE", Url = "https://example.com", LineNumber = 20 }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -356,8 +344,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = method,
                     Url = "https://api.example.com/users",
@@ -367,7 +354,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -384,8 +371,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = method,
                     Url = "https://api.example.com/users",
@@ -395,7 +381,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -408,8 +394,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "",
                     Url = "https://api.example.com/users",
@@ -419,7 +404,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -435,8 +420,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "   ",
                     Url = "https://api.example.com/users",
@@ -446,7 +430,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -464,8 +448,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = method,
                     Url = "https://api.example.com/users",
@@ -475,7 +458,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -495,8 +478,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = "",
@@ -506,7 +488,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -523,8 +505,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = "   \t  ",
@@ -534,7 +515,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -557,8 +538,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = url,
@@ -568,7 +548,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -585,8 +565,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = url,
@@ -596,7 +575,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -612,8 +591,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = "https://api.example.com/path with spaces",
@@ -623,7 +601,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -638,8 +616,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest
-                {
+                new() {
                     Name = "test-request",
                     Method = "GET",
                     Url = "{{baseUrl}}/path with spaces", // Has variables, so spaces might be valid
@@ -649,7 +626,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -678,7 +655,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -701,7 +678,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -727,7 +704,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -755,7 +732,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -780,7 +757,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -805,7 +782,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -829,7 +806,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -854,7 +831,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -886,13 +863,13 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
             result.HasWarnings.Should().BeTrue();
 
-            var lowerHeaderName = headerName.ToLowerInvariant();
+            string lowerHeaderName = headerName.ToLowerInvariant();
             if (lowerHeaderName == "content-type")
             {
                 result.Warnings[0].Message.Should().Be("Content-Type header is empty");
@@ -935,7 +912,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -968,7 +945,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1002,7 +979,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -1034,7 +1011,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1063,7 +1040,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1092,7 +1069,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1119,7 +1096,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1152,7 +1129,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -1172,10 +1149,10 @@ namespace RESTClient.NET.Core.Tests.Validation
                 ["apiKey"] = "secret123",
                 ["version"] = "v1"
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -1190,10 +1167,10 @@ namespace RESTClient.NET.Core.Tests.Validation
             {
                 [""] = "some-value"
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1212,10 +1189,10 @@ namespace RESTClient.NET.Core.Tests.Validation
             {
                 ["   "] = "some-value"
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1235,10 +1212,10 @@ namespace RESTClient.NET.Core.Tests.Validation
             {
                 [variableName] = "some-value"
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -1256,10 +1233,10 @@ namespace RESTClient.NET.Core.Tests.Validation
             {
                 ["selfRef"] = "prefix-{{selfRef}}-suffix"
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1279,10 +1256,10 @@ namespace RESTClient.NET.Core.Tests.Validation
                 ["baseUrl"] = "https://api.example.com",
                 ["fullUrl"] = "{{baseUrl}}/users" // References another variable, not itself
             };
-            var httpFile = new HttpFile(new List<HttpRequest>(), fileVariables);
+            var httpFile = new HttpFile([], fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -1331,7 +1308,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeFalse();
@@ -1408,7 +1385,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             // Assert
             result.IsValid.Should().BeTrue();

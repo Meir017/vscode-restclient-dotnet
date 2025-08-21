@@ -5,7 +5,7 @@ using RESTClient.NET.Sample.Api.Services;
 using Serilog;
 using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -25,7 +25,7 @@ builder.Services.AddControllers()
 // Configure Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                           ?? "Data Source=sample.db";
     options.UseSqlite(connectionString);
 });
@@ -46,8 +46,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     // Include XML comments
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    string xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath);
@@ -65,7 +65,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -76,7 +76,7 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "RESTClient.NET Sample API v1");
         options.RoutePrefix = string.Empty; // Set Swagger UI at app's root
     });
-    
+
     app.UseCors("Development");
 }
 
@@ -87,9 +87,9 @@ app.MapControllers();
 // Initialize database only for non-test environments
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    using (var scope = app.Services.CreateScope())
+    using (IServiceScope scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         SeedData.Initialize(context);
     }
 }

@@ -25,9 +25,11 @@ namespace RESTClient.NET.Core.Models
         public void StoreResponse(string requestName, HttpResponseData responseData)
         {
             if (string.IsNullOrEmpty(requestName))
+            {
                 throw new ArgumentException("Request name cannot be null or empty", nameof(requestName));
-            if (responseData == null)
-                throw new ArgumentNullException(nameof(responseData));
+            }
+
+            ArgumentNullException.ThrowIfNull(responseData);
 
             _responses[requestName] = responseData;
         }
@@ -40,9 +42,11 @@ namespace RESTClient.NET.Core.Models
         public HttpResponseData? GetResponse(string requestName)
         {
             if (string.IsNullOrEmpty(requestName))
+            {
                 return null;
+            }
 
-            _responses.TryGetValue(requestName, out var response);
+            _responses.TryGetValue(requestName, out HttpResponseData? response);
             return response;
         }
 
@@ -64,7 +68,9 @@ namespace RESTClient.NET.Core.Models
         public bool RemoveResponse(string requestName)
         {
             if (string.IsNullOrEmpty(requestName))
+            {
                 return false;
+            }
 
             return _responses.TryRemove(requestName, out _);
         }
@@ -94,7 +100,7 @@ namespace RESTClient.NET.Core.Models
         public ResponseContext Clone()
         {
             var clone = new ResponseContext();
-            foreach (var kvp in _responses)
+            foreach (KeyValuePair<string, HttpResponseData> kvp in _responses)
             {
                 clone._responses[kvp.Key] = kvp.Value;
             }

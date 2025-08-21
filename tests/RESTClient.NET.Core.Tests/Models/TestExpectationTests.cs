@@ -10,32 +10,32 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithValidParameters_SetsPropertiesCorrectly()
         {
             // Arrange
-            const ExpectationType type = ExpectationType.StatusCode;
-            const string value = "200";
-            const string context = "OK response";
+            const ExpectationType Type = ExpectationType.StatusCode;
+            const string Value = "200";
+            const string Context = "OK response";
 
             // Act
-            var expectation = new TestExpectation(type, value, context);
+            var expectation = new TestExpectation(Type, Value, Context);
 
             // Assert
-            expectation.Type.Should().Be(type);
-            expectation.Value.Should().Be(value);
-            expectation.Context.Should().Be(context);
+            expectation.Type.Should().Be(Type);
+            expectation.Value.Should().Be(Value);
+            expectation.Context.Should().Be(Context);
         }
 
         [Fact]
         public void Constructor_WithoutContext_SetsContextToNull()
         {
             // Arrange
-            const ExpectationType type = ExpectationType.Header;
-            const string value = "application/json";
+            const ExpectationType Type = ExpectationType.Header;
+            const string Value = "application/json";
 
             // Act
-            var expectation = new TestExpectation(type, value);
+            var expectation = new TestExpectation(Type, Value);
 
             // Assert
-            expectation.Type.Should().Be(type);
-            expectation.Value.Should().Be(value);
+            expectation.Type.Should().Be(Type);
+            expectation.Value.Should().Be(Value);
             expectation.Context.Should().BeNull();
         }
 
@@ -89,12 +89,13 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Properties_ShouldBeSettableAndGettable()
         {
             // Arrange
-            var expectation = new TestExpectation(ExpectationType.StatusCode, "200");
-
-            // Act
-            expectation.Type = ExpectationType.Header;
-            expectation.Value = "application/json";
-            expectation.Context = "Content-Type";
+            var expectation = new TestExpectation(ExpectationType.StatusCode, "200")
+            {
+                // Act
+                Type = ExpectationType.Header,
+                Value = "application/json",
+                Context = "Content-Type"
+            };
 
             // Assert
             expectation.Type.Should().Be(ExpectationType.Header);
@@ -191,10 +192,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Context_ShouldAcceptNullAndStringValues()
         {
             // Arrange
-            var expectation = new TestExpectation(ExpectationType.Header, "application/json");
-
-            // Act & Assert - null value
-            expectation.Context = null;
+            var expectation = new TestExpectation(ExpectationType.Header, "application/json")
+            {
+                // Act & Assert - null value
+                Context = null
+            };
             expectation.Context.Should().BeNull();
 
             // Act & Assert - string value
@@ -241,26 +243,26 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithSpecialCharactersInValue_SetsValueCorrectly()
         {
             // Arrange
-            const string specialValue = "!@#$%^&*()_+-={}[]|\\:;\"'<>?,./ 中文 🚀";
+            const string SpecialValue = "!@#$%^&*()_+-={}[]|\\:;\"'<>?,./ 中文 🚀";
 
             // Act
-            var expectation = new TestExpectation(ExpectationType.BodyContains, specialValue);
+            var expectation = new TestExpectation(ExpectationType.BodyContains, SpecialValue);
 
             // Assert
-            expectation.Value.Should().Be(specialValue);
+            expectation.Value.Should().Be(SpecialValue);
         }
 
         [Fact]
         public void Constructor_WithSpecialCharactersInContext_SetsContextCorrectly()
         {
             // Arrange
-            const string specialContext = "Special chars: !@#$%^&*()_+-={}[]|\\:;\"'<>?,./ 中文 🚀";
+            const string SpecialContext = "Special chars: !@#$%^&*()_+-={}[]|\\:;\"'<>?,./ 中文 🚀";
 
             // Act
-            var expectation = new TestExpectation(ExpectationType.Header, "value", specialContext);
+            var expectation = new TestExpectation(ExpectationType.Header, "value", SpecialContext);
 
             // Assert
-            expectation.Context.Should().Be(specialContext);
+            expectation.Context.Should().Be(SpecialContext);
         }
     }
 }

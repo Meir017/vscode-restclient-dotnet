@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using RESTClient.NET.Core.Exceptions;
 using RESTClient.NET.Core.Models;
 
 namespace RESTClient.NET.Core.Parsing
@@ -11,9 +10,9 @@ namespace RESTClient.NET.Core.Parsing
     /// <summary>
     /// Default implementation of HTTP syntax parser
     /// </summary>
-    public class HttpSyntaxParser : IHttpSyntaxParser
+    public partial class HttpSyntaxParser : IHttpSyntaxParser
     {
-        private static readonly Regex _variableDefinitionRegex = new Regex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled);
+        private static readonly Regex _variableDefinitionRegex = VariableDefinitionRegex();
         private static readonly Regex _metadataRegex = new Regex(@"^(?:#|\/{2})\s*@([\w-]+)(?:\s+(.*?))?\s*$", RegexOptions.Compiled);
 
         /// <inheritdoc />
@@ -26,12 +25,12 @@ namespace RESTClient.NET.Core.Parsing
             var fileVariables = new Dictionary<string, string>();
             var requestNamePositions = new Dictionary<string, int>();
 
-            var currentRequestName = string.Empty;
+            string currentRequestName = string.Empty;
             var currentRequestTokens = new List<HttpToken>();
             var currentMetadata = new HttpRequestMetadata();
-            var isParsingRequest = false;
+            bool isParsingRequest = false;
 
-            foreach (var token in tokenList)
+            foreach (HttpToken? token in tokenList)
             {
                 switch (token.Type)
                 {
@@ -43,7 +42,7 @@ namespace RESTClient.NET.Core.Parsing
                         // Finish previous request if any
                         if (isParsingRequest && !string.IsNullOrEmpty(currentRequestName))
                         {
-                            var request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
+                            HttpRequest? request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
                             if (request != null)
                             {
                                 requests.Add(request);
@@ -51,8 +50,8 @@ namespace RESTClient.NET.Core.Parsing
                         }
 
                         // Extract request name from ### <name> pattern
-                        var separatorLine = token.Value.Trim();
-                        var separatorParts = separatorLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                        string separatorLine = token.Value.Trim();
+                        string[] separatorParts = separatorLine.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
 
                         if (separatorParts.Length > 1)
                         {
@@ -86,13 +85,13 @@ namespace RESTClient.NET.Core.Parsing
                         ParseMetadata(token.Value, currentMetadata);
 
                         // Check if this is a @name declaration - start of new request
-                        var nameMatch = _metadataRegex.Match(token.Value);
+                        Match nameMatch = _metadataRegex.Match(token.Value);
                         if (nameMatch.Success && nameMatch.Groups[1].Value.ToLowerInvariant() == "name")
                         {
                             // Finish previous request if any
                             if (isParsingRequest && !string.IsNullOrEmpty(currentRequestName))
                             {
-                                var request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
+                                HttpRequest? request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
                                 if (request != null)
                                 {
                                     requests.Add(request);
@@ -153,12 +152,16 @@ namespace RESTClient.NET.Core.Parsing
                         // Finish last request if any
                         if (isParsingRequest && !string.IsNullOrEmpty(currentRequestName))
                         {
-                            var request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
+                            HttpRequest? request = ParseRequest(currentRequestName, currentRequestTokens, currentMetadata);
                             if (request != null)
                             {
                                 requests.Add(request);
                             }
                         }
+                        break;
+
+                    default:
+                        // No action needed for unhandled token types
                         break;
                 }
             }
@@ -168,22 +171,25 @@ namespace RESTClient.NET.Core.Parsing
 
         private static void ParseFileVariable(string variableDefinition, Dictionary<string, string> fileVariables)
         {
-            var match = _variableDefinitionRegex.Match(variableDefinition);
+            Match match = _variableDefinitionRegex.Match(variableDefinition);
             if (match.Success)
             {
-                var name = match.Groups[1].Value;
-                var value = match.Groups[2].Value;
+                string name = match.Groups[1].Value;
+                string value = match.Groups[2].Value;
                 fileVariables[name] = value;
             }
         }
 
         private static void ParseMetadata(string metadataLine, HttpRequestMetadata metadata)
         {
-            var match = _metadataRegex.Match(metadataLine);
-            if (!match.Success) return;
+            Match match = _metadataRegex.Match(metadataLine);
+            if (!match.Success)
+            {
+                return;
+            }
 
-            var key = match.Groups[1].Value.ToLowerInvariant();
-            var value = match.Groups[2].Value;
+            string key = match.Groups[1].Value.ToLowerInvariant();
+            string value = match.Groups[2].Value;
 
             switch (key)
             {
@@ -235,19 +241,25 @@ namespace RESTClient.NET.Core.Parsing
 
         private static void ParseExpectation(string expectationValue, HttpRequestMetadata metadata)
         {
-            if (string.IsNullOrWhiteSpace(expectationValue)) return;
+            if (string.IsNullOrWhiteSpace(expectationValue))
+            {
+                return;
+            }
 
             // Support both formats: "status 200" and "status: 200"
-            var parts = expectationValue.Contains(':')
-                ? expectationValue.Split(new[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries)
-                : expectationValue.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = expectationValue.Contains(':')
+                ? expectationValue.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries)
+                : expectationValue.Split([' '], 2, StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length != 2) return;
+            if (parts.Length != 2)
+            {
+                return;
+            }
 
-            var expectationType = parts[0].Trim().ToLowerInvariant();
-            var expectedValue = parts[1].Trim();
+            string expectationType = parts[0].Trim().ToLowerInvariant();
+            string expectedValue = parts[1].Trim();
 
-            var type = expectationType switch
+            ExpectationType? type = expectationType switch
             {
                 "status" => ExpectationType.StatusCode,
                 "header" => ExpectationType.Header,
@@ -255,7 +267,7 @@ namespace RESTClient.NET.Core.Parsing
                 "body-path" => ExpectationType.BodyPath,
                 "schema" => ExpectationType.Schema,
                 "max-time" => ExpectationType.MaxTime,
-                _ => (ExpectationType?)null
+                _ => null
             };
 
             if (type.HasValue)
@@ -266,19 +278,22 @@ namespace RESTClient.NET.Core.Parsing
 
         private static HttpRequest? ParseRequest(string requestName, List<HttpToken> tokens, HttpRequestMetadata metadata)
         {
-            if (string.IsNullOrEmpty(requestName)) return null;
+            if (string.IsNullOrEmpty(requestName))
+            {
+                return null;
+            }
 
-            var method = "GET";
-            var url = string.Empty;
+            string method = "GET";
+            string url = string.Empty;
             var headers = new Dictionary<string, string>();
             var bodyLines = new List<string>();
             var fileBodyReference = (FileBodyReference?)null;
-            var isInBody = false;
-            var lineNumber = tokens.FirstOrDefault()?.LineNumber ?? 0;
+            bool isInBody = false;
+            int lineNumber = tokens.FirstOrDefault()?.LineNumber ?? 0;
 
             for (int i = 0; i < tokens.Count; i++)
             {
-                var token = tokens[i];
+                HttpToken token = tokens[i];
 
                 switch (token.Type)
                 {
@@ -333,13 +348,13 @@ namespace RESTClient.NET.Core.Parsing
 
                     case HttpTokenType.FileBodyWithEncoding:
                         isInBody = true;
-                        var parts = token.Value.Split(new[] { '|' }, 2);
-                        var encodingName = parts.Length > 0 ? parts[0] : "utf-8";
-                        var filePath = parts.Length > 1 ? parts[1] : token.Value;
+                        string[] parts = token.Value.Split(['|'], 2);
+                        string encodingName = parts.Length > 0 ? parts[0] : "utf-8";
+                        string filePath = parts.Length > 1 ? parts[1] : token.Value;
 
                         try
                         {
-                            var encoding = GetEncodingByName(encodingName);
+                            Encoding encoding = GetEncodingByName(encodingName);
                             fileBodyReference = FileBodyReference.WithVariablesAndEncoding(filePath, encoding, token.LineNumber);
                         }
                         catch (ArgumentException)
@@ -357,8 +372,8 @@ namespace RESTClient.NET.Core.Parsing
                         else
                         {
                             // Check if this is the transition to body
-                            var nextNonWhitespaceToken = tokens.Skip(i + 1)
-                                .FirstOrDefault(t => t.Type != HttpTokenType.Whitespace && t.Type != HttpTokenType.LineBreak);
+                            HttpToken? nextNonWhitespaceToken = tokens.Skip(i + 1)
+                                .FirstOrDefault(t => t.Type is not HttpTokenType.Whitespace and not HttpTokenType.LineBreak);
 
                             if (nextNonWhitespaceToken?.Type == HttpTokenType.Body ||
                                 (nextNonWhitespaceToken != null &&
@@ -383,10 +398,14 @@ namespace RESTClient.NET.Core.Parsing
                     case HttpTokenType.EndOfFile:
                         // These tokens are handled in other contexts or can be ignored during request parsing
                         break;
+
+                    default:
+                        // No action needed for unhandled token types
+                        break;
                 }
             }
 
-            var body = bodyLines.Count > 0 ? string.Join(Environment.NewLine, bodyLines).Trim() : null;
+            string? body = bodyLines.Count > 0 ? string.Join(Environment.NewLine, bodyLines).Trim() : null;
             if (string.IsNullOrWhiteSpace(body))
             {
                 body = null;
@@ -403,13 +422,13 @@ namespace RESTClient.NET.Core.Parsing
             };
 
             // Add headers
-            foreach (var header in headers)
+            foreach (KeyValuePair<string, string> header in headers)
             {
                 request.Headers[header.Key] = header.Value;
             }
 
             // Set metadata
-            foreach (var expectation in metadata.Expectations)
+            foreach (TestExpectation expectation in metadata.Expectations)
             {
                 request.Metadata.Expectations.Add(expectation);
             }
@@ -425,7 +444,7 @@ namespace RESTClient.NET.Core.Parsing
         /// <exception cref="ArgumentException">Thrown when the encoding name is not recognized</exception>
         private static Encoding GetEncodingByName(string encodingName)
         {
-            var normalizedName = encodingName.ToLowerInvariant().Replace("-", "").Replace("_", "");
+            string normalizedName = encodingName.ToLowerInvariant().Replace("-", "").Replace("_", "");
 
             switch (normalizedName)
             {
@@ -452,5 +471,8 @@ namespace RESTClient.NET.Core.Parsing
                     throw new ArgumentException($"Unsupported encoding: {encodingName}", nameof(encodingName));
             }
         }
+
+        [GeneratedRegex(@"^@([^\s=]+)\s*=\s*(.*?)\s*$", RegexOptions.Compiled)]
+        private static partial Regex VariableDefinitionRegex();
     }
 }

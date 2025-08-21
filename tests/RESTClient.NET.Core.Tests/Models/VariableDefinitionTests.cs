@@ -10,17 +10,17 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithValidParameters_SetsPropertiesCorrectly()
         {
             // Arrange
-            const string name = "baseUrl";
-            const string value = "https://api.example.com";
-            const VariableType type = VariableType.File;
+            const string Name = "baseUrl";
+            const string Value = "https://api.example.com";
+            const VariableType Type = VariableType.File;
 
             // Act
-            var variable = new VariableDefinition(name, value, type);
+            var variable = new VariableDefinition(Name, Value, Type);
 
             // Assert
-            variable.Name.Should().Be(name);
-            variable.Value.Should().Be(value);
-            variable.Type.Should().Be(type);
+            variable.Name.Should().Be(Name);
+            variable.Value.Should().Be(Value);
+            variable.Type.Should().Be(Type);
             variable.LineNumber.Should().Be(0); // Default value
         }
 
@@ -28,15 +28,15 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithNameAndValue_DefaultsToFileType()
         {
             // Arrange
-            const string name = "apiKey";
-            const string value = "secret123";
+            const string Name = "apiKey";
+            const string Value = "secret123";
 
             // Act
-            var variable = new VariableDefinition(name, value);
+            var variable = new VariableDefinition(Name, Value);
 
             // Assert
-            variable.Name.Should().Be(name);
-            variable.Value.Should().Be(value);
+            variable.Name.Should().Be(Name);
+            variable.Value.Should().Be(Value);
             variable.Type.Should().Be(VariableType.File);
             variable.LineNumber.Should().Be(0);
         }
@@ -81,11 +81,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithDifferentVariableTypes_SetsTypeCorrectly(VariableType type)
         {
             // Arrange
-            const string name = "testVar";
-            const string value = "testValue";
+            const string Name = "testVar";
+            const string Value = "testValue";
 
             // Act
-            var variable = new VariableDefinition(name, value, type);
+            var variable = new VariableDefinition(Name, Value, type);
 
             // Assert
             variable.Type.Should().Be(type);
@@ -95,13 +95,14 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Properties_ShouldBeSettableAndGettable()
         {
             // Arrange
-            var variable = new VariableDefinition("initial", "value");
-
-            // Act
-            variable.Name = "newName";
-            variable.Value = "newValue";
-            variable.Type = VariableType.Environment;
-            variable.LineNumber = 42;
+            var variable = new VariableDefinition("initial", "value")
+            {
+                // Act
+                Name = "newName",
+                Value = "newValue",
+                Type = VariableType.Environment,
+                LineNumber = 42
+            };
 
             // Assert
             variable.Name.Should().Be("newName");
@@ -117,7 +118,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition("baseUrl", "https://api.example.com", VariableType.File);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be("baseUrl = https://api.example.com (File)");
@@ -130,7 +131,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition("PATH", "/usr/bin", VariableType.Environment);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be("PATH = /usr/bin (Environment)");
@@ -143,7 +144,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition("timestamp", "2023-01-01T00:00:00Z", VariableType.System);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be("timestamp = 2023-01-01T00:00:00Z (System)");
@@ -156,7 +157,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition("token", "abc123", VariableType.Request);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be("token = abc123 (Request)");
@@ -169,7 +170,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition("", "", VariableType.File);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be(" =  (File)");
@@ -182,7 +183,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition(null!, null!, VariableType.File);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be(" =  (File)");
@@ -202,10 +203,11 @@ namespace RESTClient.NET.Core.Tests.Models
         public void LineNumber_ShouldBeSettable()
         {
             // Arrange
-            var variable = new VariableDefinition("test", "value");
-
-            // Act
-            variable.LineNumber = 123;
+            var variable = new VariableDefinition("test", "value")
+            {
+                // Act
+                LineNumber = 123
+            };
 
             // Assert
             variable.LineNumber.Should().Be(123);
@@ -334,7 +336,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var variable = new VariableDefinition(name, value, VariableType.File);
 
             // Act
-            var result = variable.ToString();
+            string result = variable.ToString();
 
             // Assert
             result.Should().Be(expected);

@@ -28,8 +28,6 @@
 
     <!-- Code Quality Settings - Zero Warnings Policy -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <WarningsNotAsErrors />
     <NoWarn />
 
     <!-- Deterministic Builds -->
@@ -70,17 +68,14 @@
 
   <PropertyGroup Label="Documentation Generation">
     <!-- Generate XML Documentation for packable projects only -->
-    <GenerateDocumentationFile Condition="'$(IsPackable)' != 'false'">true</GenerateDocumentationFile>
-    <DocumentationFile Condition="'$(IsPackable)' != 'false'">bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-
-    <!-- Disable XML documentation for test projects -->
-    <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 
     <!-- Documentation Analysis -->
     <ReportAnalyzer>false</ReportAnalyzer>
   </PropertyGroup>
 
-  <PropertyGroup Label="Package Generation" Condition="'$(IsPackable)' != 'false'">
+  <PropertyGroup Label="Package Generation" Condition="'$(IsPackable)' == 'true'">
     <!-- Enable Package Generation -->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
@@ -92,13 +87,6 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Testing Configuration" Condition="'$(IsTestProject)' == 'true'">
-    <!-- Test Project Settings -->
-    <IsPackable>false</IsPackable>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-
-    <!-- Improve Test Performance -->
-    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
     <!-- Test Coverage -->
     <CollectCoverage>true</CollectCoverage>

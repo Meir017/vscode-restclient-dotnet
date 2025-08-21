@@ -2,8 +2,6 @@ using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using RESTClient.NET.Core.Exceptions;
 using RESTClient.NET.Core.Parsing;
-using System;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Parsing
@@ -28,11 +26,11 @@ namespace RESTClient.NET.Core.Tests.Parsing
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 INVALID_HTTP_LINE_WITHOUT_METHOD_OR_URL";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -46,10 +44,10 @@ INVALID_HTTP_LINE_WITHOUT_METHOD_OR_URL";
             // Arrange
             var parser = new HttpFileParser();
             var options = new HttpParseOptions { ValidateRequestNames = true, StrictMode = true };
-            var content = @"# @name duplicate-name
+            string content = @"# @name duplicate-name
 GET http://localhost:5000/api/users
 
-# @name duplicate-name  
+# @name duplicate-name
 POST http://localhost:5000/api/users";
 
             // Act & Assert
@@ -64,14 +62,14 @@ POST http://localhost:5000/api/users";
             // Arrange
             var parser = new HttpFileParser();
             var options = new HttpParseOptions { ValidateRequestNames = false };
-            var content = @"# @name duplicate-name
+            string content = @"# @name duplicate-name
 GET http://localhost:5000/api/users
 
 # @name duplicate-name
 POST http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Parse(content, options);
+            Core.Models.HttpFile result = parser.Parse(content, options);
 
             // Assert
             result.Should().NotBeNull();
@@ -82,14 +80,14 @@ POST http://localhost:5000/api/users";
         public void Parse_WithLogger_ShouldLogProcessing()
         {
             // Arrange
-            using var loggerFactory = LoggerFactory.Create(builder => { });
-            var logger = loggerFactory.CreateLogger<HttpFileParser>();
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => { });
+            ILogger<HttpFileParser> logger = loggerFactory.CreateLogger<HttpFileParser>();
             var parser = new HttpFileParser(logger: logger);
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -101,12 +99,12 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"@invalidVariable
+            string content = @"@invalidVariable
 # @name test-request
 GET http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -119,14 +117,14 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name 
+            string content = @"# @name
 GET http://localhost:5000/api/users
 
-# @name   
+# @name
 POST http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -139,12 +137,12 @@ POST http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# This is a comment
+            string content = @"# This is a comment
 // This is another comment
 /* This is a block comment */";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -157,7 +155,7 @@ POST http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name first-request
+            string content = @"# @name first-request
 GET http://localhost:5000/api/users
 
 ### second-request
@@ -170,7 +168,7 @@ Content-Type: application/json
 DELETE http://localhost:5000/api/users/1";
 
             // Act
-            var result = parser.Parse(content);
+            Core.Models.HttpFile result = parser.Parse(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -185,11 +183,11 @@ DELETE http://localhost:5000/api/users/1";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Parse(content, null);
+            Core.Models.HttpFile result = parser.Parse(content, null);
 
             // Assert
             result.Should().NotBeNull();
@@ -201,12 +199,12 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
             var options = new HttpParseOptions { StrictMode = true, ValidateRequestNames = true };
 
             // Act
-            var result = parser.Parse(content, options);
+            Core.Models.HttpFile result = parser.Parse(content, options);
 
             // Assert
             result.Should().NotBeNull();
@@ -218,13 +216,13 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"@baseUrl = http://localhost:5000
+            string content = @"@baseUrl = http://localhost:5000
 
 # @name test-request
 # @expect status 200
 GET {{baseUrl}}/api/users";
-            var options = new HttpParseOptions 
-            { 
+            var options = new HttpParseOptions
+            {
                 ProcessVariables = true,
                 ParseExpectations = true,
                 RequireRequestNames = true,
@@ -234,7 +232,7 @@ GET {{baseUrl}}/api/users";
             };
 
             // Act
-            var result = parser.Parse(content, options);
+            Core.Models.HttpFile result = parser.Parse(content, options);
 
             // Assert
             result.Should().NotBeNull();
@@ -259,11 +257,11 @@ GET {{baseUrl}}/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -275,11 +273,11 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 GET http://localhost:5000/api/users";
 
             // Act
-            var result = parser.Validate(content);
+            Core.Validation.ValidationResult result = parser.Validate(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -291,11 +289,11 @@ GET http://localhost:5000/api/users";
         {
             // Arrange
             var parser = new HttpFileParser();
-            var content = @"# @name test-request
+            string content = @"# @name test-request
 INVALID_HTTP_LINE";
 
             // Act
-            var result = parser.Validate(content);
+            Core.Validation.ValidationResult result = parser.Validate(content);
 
             // Assert
             result.Should().NotBeNull();

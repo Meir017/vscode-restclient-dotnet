@@ -78,10 +78,14 @@ namespace RESTClient.NET.Core
         public async Task<HttpFile> ParseFileAsync(string filePath, HttpParseOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(filePath))
+            {
                 throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
+            }
 
             if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException($"HTTP file not found: {filePath}");
+            }
 
             _logger?.LogInformation("Parsing HTTP file: {FilePath}", filePath);
 
@@ -96,8 +100,7 @@ namespace RESTClient.NET.Core
         /// <returns>Parsed HTTP file</returns>
         public Task<HttpFile> ParseContentAsync(string content, HttpParseOptions? options = null)
         {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
+            ArgumentNullException.ThrowIfNull(content);
 
             _logger?.LogInformation("Parsing HTTP content ({Length} characters)", content.Length);
 
@@ -116,7 +119,7 @@ namespace RESTClient.NET.Core
             IDictionary<string, string>? environmentVariables = null,
             HttpParseOptions? options = null)
         {
-            var httpFile = await ParseFileAsync(filePath, options);
+            HttpFile httpFile = await ParseFileAsync(filePath, options);
             return ProcessVariables(httpFile, environmentVariables);
         }
 
@@ -132,7 +135,7 @@ namespace RESTClient.NET.Core
             IDictionary<string, string>? environmentVariables = null,
             HttpParseOptions? options = null)
         {
-            var httpFile = await ParseContentAsync(content, options);
+            HttpFile httpFile = await ParseContentAsync(content, options);
             return ProcessVariables(httpFile, environmentVariables);
         }
 
@@ -146,8 +149,7 @@ namespace RESTClient.NET.Core
             HttpFile httpFile,
             IDictionary<string, string>? environmentVariables = null)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             _logger?.LogInformation("Processing variables in HTTP file with {RequestCount} requests", httpFile.Requests.Count);
 
@@ -155,7 +157,7 @@ namespace RESTClient.NET.Core
             ValidateVariableReferences(httpFile, environmentVariables);
 
             // Process the file
-            var processedFile = VariableProcessor.ProcessHttpFile(httpFile, environmentVariables);
+            HttpFile processedFile = VariableProcessor.ProcessHttpFile(httpFile, environmentVariables);
 
             _logger?.LogInformation("Variable processing completed");
 
@@ -172,15 +174,14 @@ namespace RESTClient.NET.Core
             HttpFile httpFile,
             IDictionary<string, string>? environmentVariables = null)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             var errors = new List<ValidationError>();
             var warnings = new List<ValidationWarning>();
 
             // Check for circular references in file variables
-            var circularVariables = VariableProcessor.DetectCircularReferences(httpFile.FileVariables);
-            foreach (var variable in circularVariables)
+            List<string> circularVariables = VariableProcessor.DetectCircularReferences(httpFile.FileVariables);
+            foreach (string variable in circularVariables)
             {
                 errors.Add(new ValidationError(
                     0,
@@ -189,16 +190,16 @@ namespace RESTClient.NET.Core
             }
 
             // Validate variable references in each request
-            foreach (var request in httpFile.Requests)
+            foreach (HttpRequest request in httpFile.Requests)
             {
-                var unresolvedVariables = VariableProcessor.ValidateRequestVariables(
+                Dictionary<string, List<string>> unresolvedVariables = VariableProcessor.ValidateRequestVariables(
                     request,
                     httpFile.FileVariables,
                     environmentVariables);
 
-                foreach (var kvp in unresolvedVariables)
+                foreach (KeyValuePair<string, List<string>> kvp in unresolvedVariables)
                 {
-                    foreach (var variable in kvp.Value)
+                    foreach (string variable in kvp.Value)
                     {
                         warnings.Add(new ValidationWarning(
                             request.LineNumber,
@@ -235,13 +236,14 @@ namespace RESTClient.NET.Core
             string requestName,
             IDictionary<string, string>? environmentVariables = null)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             if (string.IsNullOrWhiteSpace(requestName))
+            {
                 throw new ArgumentException("Request name cannot be null or empty", nameof(requestName));
+            }
 
-            if (!httpFile.TryGetRequestByName(requestName, out var request))
+            if (!httpFile.TryGetRequestByName(requestName, out HttpRequest? request))
             {
                 _logger?.LogWarning("Request with name '{RequestName}' not found", requestName);
                 return null;
@@ -262,14 +264,13 @@ namespace RESTClient.NET.Core
             HttpFile httpFile,
             IDictionary<string, string>? environmentVariables = null)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             var processedRequests = new List<HttpRequest>();
 
-            foreach (var request in httpFile.Requests)
+            foreach (HttpRequest request in httpFile.Requests)
             {
-                var processedRequest = VariableProcessor.ProcessRequest(request, httpFile.FileVariables, environmentVariables);
+                HttpRequest processedRequest = VariableProcessor.ProcessRequest(request, httpFile.FileVariables, environmentVariables);
                 processedRequests.Add(processedRequest);
             }
 
@@ -285,12 +286,11 @@ namespace RESTClient.NET.Core
         /// <returns>Validation result</returns>
         public ValidationResult ValidateHttpFile(HttpFile httpFile)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             _logger?.LogInformation("Validating HTTP file with {RequestCount} requests", httpFile.Requests.Count);
 
-            var result = _validator.Validate(httpFile);
+            ValidationResult result = _validator.Validate(httpFile);
 
             if (result.HasErrors)
             {

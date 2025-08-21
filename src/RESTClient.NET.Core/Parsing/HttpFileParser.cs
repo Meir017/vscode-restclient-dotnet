@@ -81,8 +81,7 @@ namespace RESTClient.NET.Core.Parsing
         /// <returns>The parsed HTTP file</returns>
         public HttpFile Parse(string content, HttpParseOptions? options = null)
         {
-            if (content == null)
-                throw new ArgumentNullException(nameof(content));
+            ArgumentNullException.ThrowIfNull(content);
 
             options ??= HttpParseOptions.Default();
 
@@ -91,24 +90,24 @@ namespace RESTClient.NET.Core.Parsing
                 _logger?.LogDebug("Starting HTTP file parsing");
 
                 // Tokenize the content
-                var tokens = _tokenizer.Tokenize(content);
+                System.Collections.Generic.IEnumerable<HttpToken> tokens = _tokenizer.Tokenize(content);
                 _logger?.LogDebug("Tokenization completed");
 
                 // Parse the tokens into an HTTP file
-                var httpFile = _syntaxParser.Parse(tokens, options);
+                HttpFile httpFile = _syntaxParser.Parse(tokens, options);
                 _logger?.LogDebug("Syntax parsing completed. Found {RequestCount} requests", httpFile.Requests.Count);
 
                 // Validate the result if requested
                 if (options.ValidateRequestNames || options.StrictMode)
                 {
-                    var validationResult = _validator.Validate(httpFile);
+                    ValidationResult validationResult = _validator.Validate(httpFile);
                     if (!validationResult.IsValid)
                     {
                         _logger?.LogWarning("Validation failed with {ErrorCount} errors", validationResult.Errors.Count);
 
                         if (options.StrictMode)
                         {
-                            var firstError = validationResult.Errors[0];
+                            ValidationError firstError = validationResult.Errors[0];
                             throw new Exceptions.HttpParseException(
                                 $"Validation failed: {firstError.Message}",
                                 firstError.LineNumber);
@@ -119,7 +118,7 @@ namespace RESTClient.NET.Core.Parsing
                 _logger?.LogInformation("HTTP file parsing completed successfully");
                 return httpFile;
             }
-            catch (Exception ex) when (!(ex is Exceptions.HttpParseException))
+            catch (Exception ex) when (ex is not Exceptions.HttpParseException)
             {
                 _logger?.LogError(ex, "Unexpected error during HTTP file parsing");
                 throw new Exceptions.HttpParseException("An unexpected error occurred during parsing", 0, 0, null, ex);
@@ -134,11 +133,10 @@ namespace RESTClient.NET.Core.Parsing
         /// <returns>The parsed HTTP file</returns>
         public HttpFile Parse(Stream stream, HttpParseOptions? options = null)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             using var reader = new StreamReader(stream);
-            var content = reader.ReadToEnd();
+            string content = reader.ReadToEnd();
             return Parse(content, options);
         }
 
@@ -151,18 +149,22 @@ namespace RESTClient.NET.Core.Parsing
         public async Task<HttpFile> ParseFileAsync(string filePath, HttpParseOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(filePath))
+            {
                 throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
+            }
 
             if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException($"HTTP file not found: {filePath}");
+            }
 
             _logger?.LogDebug("Reading HTTP file from: {FilePath}", filePath);
 
 #if NETSTANDARD2_0
-            var content = File.ReadAllText(filePath);
+            string content = File.ReadAllText(filePath);
             return await Task.FromResult(Parse(content, options)).ConfigureAwait(false);
 #else
-            var content = await File.ReadAllTextAsync(filePath).ConfigureAwait(false);
+            string content = await File.ReadAllTextAsync(filePath).ConfigureAwait(false);
             return Parse(content, options);
 #endif
         }
@@ -188,7 +190,7 @@ namespace RESTClient.NET.Core.Parsing
         {
             try
             {
-                var httpFile = Parse(content, options);
+                HttpFile httpFile = Parse(content, options);
                 return _validator.Validate(httpFile);
             }
             catch (Exceptions.HttpParseException ex)

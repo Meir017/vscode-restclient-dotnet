@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using RESTClient.NET.Testing.Extensions;
 using RESTClient.NET.Testing.Models;
 using RESTClient.NET.Testing.Tests.Shared;
 using Xunit;
@@ -25,7 +24,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     private readonly ITestOutputHelper _output;
     private static readonly Lazy<IEnumerable<object[]>> _staticTestData = new(GetStaticTestDataInternal);
 
-    public HttpFileTestBasePlaygroundTests(WebApplicationFactory<Program> factory, ITestOutputHelper output) 
+    public HttpFileTestBasePlaygroundTests(WebApplicationFactory<Program> factory, ITestOutputHelper output)
         : base(factory)
     {
         _output = output;
@@ -34,19 +33,21 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     protected override string GetHttpFilePath()
     {
         // Get the solution root directory by walking up from the test assembly location
-        var assemblyLocation = GetType().Assembly.Location;
+        string assemblyLocation = GetType().Assembly.Location;
         var directory = new DirectoryInfo(Path.GetDirectoryName(assemblyLocation)!);
-        
+
         // Walk up until we find the solution file
-        while (directory != null && !directory.GetFiles("*.slnx").Any())
+        while (directory != null && directory.GetFiles("*.slnx").Length == 0)
         {
             directory = directory.Parent;
         }
-        
+
         if (directory == null)
+        {
             throw new InvalidOperationException("Could not find solution root directory");
-            
-        var httpFilePath = Path.Combine(directory.FullName, "playground", "MinimalWebApi", "playground-api-tests.http");
+        }
+
+        string httpFilePath = Path.Combine(directory.FullName, "playground", "MinimalWebApi", "playground-api-tests.http");
         return httpFilePath;
     }
 
@@ -58,7 +59,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         OriginalFactory.Should().NotBeNull();
         HttpFile.Should().NotBeNull();
         HttpFile.Requests.Should().NotBeEmpty();
-        
+
         _output.WriteLine($"Loaded {HttpFile.Requests.Count} requests from HTTP file");
     }
 
@@ -75,7 +76,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     /// <summary>
     /// Internal method to generate static test data once using a temporary instance
     /// </summary>
-    private static IEnumerable<object[]> GetStaticTestDataInternal()
+    private static List<object[]> GetStaticTestDataInternal()
     {
         // This is a workaround since xUnit requires static member data
         // We'll create a temporary instance to get the test data (done only once)
@@ -90,26 +91,26 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     {
         // Arrange
         _output.WriteLine($"Testing: {testCase.Name} - {testCase.Method} {testCase.Url}");
-        
-        using var client = Factory.CreateClient();
-        
+
+        using HttpClient client = Factory.CreateClient();
+
         // Get the base URL from the test server and process the request with environment variables
-        var baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
+        string baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
         var environmentVariables = new Dictionary<string, string>
         {
             ["baseUrl"] = baseUrl,
             ["contentType"] = "application/json"
         };
-        
+
         // Get the processed request with environment variables applied
-        var processedRequest = GetProcessedRequest(testCase.Name, environmentVariables);
+        Core.Models.HttpRequest? processedRequest = GetProcessedRequest(testCase.Name, environmentVariables);
         processedRequest.Should().NotBeNull();
-        
+
         // Create HttpRequestMessage from processed request
         using var request = new HttpRequestMessage(new HttpMethod(processedRequest!.Method), processedRequest.Url);
-        
+
         // Add headers
-        foreach (var header in processedRequest.Headers)
+        foreach (KeyValuePair<string, string> header in processedRequest.Headers)
         {
             // Handle content headers separately
             if (TestHttpUtils.IsContentHeader(header.Key))
@@ -118,20 +119,20 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
             }
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
-        
+
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
             // Get the content type from headers for proper StringContent creation
-            var contentType = processedRequest.Headers.TryGetValue("Content-Type", out var ctValue) 
-                ? ctValue 
+            string contentType = processedRequest.Headers.TryGetValue("Content-Type", out string? ctValue)
+                ? ctValue
                 : "text/plain";
-            
+
             // Create StringContent with proper content type to avoid HTTP 415 errors
             request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body, contentType);
-            
+
             // Add other content headers (excluding Content-Type which is already set)
-            foreach (var header in processedRequest.Headers)
+            foreach (KeyValuePair<string, string> header in processedRequest.Headers)
             {
                 if (TestHttpUtils.IsContentHeader(header.Key) && !header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
                 {
@@ -141,10 +142,10 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         }
 
         // Act
-        using var response = await client.SendAsync(request);
-        
+        using HttpResponseMessage response = await client.SendAsync(request);
+
         // Log response for debugging
-        var responseContent = await response.Content.ReadAsStringAsync();
+        string responseContent = await response.Content.ReadAsStringAsync();
         _output.WriteLine($"Response: {(int)response.StatusCode} {response.StatusCode}");
         _output.WriteLine($"Content: {responseContent}");
 
@@ -165,26 +166,26 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public async Task ExecutePingTest_ShouldReturnPong()
     {
         // Arrange
-        var testCase = GetTestCase("ping-test");
-        using var client = Factory.CreateClient();
-        
+        HttpTestCase testCase = GetTestCase("ping-test");
+        using HttpClient client = Factory.CreateClient();
+
         // Get the base URL from the test server and process the request with environment variables
-        var baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
+        string baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
         var environmentVariables = new Dictionary<string, string>
         {
             ["baseUrl"] = baseUrl,
             ["contentType"] = "application/json"
         };
-        
+
         // Get the processed request with environment variables applied
-        var processedRequest = GetProcessedRequest("ping-test", environmentVariables);
+        Core.Models.HttpRequest? processedRequest = GetProcessedRequest("ping-test", environmentVariables);
         processedRequest.Should().NotBeNull();
-        
+
         // Create HttpRequestMessage from processed request
         using var request = new HttpRequestMessage(new HttpMethod(processedRequest!.Method), processedRequest.Url);
-        
+
         // Add headers
-        foreach (var header in processedRequest.Headers)
+        foreach (KeyValuePair<string, string> header in processedRequest.Headers)
         {
             // Handle content headers separately
             if (TestHttpUtils.IsContentHeader(header.Key))
@@ -193,14 +194,14 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
             }
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
-        
+
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
             request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
-            
+
             // Add content headers
-            foreach (var header in processedRequest.Headers)
+            foreach (KeyValuePair<string, string> header in processedRequest.Headers)
             {
                 if (TestHttpUtils.IsContentHeader(header.Key))
                 {
@@ -210,8 +211,8 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         }
 
         // Act
-        using var response = await client.SendAsync(request);
-        var content = await response.Content.ReadAsStringAsync();
+        using HttpResponseMessage response = await client.SendAsync(request);
+        string content = await response.Content.ReadAsStringAsync();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -222,26 +223,26 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public async Task ExecuteGetTest_ShouldReturnExpectedContent()
     {
         // Arrange
-        var testCase = GetTestCase("get-test");
-        using var client = Factory.CreateClient();
-        
+        HttpTestCase testCase = GetTestCase("get-test");
+        using HttpClient client = Factory.CreateClient();
+
         // Get the base URL from the test server and process the request with environment variables
-        var baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
+        string baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
         var environmentVariables = new Dictionary<string, string>
         {
             ["baseUrl"] = baseUrl,
             ["contentType"] = "application/json"
         };
-        
+
         // Get the processed request with environment variables applied
-        var processedRequest = GetProcessedRequest("get-test", environmentVariables);
+        Core.Models.HttpRequest? processedRequest = GetProcessedRequest("get-test", environmentVariables);
         processedRequest.Should().NotBeNull();
-        
+
         // Create HttpRequestMessage from processed request
         using var request = new HttpRequestMessage(new HttpMethod(processedRequest!.Method), processedRequest.Url);
-        
+
         // Add headers
-        foreach (var header in processedRequest.Headers)
+        foreach (KeyValuePair<string, string> header in processedRequest.Headers)
         {
             // Handle content headers separately
             if (TestHttpUtils.IsContentHeader(header.Key))
@@ -250,14 +251,14 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
             }
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
-        
+
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
             request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
-            
+
             // Add content headers
-            foreach (var header in processedRequest.Headers)
+            foreach (KeyValuePair<string, string> header in processedRequest.Headers)
             {
                 if (TestHttpUtils.IsContentHeader(header.Key))
                 {
@@ -267,8 +268,8 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         }
 
         // Act
-        using var response = await client.SendAsync(request);
-        var content = await response.Content.ReadAsStringAsync();
+        using HttpResponseMessage response = await client.SendAsync(request);
+        string content = await response.Content.ReadAsStringAsync();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -280,26 +281,26 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public async Task ExecuteHeadersTest_ShouldReturnCustomHeaders()
     {
         // Arrange
-        var testCase = GetTestCase("headers-test");
-        using var client = Factory.CreateClient();
-        
+        HttpTestCase testCase = GetTestCase("headers-test");
+        using HttpClient client = Factory.CreateClient();
+
         // Get the base URL from the test server and process the request with environment variables
-        var baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
+        string baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
         var environmentVariables = new Dictionary<string, string>
         {
             ["baseUrl"] = baseUrl,
             ["contentType"] = "application/json"
         };
-        
+
         // Get the processed request with environment variables applied
-        var processedRequest = GetProcessedRequest("headers-test", environmentVariables);
+        Core.Models.HttpRequest? processedRequest = GetProcessedRequest("headers-test", environmentVariables);
         processedRequest.Should().NotBeNull();
-        
+
         // Create HttpRequestMessage from processed request
         using var request = new HttpRequestMessage(new HttpMethod(processedRequest!.Method), processedRequest.Url);
-        
+
         // Add headers
-        foreach (var header in processedRequest.Headers)
+        foreach (KeyValuePair<string, string> header in processedRequest.Headers)
         {
             // Handle content headers separately
             if (TestHttpUtils.IsContentHeader(header.Key))
@@ -308,14 +309,14 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
             }
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
-        
+
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {
             request.Content = TestHttpUtils.CreateHttpContent(processedRequest.Body);
-            
+
             // Add content headers
-            foreach (var header in processedRequest.Headers)
+            foreach (KeyValuePair<string, string> header in processedRequest.Headers)
             {
                 if (TestHttpUtils.IsContentHeader(header.Key))
                 {
@@ -325,8 +326,8 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         }
 
         // Act
-        using var response = await client.SendAsync(request);
-        var content = await response.Content.ReadAsStringAsync();
+        using HttpResponseMessage response = await client.SendAsync(request);
+        string content = await response.Content.ReadAsStringAsync();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -338,13 +339,13 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public void GetFilteredTestData_WithNamePattern_ShouldFilterCorrectly()
     {
         // Arrange & Act
-        var filteredData = GetFilteredTestData(namePattern: "get-*");
+        IEnumerable<object[]> filteredData = GetFilteredTestData(namePattern: "get-*");
 
         // Assert
         filteredData.Should().NotBeEmpty();
-        
+
         // All filtered test cases should start with "get-"
-        foreach (var item in filteredData)
+        foreach (object[] item in filteredData)
         {
             var testCase = (HttpTestCase)item[0];
             testCase.Name.Should().StartWith("get-");
@@ -361,7 +362,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
         };
 
         // Act
-        var processedRequest = GetProcessedRequest("get-test", environmentVariables);
+        Core.Models.HttpRequest? processedRequest = GetProcessedRequest("get-test", environmentVariables);
 
         // Assert
         processedRequest.Should().NotBeNull();
@@ -372,7 +373,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public void TryGetTestCase_WithValidName_ShouldReturnTrue()
     {
         // Act
-        var found = TryGetTestCase("ping-test", out var testCase);
+        bool found = TryGetTestCase("ping-test", out HttpTestCase? testCase);
 
         // Assert
         found.Should().BeTrue();
@@ -384,7 +385,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
     public void TryGetTestCase_WithInvalidName_ShouldReturnFalse()
     {
         // Act
-        var found = TryGetTestCase("nonexistent-test", out var testCase);
+        bool found = TryGetTestCase("nonexistent-test", out HttpTestCase? testCase);
 
         // Assert
         found.Should().BeFalse();
@@ -395,7 +396,7 @@ public class HttpFileTestBasePlaygroundTests : HttpFileTestBase<Program>, IClass
 /// <summary>
 /// Simple test output helper for use in static contexts
 /// </summary>
-internal class SimpleTestOutputHelper : ITestOutputHelper
+internal sealed class SimpleTestOutputHelper : ITestOutputHelper
 {
     public void WriteLine(string message) { }
     public void WriteLine(string format, params object[] args) { }

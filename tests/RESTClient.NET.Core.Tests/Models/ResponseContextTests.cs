@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
 using Xunit;
@@ -15,7 +12,7 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
 
             // Act
             context.StoreResponse("test-request", responseData);
@@ -30,7 +27,7 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
 
             // Act & Assert
             context.Invoking(c => c.StoreResponse(null!, responseData))
@@ -55,11 +52,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
             context.StoreResponse("test-request", responseData);
 
             // Act
-            var result = context.GetResponse("test-request");
+            HttpResponseData? result = context.GetResponse("test-request");
 
             // Assert
             result.Should().NotBeNull();
@@ -73,7 +70,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var context = new ResponseContext();
 
             // Act
-            var result = context.GetResponse("non-existent");
+            HttpResponseData? result = context.GetResponse("non-existent");
 
             // Assert
             result.Should().BeNull();
@@ -84,11 +81,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
             context.StoreResponse("test-request", responseData);
 
             // Act
-            var result = context.HasResponse("test-request");
+            bool result = context.HasResponse("test-request");
 
             // Assert
             result.Should().BeTrue();
@@ -101,7 +98,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var context = new ResponseContext();
 
             // Act
-            var result = context.HasResponse("non-existent");
+            bool result = context.HasResponse("non-existent");
 
             // Assert
             result.Should().BeFalse();
@@ -112,11 +109,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
             context.StoreResponse("test-request", responseData);
 
             // Act
-            var result = context.RemoveResponse("test-request");
+            bool result = context.RemoveResponse("test-request");
 
             // Assert
             result.Should().BeTrue();
@@ -131,7 +128,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var context = new ResponseContext();
 
             // Act
-            var result = context.RemoveResponse("non-existent");
+            bool result = context.RemoveResponse("non-existent");
 
             // Assert
             result.Should().BeFalse();
@@ -164,11 +161,11 @@ namespace RESTClient.NET.Core.Tests.Models
             context.StoreResponse("request3", CreateTestResponseData());
 
             // Act
-            var requestNames = context.RequestNames;
+            IEnumerable<string> requestNames = context.RequestNames;
 
             // Assert
             requestNames.Should().HaveCount(3);
-            requestNames.Should().Contain(new[] { "request1", "request2", "request3" });
+            requestNames.Should().Contain(["request1", "request2", "request3"]);
         }
 
         [Fact]
@@ -176,13 +173,13 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var original = new ResponseContext();
-            var responseData1 = CreateTestResponseData();
-            var responseData2 = CreateTestResponseData();
+            HttpResponseData responseData1 = CreateTestResponseData();
+            HttpResponseData responseData2 = CreateTestResponseData();
             original.StoreResponse("request1", responseData1);
             original.StoreResponse("request2", responseData2);
 
             // Act
-            var clone = original.Clone();
+            ResponseContext clone = original.Clone();
 
             // Assert
             clone.Should().NotBeSameAs(original);
@@ -200,11 +197,11 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var context = new ResponseContext();
-            var responseData = CreateTestResponseData();
+            HttpResponseData responseData = CreateTestResponseData();
             context.StoreResponse("test-request", responseData);
 
             // Act
-            var responses = context.Responses;
+            IReadOnlyDictionary<string, HttpResponseData> responses = context.Responses;
 
             // Assert
             responses.Should().HaveCount(1);
@@ -215,7 +212,7 @@ namespace RESTClient.NET.Core.Tests.Models
         private static HttpResponseData CreateTestResponseData()
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            return HttpResponseData.FromHttpResponse(response, """{"test": "data"}""");
+            return HttpResponseData.FromHttpResponse(response, /*lang=json,strict*/ """{"test": "data"}""");
         }
     }
 }

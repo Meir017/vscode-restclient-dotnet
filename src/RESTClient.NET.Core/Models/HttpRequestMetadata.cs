@@ -62,7 +62,7 @@ namespace RESTClient.NET.Core.Models
         /// <returns>A collection of expectations of the specified type</returns>
         public IEnumerable<TestExpectation> GetExpectations(ExpectationType type)
         {
-            foreach (var expectation in Expectations)
+            foreach (TestExpectation expectation in Expectations)
             {
                 if (expectation.Type == type)
                 {
