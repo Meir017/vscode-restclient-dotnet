@@ -141,9 +141,6 @@
     <UseSharedCompilation>true</UseSharedCompilation>
     <BuildInParallel>true</BuildInParallel>
     <MultiProcessorCompilation>true</MultiProcessorCompilation>
-
-    <!-- Faster package restore - Disabled lock file temporarily to fix CI -->
-    <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 
