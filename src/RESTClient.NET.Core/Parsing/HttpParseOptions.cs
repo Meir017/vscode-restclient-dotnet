@@ -18,7 +18,7 @@ namespace RESTClient.NET.Core.Parsing
         /// <summary>
         /// Gets or sets a value indicating whether to use strict parsing mode
         /// </summary>
-        public bool StrictMode { get; set; } = false;
+        public bool StrictMode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to parse test expectations

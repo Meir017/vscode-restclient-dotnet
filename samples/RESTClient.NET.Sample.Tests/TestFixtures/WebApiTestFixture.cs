@@ -17,10 +17,10 @@ public class DatabaseTestFixture : IDisposable
     private bool _disposed;
 
     /// <summary>
-    /// Seeds test data into the database.
+    /// Seeds test data into the database
     /// </summary>
-    /// <param name="services">The service provider to use for database access.</param>
-    public void SeedTestData(IServiceProvider services)
+    /// <param name="services">The service provider to use for database access</param>
+    public static void SeedTestData(IServiceProvider services)
     {
         using IServiceScope scope = services.CreateScope();
         ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -182,7 +182,7 @@ public class WebApiTestFixture : HttpFileTestBase<Program>
         // We need to trigger server startup to get access to services
 
         using HttpClient client = Factory.CreateClient();
-        _databaseFixture.SeedTestData(Factory.Services);
+        DatabaseTestFixture.SeedTestData(Factory.Services);
 
     }
 

@@ -381,7 +381,7 @@ namespace RESTClient.NET.Core.Processing
             foreach (string referencedVar in referencedVariables)
             {
                 // Skip environment variables
-                if (referencedVar.StartsWith("${"))
+                if (referencedVar.StartsWith("${", StringComparison.Ordinal))
                 {
                     continue;
                 }

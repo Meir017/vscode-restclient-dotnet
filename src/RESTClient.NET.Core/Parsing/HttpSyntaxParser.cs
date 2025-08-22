@@ -66,14 +66,17 @@ namespace RESTClient.NET.Core.Parsing
                         // Validate duplicate names if enabled
                         if (options.ValidateRequestNames && !string.IsNullOrEmpty(currentRequestName))
                         {
-                            if (requestNamePositions.ContainsKey(currentRequestName))
+                            if (!requestNamePositions.TryGetValue(currentRequestName, out int existingLine))
+                            {
+                                requestNamePositions[currentRequestName] = token.LineNumber;
+                            }
+                            else
                             {
                                 throw new Exceptions.DuplicateRequestNameException(
                                     currentRequestName,
-                                    requestNamePositions[currentRequestName],
+                                    existingLine,
                                     token.LineNumber);
                             }
-                            requestNamePositions[currentRequestName] = token.LineNumber;
                         }
 
                         currentRequestTokens.Clear();
@@ -86,7 +89,7 @@ namespace RESTClient.NET.Core.Parsing
 
                         // Check if this is a @name declaration - start of new request
                         Match nameMatch = _metadataRegex.Match(token.Value);
-                        if (nameMatch.Success && nameMatch.Groups[1].Value.ToLowerInvariant() == "name")
+                        if (nameMatch.Success && string.Equals(nameMatch.Groups[1].Value, "name", StringComparison.OrdinalIgnoreCase))
                         {
                             // Finish previous request if any
                             if (isParsingRequest && !string.IsNullOrEmpty(currentRequestName))
@@ -104,14 +107,17 @@ namespace RESTClient.NET.Core.Parsing
                             // Validate duplicate names if enabled
                             if (options.ValidateRequestNames && !string.IsNullOrEmpty(currentRequestName))
                             {
-                                if (requestNamePositions.ContainsKey(currentRequestName))
+                                if (!requestNamePositions.TryGetValue(currentRequestName, out int existingLineNumber))
+                                {
+                                    requestNamePositions[currentRequestName] = token.LineNumber;
+                                }
+                                else
                                 {
                                     throw new Exceptions.DuplicateRequestNameException(
                                         currentRequestName,
-                                        requestNamePositions[currentRequestName],
+                                        existingLineNumber,
                                         token.LineNumber);
                                 }
-                                requestNamePositions[currentRequestName] = token.LineNumber;
                             }
 
                             currentRequestTokens.Clear();

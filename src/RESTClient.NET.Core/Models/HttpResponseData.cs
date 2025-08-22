@@ -90,7 +90,7 @@ namespace RESTClient.NET.Core.Models
                 {
                     // Try to parse as JSON if content type indicates JSON or if content looks like JSON
                     string? contentType = response.Content?.Headers?.ContentType?.MediaType;
-                    bool looksLikeJson = bodyContent.TrimStart().StartsWith("{") || bodyContent.TrimStart().StartsWith("[");
+                    bool looksLikeJson = bodyContent.TrimStart().StartsWith('{') || bodyContent.TrimStart().StartsWith('[');
 
                     if (IsJsonContent(contentType) || looksLikeJson)
                     {
@@ -173,8 +173,8 @@ namespace RESTClient.NET.Core.Models
                 return false;
             }
 
-            return mediaType!.IndexOf("application/json", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   mediaType.IndexOf("text/json", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            return mediaType!.Contains("application/json", StringComparison.OrdinalIgnoreCase) ||
+                   mediaType.Contains("text/json", StringComparison.OrdinalIgnoreCase) ||
                    mediaType.EndsWith("+json", StringComparison.OrdinalIgnoreCase);
         }
     }

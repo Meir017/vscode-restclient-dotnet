@@ -75,20 +75,12 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Track duplicates
-                if (requestNames.Contains(requestName))
+                if (!requestNames.Add(requestName))
                 {
-                    if (requestNameCounts.ContainsKey(requestName))
-                    {
-                        requestNameCounts[requestName]++;
-                    }
-                    else
-                    {
-                        requestNameCounts[requestName] = 2;
-                    }
+                    requestNameCounts[requestName] = requestNameCounts.TryGetValue(requestName, out int count) ? count + 1 : 2;
                 }
                 else
                 {
-                    requestNames.Add(requestName);
                     requestNameCounts[requestName] = 1;
                 }
             }
@@ -265,8 +257,8 @@ namespace RESTClient.NET.Core.Validation
                         break;
 
                     case ExpectationType.MaxTime:
-                        if (!expectation.Value.EndsWith("ms") ||
-                            !int.TryParse(expectation.Value.Substring(0, expectation.Value.Length - 2), out int timeMs) ||
+                        if (!expectation.Value.EndsWith("ms", StringComparison.Ordinal) ||
+                            !int.TryParse(expectation.Value.AsSpan(0, expectation.Value.Length - 2), out int timeMs) ||
                             timeMs <= 0)
                         {
                             errors.Add(new ValidationError(

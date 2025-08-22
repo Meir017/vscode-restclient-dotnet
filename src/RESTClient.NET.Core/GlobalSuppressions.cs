@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Justification = "Simple logging is acceptable for sample projects")]
+[assembly: SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Justification = "Simple logging is acceptable for library components")]

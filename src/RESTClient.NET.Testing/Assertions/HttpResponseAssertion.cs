@@ -252,7 +252,7 @@ namespace RESTClient.NET.Testing.Assertions
                 return content;
             }
 
-            return content.Substring(0, maxLength) + "... (truncated)";
+            return string.Concat(content.AsSpan(0, maxLength), "... (truncated)");
         }
 
         private static string ParseJsonPath(string jsonPath)

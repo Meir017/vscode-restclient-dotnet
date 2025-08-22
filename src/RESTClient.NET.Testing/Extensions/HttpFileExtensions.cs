@@ -47,7 +47,7 @@ namespace RESTClient.NET.Testing.Extensions
             {
                 // Skip requests with empty URLs or auto-generated names from separators
                 if (string.IsNullOrWhiteSpace(request.Url) ||
-                    (request.Name.StartsWith("request-") && request.Name.Length > 8 &&
+                    (request.Name.StartsWith("request-", StringComparison.Ordinal) && request.Name.Length > 8 &&
                      char.IsDigit(request.Name[8]) && !HasNameMetadata(request)))
                 {
                     continue;
@@ -265,7 +265,7 @@ namespace RESTClient.NET.Testing.Extensions
             return response;
         }
 
-        private static IDictionary<string, object> ConvertRequestMetadata(HttpRequest request)
+        private static Dictionary<string, object> ConvertRequestMetadata(HttpRequest request)
         {
             var metadata = new Dictionary<string, object>();
 
