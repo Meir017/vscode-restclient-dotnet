@@ -48,7 +48,7 @@ public class ProductService : IProductService
     public async Task<IEnumerable<Product>> SearchAsync(string query)
     {
         return await _context.Products
-            .Where(p => p.IsActive && 
+            .Where(p => p.IsActive &&
                        (p.Name.Contains(query) || p.Description.Contains(query)))
             .OrderBy(p => p.Name)
             .ToListAsync();
@@ -64,13 +64,17 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<Product>> GetByPriceRangeAsync(decimal? minPrice, decimal? maxPrice)
     {
-        var query = _context.Products.Where(p => p.IsActive);
+        IQueryable<Product> query = _context.Products.Where(p => p.IsActive);
 
         if (minPrice.HasValue)
+        {
             query = query.Where(p => p.Price >= minPrice.Value);
+        }
 
         if (maxPrice.HasValue)
+        {
             query = query.Where(p => p.Price <= maxPrice.Value);
+        }
 
         return await query.OrderBy(p => p.Price).ToListAsync();
     }
@@ -79,7 +83,7 @@ public class ProductService : IProductService
     {
         product.CreatedAt = DateTime.UtcNow;
         product.UpdatedAt = DateTime.UtcNow;
-        
+
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
         return product;
@@ -88,7 +92,7 @@ public class ProductService : IProductService
     public async Task<Product> UpdateAsync(Product product)
     {
         product.UpdatedAt = DateTime.UtcNow;
-        
+
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
         return product;
@@ -96,7 +100,7 @@ public class ProductService : IProductService
 
     public async Task DeleteAsync(int id)
     {
-        var product = await _context.Products.FindAsync(id);
+        Product? product = await _context.Products.FindAsync(id);
         if (product != null)
         {
             product.IsActive = false; // Soft delete

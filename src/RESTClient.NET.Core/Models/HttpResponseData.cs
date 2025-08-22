@@ -66,32 +66,32 @@ namespace RESTClient.NET.Core.Models
         /// <returns>HttpResponseData instance</returns>
         public static HttpResponseData FromHttpResponse(HttpResponseMessage response, string bodyContent, double responseTimeMs = 0)
         {
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            ArgumentNullException.ThrowIfNull(response);
 
             var headers = new Dictionary<string, string>();
-            foreach (var header in response.Headers)
+            foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers)
             {
                 headers[header.Key] = string.Join(", ", header.Value);
             }
 
             if (response.Content?.Headers != null)
             {
-                foreach (var header in response.Content.Headers)
+                foreach (KeyValuePair<string, IEnumerable<string>> header in response.Content.Headers)
                 {
                     headers[header.Key] = string.Join(", ", header.Value);
                 }
             }
 
             JToken? parsedBody = null;
+#pragma warning disable CA1031 // Do not catch general exception types
             try
             {
                 if (!string.IsNullOrEmpty(bodyContent))
                 {
                     // Try to parse as JSON if content type indicates JSON or if content looks like JSON
-                    var contentType = response.Content?.Headers?.ContentType?.MediaType;
-                    var looksLikeJson = bodyContent.TrimStart().StartsWith("{") || bodyContent.TrimStart().StartsWith("[");
-                    
+                    string? contentType = response.Content?.Headers?.ContentType?.MediaType;
+                    bool looksLikeJson = bodyContent.TrimStart().StartsWith('{') || bodyContent.TrimStart().StartsWith('[');
+
                     if (IsJsonContent(contentType) || looksLikeJson)
                     {
                         parsedBody = JToken.Parse(bodyContent);
@@ -103,6 +103,7 @@ namespace RESTClient.NET.Core.Models
                 // If JSON parsing fails, leave parsedBody as null
                 // This is expected for non-JSON responses
             }
+#pragma warning restore CA1031 // Do not catch general exception types
 
             return new HttpResponseData
             {
@@ -125,17 +126,21 @@ namespace RESTClient.NET.Core.Models
         public string? GetJsonPathValue(string jsonPath)
         {
             if (ParsedBody == null || string.IsNullOrEmpty(jsonPath))
+            {
                 return null;
+            }
 
+#pragma warning disable CA1031 // Do not catch general exception types
             try
             {
-                var token = ParsedBody.SelectToken(jsonPath);
+                JToken? token = ParsedBody.SelectToken(jsonPath);
                 return token?.ToString();
             }
             catch
             {
                 return null;
             }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         /// <summary>
@@ -146,9 +151,11 @@ namespace RESTClient.NET.Core.Models
         public string? GetHeaderValue(string headerName)
         {
             if (string.IsNullOrEmpty(headerName))
+            {
                 return null;
+            }
 
-            foreach (var kvp in Headers)
+            foreach (KeyValuePair<string, string> kvp in Headers)
             {
                 if (string.Equals(kvp.Key, headerName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -162,10 +169,12 @@ namespace RESTClient.NET.Core.Models
         private static bool IsJsonContent(string? mediaType)
         {
             if (string.IsNullOrEmpty(mediaType))
+            {
                 return false;
+            }
 
-            return mediaType!.IndexOf("application/json", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   mediaType.IndexOf("text/json", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            return mediaType!.Contains("application/json", StringComparison.OrdinalIgnoreCase) ||
+                   mediaType.Contains("text/json", StringComparison.OrdinalIgnoreCase) ||
                    mediaType.EndsWith("+json", StringComparison.OrdinalIgnoreCase);
         }
     }

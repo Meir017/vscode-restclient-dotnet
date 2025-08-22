@@ -1,8 +1,5 @@
 using AwesomeAssertions;
 using RESTClient.NET.Core.Validation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Validation
@@ -29,7 +26,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var errors = new List<ValidationError>
             {
-                new ValidationError(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
+                new(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
             };
 
             // Act
@@ -49,7 +46,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var warnings = new List<ValidationWarning>
             {
-                new ValidationWarning(1, "Test warning")
+                new(1, "Test warning")
             };
 
             // Act
@@ -69,11 +66,11 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var errors = new List<ValidationError>
             {
-                new ValidationError(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
+                new(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
             };
             var warnings = new List<ValidationWarning>
             {
-                new ValidationWarning(2, "Test warning")
+                new(2, "Test warning")
             };
 
             // Act
@@ -131,7 +128,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var warnings = new List<ValidationWarning>
             {
-                new ValidationWarning(1, "Test warning")
+                new(1, "Test warning")
             };
 
             // Act
@@ -150,7 +147,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var errors = new List<ValidationError>
             {
-                new ValidationError(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
+                new(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
             };
 
             // Act
@@ -169,11 +166,11 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var errors = new List<ValidationError>
             {
-                new ValidationError(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
+                new(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
             };
             var warnings = new List<ValidationWarning>
             {
-                new ValidationWarning(2, "Test warning")
+                new(2, "Test warning")
             };
 
             // Act
@@ -193,7 +190,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var errors = new List<ValidationError>
             {
-                new ValidationError(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
+                new(1, "Test error", ValidationErrorType.InvalidHttpSyntax)
             };
 
             // Act
@@ -209,7 +206,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             // Arrange
             var warnings = new List<ValidationWarning>
             {
-                new ValidationWarning(1, "Test warning")
+                new(1, "Test warning")
             };
 
             // Act
@@ -226,10 +223,10 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Constructor_WithAllParameters_ShouldInitializeCorrectly()
         {
             // Arrange
-            var lineNumber = 42;
-            var message = "Test error message";
-            var type = ValidationErrorType.InvalidHttpSyntax;
-            var context = "Additional context";
+            int lineNumber = 42;
+            string message = "Test error message";
+            ValidationErrorType type = ValidationErrorType.InvalidHttpSyntax;
+            string context = "Additional context";
 
             // Act
             var error = new ValidationError(lineNumber, message, type, context);
@@ -245,9 +242,9 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Constructor_WithoutContext_ShouldSetContextToNull()
         {
             // Arrange
-            var lineNumber = 42;
-            var message = "Test error message";
-            var type = ValidationErrorType.InvalidHttpSyntax;
+            int lineNumber = 42;
+            string message = "Test error message";
+            ValidationErrorType type = ValidationErrorType.InvalidHttpSyntax;
 
             // Act
             var error = new ValidationError(lineNumber, message, type);
@@ -266,7 +263,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var error = new ValidationError(42, "Test error message", ValidationErrorType.InvalidHttpSyntax);
 
             // Act
-            var result = error.ToString();
+            string result = error.ToString();
 
             // Assert
             result.Should().Be("Line 42: Test error message");
@@ -295,9 +292,9 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Constructor_WithAllParameters_ShouldInitializeCorrectly()
         {
             // Arrange
-            var lineNumber = 42;
-            var message = "Test warning message";
-            var context = "Additional context";
+            int lineNumber = 42;
+            string message = "Test warning message";
+            string context = "Additional context";
 
             // Act
             var warning = new ValidationWarning(lineNumber, message, context);
@@ -312,8 +309,8 @@ namespace RESTClient.NET.Core.Tests.Validation
         public void Constructor_WithoutContext_ShouldSetContextToNull()
         {
             // Arrange
-            var lineNumber = 42;
-            var message = "Test warning message";
+            int lineNumber = 42;
+            string message = "Test warning message";
 
             // Act
             var warning = new ValidationWarning(lineNumber, message);
@@ -331,7 +328,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var warning = new ValidationWarning(42, "Test warning message");
 
             // Act
-            var result = warning.ToString();
+            string result = warning.ToString();
 
             // Assert
             result.Should().Be("Line 42: Test warning message (Warning)");
@@ -344,7 +341,7 @@ namespace RESTClient.NET.Core.Tests.Validation
             var warning = new ValidationWarning(42, "Test warning message", "context");
 
             // Act
-            var result = warning.ToString();
+            string result = warning.ToString();
 
             // Assert
             result.Should().Be("Line 42: Test warning message (Warning)");

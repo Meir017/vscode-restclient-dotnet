@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -23,8 +22,9 @@ namespace RESTClient.NET.Testing.Tests.Playground;
 public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly ITestOutputHelper _output;
+    private static readonly string[] _postPutMethods = { "POST", "PUT" };
 
-    public HttpFileTestBaseIntegrationTests(WebApplicationFactory<Program> factory, ITestOutputHelper output) 
+    public HttpFileTestBaseIntegrationTests(WebApplicationFactory<Program> factory, ITestOutputHelper output)
         : base(factory)
     {
         _output = output;
@@ -110,7 +110,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     }
 
     // Simple test output helper for static method
-    private class NullTestOutputHelper : ITestOutputHelper
+    private sealed class NullTestOutputHelper : ITestOutputHelper
     {
         public void WriteLine(string message) { }
         public void WriteLine(string format, params object[] args) { }
@@ -120,7 +120,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void GetTestCase_WithValidName_ShouldReturnTestCase()
     {
         // Act
-        var testCase = GetTestCase("get-test");
+        HttpTestCase testCase = GetTestCase("get-test");
 
         // Assert
         testCase.Should().NotBeNull();
@@ -133,7 +133,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void GetTestCase_WithInvalidName_ShouldThrowKeyNotFoundException()
     {
         // Act & Assert
-        var action = () => GetTestCase("non-existent-request");
+        Func<HttpTestCase> action = () => GetTestCase("non-existent-request");
         action.Should().Throw<KeyNotFoundException>();
     }
 
@@ -141,7 +141,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void TryGetTestCase_WithValidName_ShouldReturnTrueAndTestCase()
     {
         // Act
-        var result = TryGetTestCase("create-test", out var testCase);
+        bool result = TryGetTestCase("create-test", out HttpTestCase? testCase);
 
         // Assert
         result.Should().BeTrue();
@@ -154,7 +154,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void TryGetTestCase_WithInvalidName_ShouldReturnFalse()
     {
         // Act
-        var result = TryGetTestCase("non-existent-request", out var testCase);
+        bool result = TryGetTestCase("non-existent-request", out HttpTestCase? testCase);
 
         // Assert
         result.Should().BeFalse();
@@ -177,7 +177,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void GetFilteredTestData_WithMethods_ShouldFilterCorrectly()
     {
         // Act
-        var filteredData = GetFilteredTestData(methods: new[] { "POST", "PUT" }).ToList();
+        var filteredData = GetFilteredTestData(methods: _postPutMethods).ToList();
 
         // Assert
         filteredData.Should().NotBeEmpty();
@@ -199,8 +199,8 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
         var testCasesWithExpectations = withExpectations.Select(data => (HttpTestCase)data[0]).ToList();
         var testCasesWithoutExpectations = withoutExpectations.Select(data => (HttpTestCase)data[0]).ToList();
 
-        testCasesWithExpectations.Should().OnlyContain(tc => tc.ExpectedResponse != null && tc.ExpectedResponse.HasExpectations == true);
-        testCasesWithoutExpectations.Should().OnlyContain(tc => tc.ExpectedResponse == null || tc.ExpectedResponse.HasExpectations != true);
+        testCasesWithExpectations.Should().OnlyContain(tc => tc.ExpectedResponse != null && tc.ExpectedResponse.HasExpectations);
+        testCasesWithoutExpectations.Should().OnlyContain(tc => tc.ExpectedResponse == null || !tc.ExpectedResponse.HasExpectations);
     }
 
     [Fact]
@@ -213,7 +213,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
         };
 
         // Act
-        var processedRequest = GetProcessedRequest("get-test", environmentVariables);
+        HttpRequest? processedRequest = GetProcessedRequest("get-test", environmentVariables);
 
         // Assert
         processedRequest.Should().NotBeNull();
@@ -225,7 +225,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void GetProcessedRequest_WithInvalidName_ShouldReturnNull()
     {
         // Act
-        var processedRequest = GetProcessedRequest("non-existent-request");
+        HttpRequest? processedRequest = GetProcessedRequest("non-existent-request");
 
         // Assert
         processedRequest.Should().BeNull();
@@ -235,7 +235,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public void GetProcessedRequest_WithoutEnvironmentVariables_ShouldUseFileVariables()
     {
         // Act
-        var processedRequest = GetProcessedRequest("get-test");
+        HttpRequest? processedRequest = GetProcessedRequest("get-test");
 
         // Assert
         processedRequest.Should().NotBeNull();
@@ -259,7 +259,7 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
         {
             filteredData.Should().NotBeEmpty(); // We have GET requests
         }
-        
+
         var testCases = filteredData.Select(data => (HttpTestCase)data[0]).ToList();
         testCases.Should().OnlyContain(tc => tc.Method == method);
     }
@@ -268,18 +268,18 @@ public class HttpFileTestBaseIntegrationTests : HttpFileTestBase<Program>, IClas
     public async Task ToHttpRequestMessage_Integration_ShouldCreateValidRequest()
     {
         // Arrange
-        var testCase = GetTestCase("get-test");
-        using var client = Factory.CreateClient();
+        HttpTestCase testCase = GetTestCase("get-test");
+        using HttpClient client = Factory.CreateClient();
 
         // Act
         using var request = testCase.ToHttpRequestMessage();
-        using var response = await client.SendAsync(request);
+        using HttpResponseMessage response = await client.SendAsync(request);
 
         // Assert
         request.Should().NotBeNull();
         request.Method.ToString().Should().Be("GET");
         request.RequestUri.Should().NotBeNull();
-        
+
         response.Should().NotBeNull();
         // The actual response validation would depend on your test server
     }

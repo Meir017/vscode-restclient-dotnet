@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,11 +39,11 @@ namespace RESTClient.NET.Core.Validation
         /// <param name="errors">The validation errors</param>
         /// <param name="warnings">The validation warnings</param>
         public ValidationResult(
-            IEnumerable<ValidationError>? errors = null, 
+            IEnumerable<ValidationError>? errors = null,
             IEnumerable<ValidationWarning>? warnings = null)
         {
-            Errors = (errors ?? Enumerable.Empty<ValidationError>()).ToList().AsReadOnly();
-            Warnings = (warnings ?? Enumerable.Empty<ValidationWarning>()).ToList().AsReadOnly();
+            Errors = (errors ?? []).ToList().AsReadOnly();
+            Warnings = (warnings ?? []).ToList().AsReadOnly();
         }
 
         /// <summary>

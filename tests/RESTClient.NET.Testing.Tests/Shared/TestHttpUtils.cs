@@ -38,18 +38,20 @@ internal static class TestHttpUtils
     public static HttpContent CreateHttpContent(string body, IDictionary<string, string> headers)
     {
         if (string.IsNullOrEmpty(body))
+        {
             return null!;
+        }
 
         // Get the content type from headers for proper StringContent creation
-        var contentType = headers.TryGetValue("Content-Type", out var ctValue) 
-            ? ctValue 
+        string contentType = headers.TryGetValue("Content-Type", out string? ctValue)
+            ? ctValue
             : "text/plain";
-        
+
         // Create StringContent with proper content type to avoid HTTP 415 errors
         var content = new StringContent(body, Encoding.UTF8, contentType);
-        
+
         // Add other content headers (excluding Content-Type which is already set)
-        foreach (var header in headers)
+        foreach (KeyValuePair<string, string> header in headers)
         {
             if (IsContentHeader(header.Key) && !header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
             {
@@ -69,7 +71,9 @@ internal static class TestHttpUtils
     public static HttpContent CreateHttpContent(string body, string contentType = "text/plain")
     {
         if (string.IsNullOrEmpty(body))
+        {
             return null!;
+        }
 
         return new StringContent(body, Encoding.UTF8, contentType);
     }
@@ -81,20 +85,19 @@ internal static class TestHttpUtils
     /// <returns>HttpRequestMessage ready for sending</returns>
     public static HttpRequestMessage CreateHttpRequestMessage(HttpRequest processedRequest)
     {
-        if (processedRequest == null)
-            throw new ArgumentNullException(nameof(processedRequest));
+        ArgumentNullException.ThrowIfNull(processedRequest);
 
         var request = new HttpRequestMessage(new HttpMethod(processedRequest.Method), processedRequest.Url);
-        
+
         // Add headers (non-content headers)
-        foreach (var header in processedRequest.Headers)
+        foreach (KeyValuePair<string, string> header in processedRequest.Headers)
         {
             if (!IsContentHeader(header.Key))
             {
                 request.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
-        
+
         // Add body content if present
         if (!string.IsNullOrEmpty(processedRequest.Body))
         {

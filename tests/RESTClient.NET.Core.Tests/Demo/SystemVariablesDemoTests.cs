@@ -1,8 +1,5 @@
 using AwesomeAssertions;
-using RESTClient.NET.Core;
 using RESTClient.NET.Core.Processing;
-using System;
-using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,7 +18,7 @@ namespace RESTClient.NET.Core.Tests.Demo
         public async Task SystemVariables_Integration_Demo()
         {
             // Arrange
-            var httpContent = @"
+            string httpContent = @"
 @baseUrl = https://api.example.com
 
 # @name create-user
@@ -51,16 +48,16 @@ Authorization: Bearer token-{{$randomInt 10000 99999}}
 
             // Act - Parse the HTTP file
             var httpFileProcessor = new HttpFileProcessor();
-            var httpFile = await httpFileProcessor.ParseContentAsync(httpContent);
+            Core.Models.HttpFile httpFile = await httpFileProcessor.ParseContentAsync(httpContent);
 
             // Process variables
-            var processedFile = VariableProcessor.ProcessHttpFile(httpFile);
+            Core.Models.HttpFile processedFile = VariableProcessor.ProcessHttpFile(httpFile);
 
             // Assert and demonstrate
             processedFile.Requests.Should().HaveCount(3); // includes an empty request from ###
 
-            var createUserRequest = processedFile.Requests[0];
-            var getUserRequest = processedFile.Requests[2]; // Skip the empty request at index 1
+            Core.Models.HttpRequest createUserRequest = processedFile.Requests[0];
+            Core.Models.HttpRequest getUserRequest = processedFile.Requests[2]; // Skip the empty request at index 1
 
             _output.WriteLine("=== Processed Requests ===");
             _output.WriteLine("");
@@ -69,21 +66,21 @@ Authorization: Bearer token-{{$randomInt 10000 99999}}
             _output.WriteLine($"1. {createUserRequest.Name}");
             _output.WriteLine($"   Method: {createUserRequest.Method}");
             _output.WriteLine($"   URL: {createUserRequest.Url}");
-            
-            foreach (var header in createUserRequest.Headers)
+
+            foreach (KeyValuePair<string, string> header in createUserRequest.Headers)
             {
                 _output.WriteLine($"   {header.Key}: {header.Value}");
             }
-            
+
             _output.WriteLine($"   Body: {createUserRequest.Body}");
             _output.WriteLine("");
 
-            // Get User Request  
+            // Get User Request
             _output.WriteLine($"2. {getUserRequest.Name}");
             _output.WriteLine($"   Method: {getUserRequest.Method}");
             _output.WriteLine($"   URL: {getUserRequest.Url}");
-            
-            foreach (var header in getUserRequest.Headers)
+
+            foreach (KeyValuePair<string, string> header in getUserRequest.Headers)
             {
                 _output.WriteLine($"   {header.Key}: {header.Value}");
             }
@@ -112,7 +109,7 @@ Authorization: Bearer token-{{$randomInt 10000 99999}}
         public void SystemVariables_AllTypes_Demo()
         {
             // Arrange
-            var testCases = new[]
+            (string, string)[] testCases = new[]
             {
                 ("{{$guid}}", @"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"),
                 ("{{$randomInt 100 200}}", @"^1[0-9]{2}$"),
@@ -125,10 +122,10 @@ Authorization: Bearer token-{{$randomInt 10000 99999}}
             _output.WriteLine("=== System Variables Resolution Demo ===");
             _output.WriteLine("");
 
-            foreach (var (input, expectedPattern) in testCases)
+            foreach ((string input, string expectedPattern) in testCases)
             {
                 // Act
-                var result = SystemVariableProcessor.ResolveSystemVariables(input);
+                string? result = SystemVariableProcessor.ResolveSystemVariables(input);
 
                 // Assert
                 result.Should().NotBe(input);

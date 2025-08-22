@@ -12,6 +12,8 @@ namespace RESTClient.NET.Testing.Tests.Assertions
 {
     public class HttpResponseAssertionTests
     {
+        private static readonly string[] _multiHeaderValues = { "value1", "value2", "value3" };
+
         [Fact]
         public void AssertStatusCode_WithMatchingStatus_ShouldNotThrow()
         {
@@ -19,7 +21,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage(HttpStatusCode.OK);
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
+            Action action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
             action.Should().NotThrow();
         }
 
@@ -30,7 +32,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage(HttpStatusCode.NotFound);
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
+            Action action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
             action.Should().Throw<AssertionException>()
                 .WithMessage("Expected status code 200, but got 404 (NotFound)");
         }
@@ -42,7 +44,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             HttpResponseMessage response = null!;
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
+            Action action = () => HttpResponseAssertion.AssertStatusCode(response, 200);
             action.Should().Throw<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -59,7 +61,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage(actualCode);
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertStatusCode(response, expectedCode);
+            Action action = () => HttpResponseAssertion.AssertStatusCode(response, expectedCode);
             action.Should().NotThrow();
         }
 
@@ -73,7 +75,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "World");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "World");
             await action.Should().NotThrowAsync();
         }
 
@@ -87,7 +89,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "Universe");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "Universe");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Expected response body to contain 'Universe'"));
         }
@@ -99,7 +101,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             HttpResponseMessage response = null!;
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "test");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "test");
             await action.Should().ThrowAsync<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -114,7 +116,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, null!);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, null!);
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("expectedContent");
         }
@@ -129,7 +131,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "");
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("expectedContent");
         }
@@ -144,7 +146,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert - whitespace should be searchable
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "   ");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "   ");
             await action.Should().NotThrowAsync();
         }
 
@@ -155,7 +157,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "test");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "test");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Expected response body to contain 'test'"));
         }
@@ -170,7 +172,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert - case mismatch should NOT throw (it's case-insensitive)
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "WORLD");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "WORLD");
             await action.Should().NotThrowAsync();
         }
 
@@ -178,14 +180,14 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         public async Task AssertBodyContains_WithJsonContent_ShouldWorkCorrectly()
         {
             // Arrange
-            var jsonContent = @"{""name"": ""John Doe"", ""age"": 30, ""city"": ""New York""}";
+            string jsonContent = @"{""name"": ""John Doe"", ""age"": 30, ""city"": ""New York""}";
             var response = new HttpResponseMessage
             {
                 Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json")
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "John Doe");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "John Doe");
             await action.Should().NotThrowAsync();
         }
 
@@ -199,7 +201,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertBodyContains(response, "very long response");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertBodyContains(response, "very long response");
             await action.Should().NotThrowAsync();
         }
 
@@ -211,7 +213,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             response.Headers.Add("X-Custom-Header", "custom-value");
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Header", "custom-value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Header", "custom-value");
             action.Should().NotThrow();
         }
 
@@ -223,7 +225,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             response.Headers.Add("X-Custom-Header", "actual-value");
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Header", "expected-value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Header", "expected-value");
             action.Should().Throw<AssertionException>()
                 .WithMessage("Expected header 'X-Custom-Header' to have value 'expected-value', but got 'actual-value'");
         }
@@ -235,7 +237,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Missing-Header", "expected-value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Missing-Header", "expected-value");
             action.Should().Throw<AssertionException>()
                 .WithMessage("Header 'X-Missing-Header' was not found in the response");
         }
@@ -250,7 +252,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "Content-Type", "application/json; charset=utf-8");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "Content-Type", "application/json; charset=utf-8");
             action.Should().NotThrow();
         }
 
@@ -259,10 +261,10 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         {
             // Arrange
             var response = new HttpResponseMessage();
-            response.Headers.Add("X-Multi-Header", new[] { "value1", "value2", "value3" });
+            response.Headers.Add("X-Multi-Header", _multiHeaderValues);
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Multi-Header", "value1, value2, value3");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Multi-Header", "value1, value2, value3");
             action.Should().NotThrow();
         }
 
@@ -273,7 +275,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             HttpResponseMessage response = null!;
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Header", "value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Header", "value");
             action.Should().Throw<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -285,7 +287,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, null!, "value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, null!, "value");
             action.Should().Throw<ArgumentException>()
                 .WithParameterName("headerName");
         }
@@ -297,7 +299,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "", "value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "", "value");
             action.Should().Throw<ArgumentException>()
                 .WithParameterName("headerName");
         }
@@ -309,7 +311,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "   ", "value");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "   ", "value");
             action.Should().Throw<ArgumentException>()
                 .WithParameterName("headerName");
         }
@@ -322,7 +324,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             response.Headers.Add("X-Custom-Language", "en-US");
 
             // Act & Assert - header comparison should be case-insensitive
-            var action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Language", "EN-US");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "X-Custom-Language", "EN-US");
             action.Should().NotThrow();
         }
 
@@ -330,14 +332,14 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         public async Task AssertJsonPath_WithValidJsonAndPath_ShouldNotThrow()
         {
             // Arrange
-            var jsonContent = @"{""user"": {""name"": ""John"", ""age"": 30}}";
+            string jsonContent = @"{""user"": {""name"": ""John"", ""age"": 30}}";
             var response = new HttpResponseMessage
             {
                 Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json")
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
             await action.Should().NotThrowAsync();
         }
 
@@ -345,14 +347,14 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         public async Task AssertJsonPath_WithInvalidJson_ShouldThrow()
         {
             // Arrange
-            var invalidJson = @"{""user"": {""name"": ""John"", ""age"":}"; // Invalid JSON
+            string invalidJson = @"{""user"": {""name"": ""John"", ""age"":}"; // Invalid JSON
             var response = new HttpResponseMessage
             {
                 Content = new StringContent(invalidJson, System.Text.Encoding.UTF8, "application/json")
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("JSONPath assertion failed"));
         }
@@ -364,7 +366,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             HttpResponseMessage response = null!;
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
             await action.Should().ThrowAsync<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -379,7 +381,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, null!);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, null!);
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("jsonPath");
         }
@@ -394,7 +396,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, "");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, "");
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("jsonPath");
         }
@@ -406,7 +408,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertJsonPath(response, "$.user.name");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Response has no content") || ex.Message.Contains("JSONPath assertion failed"));
         }
@@ -415,14 +417,14 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         public async Task AssertSchema_WithValidJson_ShouldNotThrow()
         {
             // Arrange
-            var jsonContent = @"{""name"": ""John"", ""age"": 30}";
+            string jsonContent = @"{""name"": ""John"", ""age"": 30}";
             var response = new HttpResponseMessage
             {
                 Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json")
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, "user-schema.json");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, "user-schema.json");
             await action.Should().NotThrowAsync();
         }
 
@@ -430,14 +432,14 @@ namespace RESTClient.NET.Testing.Tests.Assertions
         public async Task AssertSchema_WithInvalidJson_ShouldThrow()
         {
             // Arrange
-            var invalidJson = @"{""name"": ""John"", ""age"":}"; // Invalid JSON
+            string invalidJson = @"{""name"": ""John"", ""age"":}"; // Invalid JSON
             var response = new HttpResponseMessage
             {
                 Content = new StringContent(invalidJson, System.Text.Encoding.UTF8, "application/json")
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, "user-schema.json");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, "user-schema.json");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Response content is not valid JSON"));
         }
@@ -449,7 +451,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             HttpResponseMessage response = null!;
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, "schema.json");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, "schema.json");
             await action.Should().ThrowAsync<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -464,7 +466,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, null!);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, null!);
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("schemaPath");
         }
@@ -479,7 +481,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, "");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, "");
             await action.Should().ThrowAsync<ArgumentException>()
                 .WithParameterName("schemaPath");
         }
@@ -491,7 +493,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage();
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertSchema(response, "schema.json");
+            Func<Task> action = async () => await HttpResponseAssertion.AssertSchema(response, "schema.json");
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Response has no content") || ex.Message.Contains("Response content is not valid JSON"));
         }
@@ -503,7 +505,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var response = new HttpResponseMessage(HttpStatusCode.OK);
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, null);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, null);
             await action.Should().NotThrowAsync();
         }
 
@@ -515,7 +517,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var expected = new HttpExpectedResponse(); // No expectations set
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().NotThrowAsync();
         }
 
@@ -537,7 +539,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().NotThrowAsync();
         }
 
@@ -549,7 +551,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var expected = new HttpExpectedResponse { ExpectedStatusCode = 200 };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Expected status code 200, but got 400"));
         }
@@ -567,7 +569,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Expected header 'X-Request-Id' to have value 'expected-id'"));
         }
@@ -587,7 +589,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().ThrowAsync<AssertionException>()
                 .Where(ex => ex.Message.Contains("Expected response body to contain 'expected content'"));
         }
@@ -610,7 +612,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert - should not throw as custom expectations are handled gracefully
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().NotThrowAsync();
         }
 
@@ -622,7 +624,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             var expected = new HttpExpectedResponse { ExpectedStatusCode = 200 };
 
             // Act & Assert
-            var action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
+            Func<Task> action = async () => await HttpResponseAssertion.AssertResponse(response, expected);
             await action.Should().ThrowAsync<ArgumentNullException>()
                 .WithParameterName("response");
         }
@@ -640,7 +642,7 @@ namespace RESTClient.NET.Testing.Tests.Assertions
             };
 
             // Act & Assert
-            var action = () => HttpResponseAssertion.AssertHeader(response, "Content-Type", $"{contentType}; charset=utf-8");
+            Action action = () => HttpResponseAssertion.AssertHeader(response, "Content-Type", $"{contentType}; charset=utf-8");
             action.Should().NotThrow();
         }
     }

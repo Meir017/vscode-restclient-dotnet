@@ -38,29 +38,29 @@ namespace RESTClient.NET.Testing
     /// public class ApiIntegrationTests : HttpFileTestBase&lt;Program&gt;
     /// {
     ///     public ApiIntegrationTests(WebApplicationFactory&lt;Program&gt; factory) : base(factory) { }
-    /// 
+    ///
     ///     protected override string GetHttpFilePath() =&gt; "HttpFiles/api-tests.http";
-    /// 
+    ///
     ///     [Theory]
     ///     [MemberData(nameof(GetHttpFileTestData))]
     ///     public async Task ExecuteHttpFileTest(HttpTestCase testCase)
     ///     {
     ///         // Create HTTP client from factory
     ///         using var client = Factory.CreateClient();
-    ///         
+    ///
     ///         // Convert test case to HTTP request message
     ///         using var request = testCase.ToHttpRequestMessage();
-    ///         
+    ///
     ///         // Execute request
     ///         using var response = await client.SendAsync(request);
-    ///         
+    ///
     ///         // Validate expectations if present
     ///         if (testCase.ExpectedResponse != null)
     ///         {
     ///             // Add your validation logic here
     ///         }
     ///     }
-    /// 
+    ///
     ///     [Fact]
     ///     public async Task SpecificEndpointTest()
     ///     {
@@ -68,7 +68,7 @@ namespace RESTClient.NET.Testing
     ///         using var client = Factory.CreateClient();
     ///         using var request = testCase.ToHttpRequestMessage();
     ///         using var response = await client.SendAsync(request);
-    ///         
+    ///
     ///         Assert.Equal(200, (int)response.StatusCode);
     ///     }
     /// }
@@ -77,9 +77,6 @@ namespace RESTClient.NET.Testing
     public abstract class HttpFileTestBase<TProgram> : IClassFixture<WebApplicationFactory<TProgram>>, IDisposable
         where TProgram : class
     {
-        private readonly WebApplicationFactory<TProgram> _originalFactory;
-        private readonly WebApplicationFactory<TProgram> _configuredFactory;
-        private readonly HttpFile _httpFile;
         private readonly HttpFileProcessor _httpFileProcessor;
         private readonly bool _ownsConfiguredFactory;
         private bool _disposed;
@@ -87,17 +84,17 @@ namespace RESTClient.NET.Testing
         /// <summary>
         /// Gets the original WebApplicationFactory passed to the constructor
         /// </summary>
-        protected WebApplicationFactory<TProgram> OriginalFactory => _originalFactory;
+        protected WebApplicationFactory<TProgram> OriginalFactory { get; }
 
         /// <summary>
         /// Gets the configured WebApplicationFactory for creating test clients
         /// </summary>
-        protected WebApplicationFactory<TProgram> Factory => _configuredFactory;
+        protected WebApplicationFactory<TProgram> Factory { get; }
 
         /// <summary>
         /// Gets the parsed HTTP file
         /// </summary>
-        protected HttpFile HttpFile => _httpFile;
+        protected HttpFile HttpFile { get; }
 
         /// <summary>
         /// Initializes a new instance of the HttpFileTestBase class
@@ -105,29 +102,29 @@ namespace RESTClient.NET.Testing
         /// <param name="factory">The WebApplicationFactory to use for testing</param>
         protected HttpFileTestBase(WebApplicationFactory<TProgram> factory)
         {
-            _originalFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+            OriginalFactory = factory ?? throw new ArgumentNullException(nameof(factory));
 
             // Configure the factory
-            _configuredFactory = ConfigureFactory(_originalFactory);
-            _ownsConfiguredFactory = !ReferenceEquals(_configuredFactory, _originalFactory);
+            Factory = ConfigureFactory(OriginalFactory);
+            _ownsConfiguredFactory = !ReferenceEquals(Factory, OriginalFactory);
 
             // Get logger from the configured factory's services
-            var loggerFactory = _configuredFactory.Services.GetService<ILoggerFactory>();
-            var processorLogger = loggerFactory?.CreateLogger<HttpFileProcessor>();
+            ILoggerFactory? loggerFactory = Factory.Services.GetService<ILoggerFactory>();
+            ILogger<HttpFileProcessor>? processorLogger = loggerFactory?.CreateLogger<HttpFileProcessor>();
 
             // Initialize HTTP file processor
             _httpFileProcessor = new HttpFileProcessor(processorLogger);
 
             // Load and parse the HTTP file
-            var httpFilePath = GetHttpFilePath();
+            string httpFilePath = GetHttpFilePath();
             processorLogger?.LogInformation("Loading HTTP file from: {FilePath}", httpFilePath);
 
-            _httpFile = LoadHttpFileSync(httpFilePath);
-            
-            // Allow modification of the HTTP file before tests
-            ModifyHttpFile(_httpFile);
+            HttpFile = LoadHttpFileSync(httpFilePath);
 
-            processorLogger?.LogInformation("Loaded {RequestCount} requests from HTTP file", _httpFile.Requests.Count);
+            // Allow modification of the HTTP file before tests
+            ModifyHttpFile(HttpFile);
+
+            processorLogger?.LogInformation("Loaded {RequestCount} requests from HTTP file", HttpFile.Requests.Count);
         }
 
         /// <summary>
@@ -179,7 +176,7 @@ namespace RESTClient.NET.Testing
         /// <returns>Test data for xUnit [MemberData]</returns>
         public IEnumerable<object[]> GetHttpFileTestData()
         {
-            return _httpFile.GetTestData();
+            return HttpFile.GetTestData();
         }
 
         /// <summary>
@@ -218,7 +215,7 @@ namespace RESTClient.NET.Testing
             IEnumerable<string>? methods = null,
             bool? hasExpectations = null)
         {
-            return _httpFile.GetTestCases()
+            return HttpFile.GetTestCases()
                 .Filter(namePattern, methods, hasExpectations)
                 .Select(testCase => new object[] { testCase });
         }
@@ -231,8 +228,8 @@ namespace RESTClient.NET.Testing
         /// <exception cref="KeyNotFoundException">Thrown when the test case is not found</exception>
         protected HttpTestCase GetTestCase(string name)
         {
-            var request = _httpFile.GetRequestByName(name);
-            return _httpFile.GetTestCases().First(tc => tc.Name == name);
+            HttpRequest request = HttpFile.GetRequestByName(name);
+            return HttpFile.GetTestCases().First(tc => tc.Name == name);
         }
 
         /// <summary>
@@ -244,11 +241,13 @@ namespace RESTClient.NET.Testing
         protected bool TryGetTestCase(string name, out HttpTestCase testCase)
         {
             testCase = null!;
-            
-            if (!_httpFile.TryGetRequestByName(name, out var request))
-                return false;
 
-            testCase = _httpFile.GetTestCases().First(tc => tc.Name == name);
+            if (!HttpFile.TryGetRequestByName(name, out HttpRequest? request))
+            {
+                return false;
+            }
+
+            testCase = HttpFile.GetTestCases().First(tc => tc.Name == name);
             return true;
         }
 
@@ -260,47 +259,23 @@ namespace RESTClient.NET.Testing
         /// <returns>The processed request</returns>
         protected HttpRequest? GetProcessedRequest(string requestName, IDictionary<string, string>? environmentVariables = null)
         {
-            return _httpFileProcessor.GetProcessedRequest(_httpFile, requestName, environmentVariables);
-        }
-
-        private async Task<HttpFile> LoadHttpFileAsync(string httpFilePath)
-        {
-            if (string.IsNullOrWhiteSpace(httpFilePath))
-                throw new ArgumentException("HTTP file path cannot be null or empty", nameof(httpFilePath));
-
-            // Resolve relative paths relative to the test assembly, not the program assembly
-            if (!Path.IsPathRooted(httpFilePath))
-            {
-                var testAssemblyLocation = GetType().Assembly.Location;
-                if (!string.IsNullOrEmpty(testAssemblyLocation))
-                {
-                    var testAssemblyDirectory = Path.GetDirectoryName(testAssemblyLocation);
-                    if (!string.IsNullOrEmpty(testAssemblyDirectory))
-                    {
-                        httpFilePath = Path.Combine(testAssemblyDirectory, httpFilePath);
-                    }
-                }
-            }
-
-            if (!File.Exists(httpFilePath))
-                throw new FileNotFoundException($"HTTP file not found: {httpFilePath}");
-
-            var parser = new HttpFileParser();
-            return await parser.ParseFileAsync(httpFilePath);
+            return _httpFileProcessor.GetProcessedRequest(HttpFile, requestName, environmentVariables);
         }
 
         private HttpFile LoadHttpFileSync(string httpFilePath)
         {
             if (string.IsNullOrWhiteSpace(httpFilePath))
+            {
                 throw new ArgumentException("HTTP file path cannot be null or empty", nameof(httpFilePath));
+            }
 
             // Resolve relative paths relative to the test assembly, not the program assembly
             if (!Path.IsPathRooted(httpFilePath))
             {
-                var testAssemblyLocation = GetType().Assembly.Location;
+                string testAssemblyLocation = GetType().Assembly.Location;
                 if (!string.IsNullOrEmpty(testAssemblyLocation))
                 {
-                    var testAssemblyDirectory = Path.GetDirectoryName(testAssemblyLocation);
+                    string? testAssemblyDirectory = Path.GetDirectoryName(testAssemblyLocation);
                     if (!string.IsNullOrEmpty(testAssemblyDirectory))
                     {
                         httpFilePath = Path.Combine(testAssemblyDirectory, httpFilePath);
@@ -309,11 +284,13 @@ namespace RESTClient.NET.Testing
             }
 
             if (!File.Exists(httpFilePath))
+            {
                 throw new FileNotFoundException($"HTTP file not found: {httpFilePath}");
+            }
 
             var parser = new HttpFileParser();
             // Use the synchronous Parse method instead of async to avoid deadlocks
-            var content = File.ReadAllText(httpFilePath);
+            string content = File.ReadAllText(httpFilePath);
             return parser.Parse(content);
         }
 
@@ -327,7 +304,7 @@ namespace RESTClient.NET.Testing
                 // Only dispose the configured factory if this instance owns it
                 if (_ownsConfiguredFactory)
                 {
-                    _configuredFactory?.Dispose();
+                    Factory?.Dispose();
                 }
                 _disposed = true;
             }

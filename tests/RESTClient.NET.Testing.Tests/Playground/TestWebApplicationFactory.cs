@@ -15,7 +15,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     public TestWebApplicationFactory()
     {
         // Create a dummy solution file to prevent the "Solution root could not be located" error
-        var solutionFile = Path.Combine(AppContext.BaseDirectory, "dummy.sln");
+        string solutionFile = Path.Combine(AppContext.BaseDirectory, "dummy.sln");
         if (!File.Exists(solutionFile))
         {
             File.WriteAllText(solutionFile, @"
@@ -34,10 +34,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
-        
+
         builder.UseEnvironment("Test");
         builder.UseContentRoot(AppContext.BaseDirectory);
-        
+
         // Configure services
         builder.ConfigureServices(services =>
         {

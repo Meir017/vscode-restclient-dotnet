@@ -28,15 +28,15 @@ namespace RESTClient.NET.Core.Models
     ///     Url = "https://api.example.com/users",
     ///     Body = @"{""name"": ""John Doe"", ""email"": ""john@example.com""}"
     /// };
-    /// 
+    ///
     /// // Add headers (case-insensitive)
     /// request.Headers["Content-Type"] = "application/json";
     /// request.Headers["Authorization"] = "Bearer token123";
-    /// 
+    ///
     /// // Set expectations for testing
     /// request.Metadata.ExpectedStatusCode = 201;
     /// request.Metadata.ExpectedHeaders["Location"] = "/users/123";
-    /// 
+    ///
     /// // Access request properties
     /// Console.WriteLine($"Request: {request.Method} {request.Url}");
     /// Console.WriteLine($"Expected status: {request.Metadata.ExpectedStatusCode}");
@@ -106,7 +106,7 @@ namespace RESTClient.NET.Core.Models
         /// <returns>The header value if found; otherwise, null</returns>
         public string? GetHeader(string name)
         {
-            return Headers.TryGetValue(name, out var value) ? value : null;
+            return Headers.TryGetValue(name, out string? value) ? value : null;
         }
 
         /// <summary>

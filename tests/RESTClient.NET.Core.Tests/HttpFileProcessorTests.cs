@@ -1,13 +1,8 @@
 using AwesomeAssertions;
-using Microsoft.Extensions.Logging;
-using RESTClient.NET.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 using RESTClient.NET.Core.Models;
 using RESTClient.NET.Core.Parsing;
 using RESTClient.NET.Core.Validation;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests
@@ -28,7 +23,7 @@ namespace RESTClient.NET.Core.Tests
         public void Constructor_WithLogger_ShouldInitializeCorrectly()
         {
             // Arrange
-            var logger = new TestLogger<HttpFileProcessor>();
+            var logger = new NullLogger<HttpFileProcessor>();
 
             // Act
             var processor = new HttpFileProcessor(logger);
@@ -88,7 +83,7 @@ namespace RESTClient.NET.Core.Tests
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var nonExistentPath = "non-existent-file.http";
+            string nonExistentPath = "non-existent-file.http";
 
             // Act & Assert
             Func<Task> act = async () => await processor.ParseFileAsync(nonExistentPath);
@@ -111,13 +106,13 @@ namespace RESTClient.NET.Core.Tests
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var content = @"
+            string content = @"
 # @name test-request
 GET https://api.example.com/users HTTP/1.1
 ";
 
             // Act
-            var result = await processor.ParseContentAsync(content);
+            HttpFile result = await processor.ParseContentAsync(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -130,14 +125,14 @@ GET https://api.example.com/users HTTP/1.1
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var content = @"
+            string content = @"
 # @name test-request
 GET https://api.example.com/users HTTP/1.1
 ";
             var options = new HttpParseOptions();
 
             // Act
-            var result = await processor.ParseContentAsync(content, options);
+            HttpFile result = await processor.ParseContentAsync(content, options);
 
             // Assert
             result.Should().NotBeNull();
@@ -148,7 +143,7 @@ GET https://api.example.com/users HTTP/1.1
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var content = @"
+            string content = @"
 @baseUrl = https://api.example.com
 
 # @name test-request
@@ -157,7 +152,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var envVars = new Dictionary<string, string>();
 
             // Act
-            var result = await processor.ParseAndProcessContentAsync(content, envVars);
+            HttpFile result = await processor.ParseAndProcessContentAsync(content, envVars);
 
             // Assert
             result.Should().NotBeNull();
@@ -182,19 +177,19 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test", 
-                    Method = "GET", 
-                    Url = "{{baseUrl}}/users", 
-                    LineNumber = 1 
+                new()
+                {
+                    Name = "test",
+                    Method = "GET",
+                    Url = "{{baseUrl}}/users",
+                    LineNumber = 1
                 }
             };
             var fileVariables = new Dictionary<string, string> { { "baseUrl", "https://api.example.com" } };
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = processor.ProcessVariables(httpFile);
+            HttpFile result = processor.ProcessVariables(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -219,18 +214,18 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test", 
-                    Method = "GET", 
-                    Url = "https://api.example.com/users", 
-                    LineNumber = 1 
+                new()
+                {
+                    Name = "test",
+                    Method = "GET",
+                    Url = "https://api.example.com/users",
+                    LineNumber = 1
                 }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = processor.ValidateVariableReferences(httpFile);
+            ValidationResult result = processor.ValidateVariableReferences(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -243,12 +238,12 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test", 
-                    Method = "GET", 
-                    Url = "https://api.example.com/users", 
-                    LineNumber = 1 
+                new()
+                {
+                    Name = "test",
+                    Method = "GET",
+                    Url = "https://api.example.com/users",
+                    LineNumber = 1
                 }
             };
             var fileVariables = new Dictionary<string, string>
@@ -259,7 +254,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = processor.ValidateVariableReferences(httpFile);
+            ValidationResult result = processor.ValidateVariableReferences(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -282,7 +277,7 @@ GET {{baseUrl}}/users HTTP/1.1
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var httpFile = new HttpFile(new List<HttpRequest>());
+            var httpFile = new HttpFile([]);
 
             // Act & Assert
             Action act = () => processor.GetProcessedRequest(httpFile, null!);
@@ -294,7 +289,7 @@ GET {{baseUrl}}/users HTTP/1.1
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var httpFile = new HttpFile(new List<HttpRequest>());
+            var httpFile = new HttpFile([]);
 
             // Act & Assert
             Action act = () => processor.GetProcessedRequest(httpFile, "");
@@ -306,7 +301,7 @@ GET {{baseUrl}}/users HTTP/1.1
         {
             // Arrange
             var processor = new HttpFileProcessor();
-            var httpFile = new HttpFile(new List<HttpRequest>());
+            var httpFile = new HttpFile([]);
 
             // Act & Assert
             Action act = () => processor.GetProcessedRequest(httpFile, "   ");
@@ -320,12 +315,13 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "existing-request", Method = "GET", Url = "https://api.example.com" }
+                new()
+                { Name = "existing-request", Method = "GET", Url = "https://api.example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = processor.GetProcessedRequest(httpFile, "non-existent-request");
+            HttpRequest? result = processor.GetProcessedRequest(httpFile, "non-existent-request");
 
             // Assert
             result.Should().BeNull();
@@ -338,10 +334,10 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test-request", 
-                    Method = "GET", 
+                new()
+                {
+                    Name = "test-request",
+                    Method = "GET",
                     Url = "{{baseUrl}}/users",
                     LineNumber = 1
                 }
@@ -350,7 +346,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = processor.GetProcessedRequest(httpFile, "test-request");
+            HttpRequest? result = processor.GetProcessedRequest(httpFile, "test-request");
 
             // Assert
             result.Should().NotBeNull();
@@ -375,17 +371,17 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "request1", 
-                    Method = "GET", 
+                new()
+                {
+                    Name = "request1",
+                    Method = "GET",
                     Url = "{{baseUrl}}/users",
                     LineNumber = 1
                 },
-                new HttpRequest 
-                { 
-                    Name = "request2", 
-                    Method = "POST", 
+                new()
+                {
+                    Name = "request2",
+                    Method = "POST",
                     Url = "{{baseUrl}}/posts",
                     LineNumber = 5
                 }
@@ -394,7 +390,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = processor.GetAllProcessedRequests(httpFile);
+            List<HttpRequest> result = processor.GetAllProcessedRequests(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -419,10 +415,10 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test-request", 
-                    Method = "GET", 
+                new()
+                {
+                    Name = "test-request",
+                    Method = "GET",
                     Url = "https://api.example.com/users",
                     LineNumber = 1
                 }
@@ -430,7 +426,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = processor.ValidateHttpFile(httpFile);
+            ValidationResult result = processor.ValidateHttpFile(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -443,10 +439,10 @@ GET {{baseUrl}}/users HTTP/1.1
             // Arrange
             var validator = new TestValidator();
             var processor = new HttpFileProcessor(null, validator);
-            var httpFile = new HttpFile(new List<HttpRequest>());
+            var httpFile = new HttpFile([]);
 
             // Act
-            var result = processor.ValidateHttpFile(httpFile);
+            ValidationResult result = processor.ValidateHttpFile(httpFile);
 
             // Assert
             result.Should().NotBeNull();
@@ -460,12 +456,12 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test", 
-                    Method = "GET", 
-                    Url = "{{baseUrl}}/{{endpoint}}", 
-                    LineNumber = 1 
+                new()
+                {
+                    Name = "test",
+                    Method = "GET",
+                    Url = "{{baseUrl}}/{{endpoint}}",
+                    LineNumber = 1
                 }
             };
             var fileVariables = new Dictionary<string, string> { { "baseUrl", "https://api.example.com" } };
@@ -473,7 +469,7 @@ GET {{baseUrl}}/users HTTP/1.1
             var httpFile = new HttpFile(requests, fileVariables);
 
             // Act
-            var result = processor.ProcessVariables(httpFile, envVariables);
+            HttpFile result = processor.ProcessVariables(httpFile, envVariables);
 
             // Assert
             result.Should().NotBeNull();
@@ -487,40 +483,32 @@ GET {{baseUrl}}/users HTTP/1.1
             var processor = new HttpFileProcessor();
             var requests = new List<HttpRequest>
             {
-                new HttpRequest 
-                { 
-                    Name = "test", 
-                    Method = "GET", 
-                    Url = "{{undefinedVariable}}/users", 
-                    LineNumber = 1 
+                new()
+                {
+                    Name = "test",
+                    Method = "GET",
+                    Url = "{{undefinedVariable}}/users",
+                    LineNumber = 1
                 }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = processor.ValidateVariableReferences(httpFile);
+            ValidationResult result = processor.ValidateVariableReferences(httpFile);
 
             // Assert
             result.Should().NotBeNull();
             result.HasWarnings.Should().BeTrue();
         }
 
-        // Test helper classes
-        private class TestLogger<T> : ILogger<T>
-        {
-            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-            public bool IsEnabled(LogLevel logLevel) => true;
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) { }
-        }
-
-        private class TestValidator : IHttpFileValidator
+        private sealed class TestValidator : IHttpFileValidator
         {
             public bool ValidateCalled { get; private set; }
 
             public ValidationResult Validate(HttpFile httpFile)
             {
                 ValidateCalled = true;
-                return new ValidationResult(new List<ValidationError>(), new List<ValidationWarning>());
+                return new ValidationResult([], []);
             }
         }
     }

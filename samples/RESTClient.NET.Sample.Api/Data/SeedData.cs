@@ -22,7 +22,7 @@ public static class SeedData
         }
 
         // Seed users
-        var users = new[]
+        User[] users = new[]
         {
             new User
             {
@@ -50,7 +50,7 @@ public static class SeedData
         context.SaveChanges();
 
         // Seed products
-        var products = new[]
+        Product[] products = new[]
         {
             new Product
             {

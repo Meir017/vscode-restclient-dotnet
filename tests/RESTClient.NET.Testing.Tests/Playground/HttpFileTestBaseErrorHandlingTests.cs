@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using RESTClient.NET.Testing;
 using Xunit;
 
 namespace RESTClient.NET.Testing.Tests.Playground;
@@ -16,7 +15,7 @@ public class HttpFileTestBaseErrorHandlingTests
     public void Constructor_WithNullFactory_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        var action = () => new TestHttpFileTestBase(null!);
+        Func<TestHttpFileTestBase> action = () => new TestHttpFileTestBase(null!);
         action.Should().Throw<ArgumentNullException>()
             .WithParameterName("factory");
     }
@@ -28,7 +27,7 @@ public class HttpFileTestBaseErrorHandlingTests
         using var factory = new TestWebApplicationFactory();
 
         // Act & Assert
-        var action = () => new TestHttpFileTestBaseWithNonExistentFile(factory);
+        Func<TestHttpFileTestBaseWithNonExistentFile> action = () => new TestHttpFileTestBaseWithNonExistentFile(factory);
         action.Should().Throw<FileNotFoundException>()
             .WithMessage("*non-existent-file.http*");
     }
@@ -40,7 +39,7 @@ public class HttpFileTestBaseErrorHandlingTests
         using var factory = new TestWebApplicationFactory();
 
         // Act & Assert
-        var action = () => new TestHttpFileTestBaseWithEmptyPath(factory);
+        Func<TestHttpFileTestBaseWithEmptyPath> action = () => new TestHttpFileTestBaseWithEmptyPath(factory);
         action.Should().Throw<ArgumentException>()
             .WithParameterName("httpFilePath");
     }
@@ -52,7 +51,7 @@ public class HttpFileTestBaseErrorHandlingTests
         using var factory = new TestWebApplicationFactory();
 
         // Act & Assert
-        var action = () => new TestHttpFileTestBaseWithNullPath(factory);
+        Func<TestHttpFileTestBaseWithNullPath> action = () => new TestHttpFileTestBaseWithNullPath(factory);
         action.Should().Throw<ArgumentException>()
             .WithParameterName("httpFilePath");
     }
@@ -66,7 +65,7 @@ public class HttpFileTestBaseErrorHandlingTests
 
         // Act & Assert
         testBase.Dispose(); // First call
-        var action = () => testBase.Dispose(); // Second call
+        Action action = () => testBase.Dispose(); // Second call
         action.Should().NotThrow();
     }
 
@@ -76,36 +75,36 @@ public class HttpFileTestBaseErrorHandlingTests
         // Arrange
         using var originalFactory = new TestWebApplicationFactory();
         var testBase = new TestHttpFileTestBase(originalFactory);
-        
+
         // Act
         testBase.Dispose();
 
         // Assert
         // Original factory should still be usable (not disposed)
-        var action = () => originalFactory.CreateClient();
+        Func<System.Net.Http.HttpClient> action = () => originalFactory.CreateClient();
         action.Should().NotThrow();
     }
 
     // Test implementations for error scenarios
-    private class TestHttpFileTestBase : HttpFileTestBase<Program>
+    private sealed class TestHttpFileTestBase : HttpFileTestBase<Program>
     {
         public TestHttpFileTestBase(WebApplicationFactory<Program> factory) : base(factory) { }
         protected override string GetHttpFilePath() => "Integration/test-integration.http";
     }
 
-    private class TestHttpFileTestBaseWithNonExistentFile : HttpFileTestBase<Program>
+    private sealed class TestHttpFileTestBaseWithNonExistentFile : HttpFileTestBase<Program>
     {
         public TestHttpFileTestBaseWithNonExistentFile(WebApplicationFactory<Program> factory) : base(factory) { }
         protected override string GetHttpFilePath() => "non-existent-file.http";
     }
 
-    private class TestHttpFileTestBaseWithEmptyPath : HttpFileTestBase<Program>
+    private sealed class TestHttpFileTestBaseWithEmptyPath : HttpFileTestBase<Program>
     {
         public TestHttpFileTestBaseWithEmptyPath(WebApplicationFactory<Program> factory) : base(factory) { }
         protected override string GetHttpFilePath() => string.Empty;
     }
 
-    private class TestHttpFileTestBaseWithNullPath : HttpFileTestBase<Program>
+    private sealed class TestHttpFileTestBaseWithNullPath : HttpFileTestBase<Program>
     {
         public TestHttpFileTestBaseWithNullPath(WebApplicationFactory<Program> factory) : base(factory) { }
         protected override string GetHttpFilePath() => null!;

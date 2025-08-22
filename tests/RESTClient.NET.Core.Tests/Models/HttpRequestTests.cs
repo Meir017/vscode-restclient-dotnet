@@ -1,7 +1,5 @@
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace RESTClient.NET.Core.Tests.Models
@@ -49,7 +47,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Authorization"] = "Bearer token123";
 
             // Act
-            var result = request.GetHeader("Authorization");
+            string? result = request.GetHeader("Authorization");
 
             // Assert
             result.Should().Be("Bearer token123");
@@ -63,7 +61,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Authorization"] = "Bearer token123";
 
             // Act
-            var result = request.GetHeader("AUTHORIZATION");
+            string? result = request.GetHeader("AUTHORIZATION");
 
             // Assert
             result.Should().Be("Bearer token123");
@@ -76,7 +74,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var request = new HttpRequest();
 
             // Act
-            var result = request.GetHeader("NonExistent");
+            string? result = request.GetHeader("NonExistent");
 
             // Assert
             result.Should().BeNull();
@@ -134,7 +132,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Authorization"] = "Bearer token123";
 
             // Act
-            var result = request.HasHeader("Authorization");
+            bool result = request.HasHeader("Authorization");
 
             // Assert
             result.Should().BeTrue();
@@ -148,7 +146,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Authorization"] = "Bearer token123";
 
             // Act
-            var result = request.HasHeader("AUTHORIZATION");
+            bool result = request.HasHeader("AUTHORIZATION");
 
             // Assert
             result.Should().BeTrue();
@@ -161,7 +159,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var request = new HttpRequest();
 
             // Act
-            var result = request.HasHeader("NonExistent");
+            bool result = request.HasHeader("NonExistent");
 
             // Assert
             result.Should().BeFalse();
@@ -176,7 +174,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Content-Type"] = "application/json";
 
             // Act
-            var result = request.RemoveHeader("Authorization");
+            bool result = request.RemoveHeader("Authorization");
 
             // Assert
             result.Should().BeTrue();
@@ -193,7 +191,7 @@ namespace RESTClient.NET.Core.Tests.Models
             request.Headers["Authorization"] = "Bearer token123";
 
             // Act
-            var result = request.RemoveHeader("AUTHORIZATION");
+            bool result = request.RemoveHeader("AUTHORIZATION");
 
             // Assert
             result.Should().BeTrue();
@@ -207,7 +205,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var request = new HttpRequest();
 
             // Act
-            var result = request.RemoveHeader("NonExistent");
+            bool result = request.RemoveHeader("NonExistent");
 
             // Assert
             result.Should().BeFalse();
@@ -225,7 +223,7 @@ namespace RESTClient.NET.Core.Tests.Models
             };
 
             // Act
-            var result = request.ToString();
+            string result = request.ToString();
 
             // Assert
             result.Should().Be("test-request: POST https://api.example.com/users");
@@ -242,7 +240,7 @@ namespace RESTClient.NET.Core.Tests.Models
             };
 
             // Act
-            var result = request.ToString();
+            string result = request.ToString();
 
             // Assert
             result.Should().Be(": GET https://api.example.com/users");
@@ -307,11 +305,11 @@ namespace RESTClient.NET.Core.Tests.Models
             // Act & Assert
             request.HasHeader(headerName).Should().BeTrue();
             request.GetHeader(headerName).Should().Be("application/json");
-            
+
             request.SetHeader(headerName, "text/plain");
             request.GetHeader("Content-Type").Should().Be("text/plain");
             request.Headers.Should().HaveCount(1); // Should not create duplicate
-            
+
             request.RemoveHeader(headerName).Should().BeTrue();
             request.Headers.Should().BeEmpty();
         }
@@ -320,10 +318,10 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Body_ShouldAllowNullAndStringValues()
         {
             // Arrange
-            var request = new HttpRequest();
-
-            // Act & Assert - null body
-            request.Body = null;
+            var request = new HttpRequest
+            {
+                Body = null
+            };
             request.Body.Should().BeNull();
 
             // Act & Assert - string body
@@ -370,27 +368,27 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var request = new HttpRequest();
-            const string name = "test-request";
-            const string method = "POST";
-            const string url = "https://api.example.com/users";
-            const string body = "{\"name\":\"test\"}";
-            const int lineNumber = 42;
+            const string Name = "test-request";
+            const string Method = "POST";
+            const string Url = "https://api.example.com/users";
+            const string Body = /*lang=json,strict*/ "{\"name\":\"test\"}";
+            const int LineNumber = 42;
 
             // Act
-            request.Name = name;
-            request.Method = method;
-            request.Url = url;
-            request.Body = body;
-            request.LineNumber = lineNumber;
+            request.Name = Name;
+            request.Method = Method;
+            request.Url = Url;
+            request.Body = Body;
+            request.LineNumber = LineNumber;
             request.SetHeader("Content-Type", "application/json");
             request.SetHeader("Authorization", "Bearer token123");
 
             // Assert
-            request.Name.Should().Be(name);
-            request.Method.Should().Be(method);
-            request.Url.Should().Be(url);
-            request.Body.Should().Be(body);
-            request.LineNumber.Should().Be(lineNumber);
+            request.Name.Should().Be(Name);
+            request.Method.Should().Be(Method);
+            request.Url.Should().Be(Url);
+            request.Body.Should().Be(Body);
+            request.LineNumber.Should().Be(LineNumber);
             request.Headers.Should().HaveCount(2);
             request.GetHeader("Content-Type").Should().Be("application/json");
             request.GetHeader("Authorization").Should().Be("Bearer token123");
@@ -401,22 +399,22 @@ namespace RESTClient.NET.Core.Tests.Models
         {
             // Arrange
             var request = new HttpRequest();
-            const string name = "file-request";
-            const string method = "PUT";
-            const string url = "https://api.example.com/upload";
+            const string Name = "file-request";
+            const string Method = "PUT";
+            const string Url = "https://api.example.com/upload";
             var fileBodyRef = new FileBodyReference("test-file.txt", true, null, 1);
 
             // Act
-            request.Name = name;
-            request.Method = method;
-            request.Url = url;
+            request.Name = Name;
+            request.Method = Method;
+            request.Url = Url;
             request.FileBodyReference = fileBodyRef;
             request.SetHeader("Content-Type", "application/octet-stream");
 
             // Assert
-            request.Name.Should().Be(name);
-            request.Method.Should().Be(method);
-            request.Url.Should().Be(url);
+            request.Name.Should().Be(Name);
+            request.Method.Should().Be(Method);
+            request.Url.Should().Be(Url);
             request.Body.Should().BeNull(); // Body should be null when FileBodyReference is set
             request.FileBodyReference.Should().Be(fileBodyRef);
             request.GetHeader("Content-Type").Should().Be("application/octet-stream");

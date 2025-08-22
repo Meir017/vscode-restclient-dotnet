@@ -12,8 +12,8 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new() { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
 
             var fileVariables = new Dictionary<string, string>
@@ -37,7 +37,9 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithNullRequests_ShouldThrowArgumentNullException()
         {
             // Act & Assert
+#pragma warning disable CA1806 // Do not ignore method results
             Action act = () => new HttpFile(null!);
+#pragma warning restore CA1806 // Do not ignore method results
             act.Should().Throw<ArgumentNullException>().WithParameterName("requests");
         }
 
@@ -47,13 +49,13 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new() { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = httpFile.TryGetRequestByName("test1", out var request);
+            bool result = httpFile.TryGetRequestByName("test1", out HttpRequest? request);
 
             // Assert
             result.Should().BeTrue();
@@ -68,12 +70,12 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var result = httpFile.TryGetRequestByName("nonexistent", out var request);
+            bool result = httpFile.TryGetRequestByName("nonexistent", out HttpRequest? request);
 
             // Assert
             result.Should().BeFalse();
@@ -86,18 +88,18 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act & Assert
-            httpFile.TryGetRequestByName(null!, out var request1).Should().BeFalse();
+            httpFile.TryGetRequestByName(null!, out HttpRequest? request1).Should().BeFalse();
             request1.Should().BeNull();
 
-            httpFile.TryGetRequestByName("", out var request2).Should().BeFalse();
+            httpFile.TryGetRequestByName("", out HttpRequest? request2).Should().BeFalse();
             request2.Should().BeNull();
 
-            httpFile.TryGetRequestByName("   ", out var request3).Should().BeFalse();
+            httpFile.TryGetRequestByName("   ", out HttpRequest? request3).Should().BeFalse();
             request3.Should().BeNull();
         }
 
@@ -107,13 +109,13 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { Name = "test2", Method = "POST", Url = "http://api.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" },
+                new() { Name = "test2", Method = "POST", Url = "http://api.com" }
             };
             var httpFile = new HttpFile(requests);
 
             // Act
-            var request = httpFile.GetRequestByName("test2");
+            HttpRequest request = httpFile.GetRequestByName("test2");
 
             // Assert
             request.Should().NotBeNull();
@@ -127,7 +129,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
             var httpFile = new HttpFile(requests);
 
@@ -143,9 +145,9 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "duplicate", Method = "GET", Url = "http://example.com" },
-                new HttpRequest { Name = "duplicate", Method = "POST", Url = "http://api.com" },
-                new HttpRequest { Name = "unique", Method = "PUT", Url = "http://other.com" }
+                new() { Name = "duplicate", Method = "GET", Url = "http://example.com" },
+                new() { Name = "duplicate", Method = "POST", Url = "http://api.com" },
+                new() { Name = "unique", Method = "PUT", Url = "http://other.com" }
             };
 
             // Act
@@ -153,9 +155,9 @@ namespace RESTClient.NET.Core.Tests.Models
 
             // Assert
             httpFile.Requests.Should().HaveCount(3);
-            
+
             // The lookup should return the first occurrence
-            var foundRequest = httpFile.GetRequestByName("duplicate");
+            HttpRequest foundRequest = httpFile.GetRequestByName("duplicate");
             foundRequest.Method.Should().Be("GET");
         }
 
@@ -165,7 +167,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
 
             // Act
@@ -182,7 +184,7 @@ namespace RESTClient.NET.Core.Tests.Models
             // Arrange
             var requests = new List<HttpRequest>
             {
-                new HttpRequest { Name = "test1", Method = "GET", Url = "http://example.com" }
+                new() { Name = "test1", Method = "GET", Url = "http://example.com" }
             };
 
             var fileVariables = new Dictionary<string, string>

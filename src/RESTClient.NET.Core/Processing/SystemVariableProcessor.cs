@@ -46,7 +46,7 @@ namespace RESTClient.NET.Core.Processing
     /// POST /api/users HTTP/1.1
     /// X-Request-ID: {{$guid}}
     /// Content-Type: application/json
-    /// 
+    ///
     /// {
     ///   ""id"": ""{{$guid}}"",
     ///   ""timestamp"": {{$timestamp}},
@@ -54,18 +54,19 @@ namespace RESTClient.NET.Core.Processing
     ///   ""created"": ""{{$datetime iso8601}}"",
     ///   ""expires"": ""{{$datetime iso8601 1 d}}""
     /// }";
-    /// 
+    ///
     /// var resolved = SystemVariableProcessor.ResolveSystemVariables(content);
     /// // All {{$...}} variables will be replaced with actual values
     /// </code>
     /// </example>
-    public static class SystemVariableProcessor
+    public static partial class SystemVariableProcessor
     {
-        private static readonly Regex SystemVariableRegex = new Regex(
-            @"\{\{\$([a-zA-Z]+)(?:\s+([^}]+))?\}\}", 
-            RegexOptions.Compiled);
+        private static readonly Regex _systemVariableRegex = MyRegex();
 
-        private static readonly Random RandomGenerator = new Random();
+        private static readonly Random _randomGenerator = new Random();
+
+        // Simplified collection initialization for SpaceSeparator
+        private static readonly char[] _spaceSeparator = [' '];
 
         /// <summary>
         /// Resolves all system variables in the given content
@@ -75,12 +76,15 @@ namespace RESTClient.NET.Core.Processing
         public static string? ResolveSystemVariables(string? content)
         {
             if (string.IsNullOrEmpty(content))
-                return content;
-
-            return SystemVariableRegex.Replace(content, match =>
             {
-                var variableName = match.Groups[1].Value.ToLowerInvariant();
-                var parameters = match.Groups[2].Success ? match.Groups[2].Value.Trim() : string.Empty;
+                return content;
+            }
+
+            // Updated ResolveSystemVariables to catch specific exceptions
+            return _systemVariableRegex.Replace(content, match =>
+            {
+                string variableName = match.Groups[1].Value.ToLowerInvariant();
+                string parameters = match.Groups[2].Success ? match.Groups[2].Value.Trim() : string.Empty;
 
                 try
                 {
@@ -94,9 +98,9 @@ namespace RESTClient.NET.Core.Processing
                         _ => match.Value // Return original if unknown variable
                     };
                 }
-                catch (Exception)
+                catch (ArgumentException)
                 {
-                    // Return original value if resolution fails
+                    // Return original value if resolution fails due to invalid arguments
                     return match.Value;
                 }
             });
@@ -119,19 +123,27 @@ namespace RESTClient.NET.Core.Processing
         private static string ResolveRandomInt(string parameters)
         {
             if (string.IsNullOrEmpty(parameters))
+            {
                 throw new ArgumentException("randomInt requires min and max parameters");
+            }
 
-            var parts = parameters.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = parameters.Split(_spaceSeparator, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 2)
+            {
                 throw new ArgumentException("randomInt requires exactly two parameters: min max");
+            }
 
-            if (!int.TryParse(parts[0], out var min) || !int.TryParse(parts[1], out var max))
+            if (!int.TryParse(parts[0], out int min) || !int.TryParse(parts[1], out int max))
+            {
                 throw new ArgumentException("randomInt parameters must be valid integers");
+            }
 
             if (min >= max)
+            {
                 throw new ArgumentException("randomInt min parameter must be less than max parameter");
+            }
 
-            return RandomGenerator.Next(min, max).ToString();
+            return _randomGenerator.Next(min, max).ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -141,14 +153,14 @@ namespace RESTClient.NET.Core.Processing
         /// <returns>Unix timestamp as string</returns>
         private static string ResolveTimestamp(string parameters)
         {
-            var baseTime = DateTimeOffset.UtcNow;
+            DateTimeOffset baseTime = DateTimeOffset.UtcNow;
 
             if (!string.IsNullOrEmpty(parameters))
             {
                 baseTime = ApplyTimeOffset(baseTime, parameters);
             }
 
-            return baseTime.ToUnixTimeSeconds().ToString();
+            return baseTime.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -159,22 +171,23 @@ namespace RESTClient.NET.Core.Processing
         /// <returns>Formatted datetime string</returns>
         private static string ResolveDatetime(string parameters, bool useLocalTime)
         {
-            var baseTime = useLocalTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
-            var format = "iso8601";
+            DateTimeOffset baseTime = useLocalTime ? DateTimeOffset.Now : DateTimeOffset.UtcNow;
+            string format = "iso8601";
 
             if (!string.IsNullOrEmpty(parameters))
             {
-                var parts = SplitParametersRespectingQuotes(parameters);
-                
-                if (parts.Length > 0)
+                // Updated type of 'parts' to List<string>
+                List<string> parts = SplitParametersRespectingQuotes(parameters);
+
+                if (parts.Count > 0)
                 {
                     format = parts[0];
                 }
 
-                if (parts.Length > 1)
+                if (parts.Count > 1)
                 {
                     // Apply time offset
-                    var offsetSpec = string.Join(" ", parts, 1, parts.Length - 1);
+                    string offsetSpec = string.Join(" ", parts.GetRange(1, parts.Count - 1));
                     baseTime = ApplyTimeOffset(baseTime, offsetSpec);
                 }
             }
@@ -190,25 +203,29 @@ namespace RESTClient.NET.Core.Processing
         /// <returns>Datetime with offset applied</returns>
         private static DateTimeOffset ApplyTimeOffset(DateTimeOffset baseTime, string offsetSpec)
         {
-            var parts = offsetSpec.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 2)
+            string[] offsetParts = offsetSpec.Split(_spaceSeparator, StringSplitOptions.RemoveEmptyEntries);
+            if (offsetParts.Length != 2)
+            {
                 throw new ArgumentException($"Invalid offset specification: {offsetSpec}. Expected format: 'offset unit'");
+            }
 
-            if (!int.TryParse(parts[0], out var offset))
-                throw new ArgumentException($"Invalid offset value: {parts[0]}. Must be an integer");
+            if (!int.TryParse(offsetParts[0], out int offset))
+            {
+                throw new ArgumentException($"Invalid offset value: {offsetParts[0]}. Must be an integer");
+            }
 
-            var unit = parts[1].ToLowerInvariant();
+            string unit = offsetParts[1].ToLowerInvariant();
             return unit switch
             {
                 "y" => baseTime.AddYears(offset),
-                "m" when parts[1] == "M" => baseTime.AddMonths(offset), // Capital M for months
+                "m" when offsetParts[1] == "M" => baseTime.AddMonths(offset), // Capital M for months
                 "w" => baseTime.AddDays(offset * 7),
                 "d" => baseTime.AddDays(offset),
                 "h" => baseTime.AddHours(offset),
                 "m" => baseTime.AddMinutes(offset), // Lowercase m for minutes
                 "s" => baseTime.AddSeconds(offset),
                 "ms" => baseTime.AddMilliseconds(offset),
-                _ => throw new ArgumentException($"Unknown time unit: {parts[1]}. Supported units: y, M, w, d, h, m, s, ms")
+                _ => throw new ArgumentException($"Unknown time unit: {offsetParts[1]}. Supported units: y, M, w, d, h, m, s, ms")
             };
         }
 
@@ -234,16 +251,16 @@ namespace RESTClient.NET.Core.Processing
         /// </summary>
         /// <param name="parameters">Parameter string</param>
         /// <returns>Array of parameter parts</returns>
-        private static string[] SplitParametersRespectingQuotes(string parameters)
+        private static List<string> SplitParametersRespectingQuotes(string parameters)
         {
             var parts = new List<string>();
             var current = new StringBuilder();
-            var inQuotes = false;
-            var quoteChar = '\0';
+            bool inQuotes = false;
+            char quoteChar = '\0';
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                var c = parameters[i];
+                char c = parameters[i];
 
                 if (!inQuotes && (c == '"' || c == '\''))
                 {
@@ -275,7 +292,8 @@ namespace RESTClient.NET.Core.Processing
                 parts.Add(current.ToString());
             }
 
-            return parts.ToArray();
+            // Updated to return the list directly instead of converting to an array
+            return parts;
         }
 
         /// <summary>
@@ -286,8 +304,8 @@ namespace RESTClient.NET.Core.Processing
         private static bool IsQuotedString(string value)
         {
             return value.Length >= 2 &&
-                   ((value.StartsWith("\"") && value.EndsWith("\"")) ||
-                    (value.StartsWith("'") && value.EndsWith("'")));
+                   ((value.StartsWith('"') && value.EndsWith('"')) ||
+                    (value.StartsWith('\'') && value.EndsWith('\'')));
         }
 
         /// <summary>
@@ -297,11 +315,11 @@ namespace RESTClient.NET.Core.Processing
         /// <returns>Unquoted string</returns>
         private static string UnquoteString(string value)
         {
-            if (IsQuotedString(value))
-            {
-                return value.Substring(1, value.Length - 2);
-            }
-            return value;
+            // Simplified 'if' statement
+            return IsQuotedString(value) ? value[1..^1] : value;
         }
+
+        [GeneratedRegex(@"\{\{\$([a-zA-Z]+)(?:\s+([^}]+))?\}\}", RegexOptions.Compiled)]
+        private static partial Regex MyRegex();
     }
 }

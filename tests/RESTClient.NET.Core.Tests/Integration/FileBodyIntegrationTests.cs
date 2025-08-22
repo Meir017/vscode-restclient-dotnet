@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Parsing;
@@ -12,7 +11,7 @@ namespace RESTClient.NET.Core.Tests.Integration
         public async Task ParseAsync_CompleteFileBodyDemo_ShouldParseAllRequestsCorrectly()
         {
             // Arrange
-            var content = @"# RESTClient.NET File Body Demo
+            string content = @"# RESTClient.NET File Body Demo
 @baseUrl = https://api.example.com
 @token = your-auth-token-here
 
@@ -48,7 +47,7 @@ Content-Type: application/json; charset=utf-8
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
@@ -60,7 +59,7 @@ Content-Type: application/json; charset=utf-8
             result.FileVariables["token"].Should().Be("your-auth-token-here");
 
             // Test raw XML file body
-            var rawXmlRequest = result.GetRequestByName("upload-raw-xml");
+            Core.Models.HttpRequest rawXmlRequest = result.GetRequestByName("upload-raw-xml");
             rawXmlRequest.Should().NotBeNull();
             rawXmlRequest.FileBodyReference.Should().NotBeNull();
             rawXmlRequest.FileBodyReference!.FilePath.Should().Be("./sample-data.xml");
@@ -74,7 +73,7 @@ Content-Type: application/json; charset=utf-8
             rawXmlRequest.Metadata.Expectations.Should().HaveCount(1);
 
             // Test JSON template with variables
-            var templateJsonRequest = result.GetRequestByName("upload-template-json");
+            Core.Models.HttpRequest templateJsonRequest = result.GetRequestByName("upload-template-json");
             templateJsonRequest.Should().NotBeNull();
             templateJsonRequest.FileBodyReference.Should().NotBeNull();
             templateJsonRequest.FileBodyReference!.FilePath.Should().Be("./request-template.json");
@@ -83,7 +82,7 @@ Content-Type: application/json; charset=utf-8
             templateJsonRequest.Body.Should().BeNull();
 
             // Test Latin1 encoding
-            var latin1Request = result.GetRequestByName("upload-latin1-text");
+            Core.Models.HttpRequest latin1Request = result.GetRequestByName("upload-latin1-text");
             latin1Request.Should().NotBeNull();
             latin1Request.FileBodyReference.Should().NotBeNull();
             latin1Request.FileBodyReference!.FilePath.Should().Be("./legacy-data.txt");
@@ -92,7 +91,7 @@ Content-Type: application/json; charset=utf-8
             latin1Request.Headers["Content-Type"].Should().Be("text/plain; charset=iso-8859-1");
 
             // Test UTF8 explicit encoding
-            var utf8Request = result.GetRequestByName("upload-utf8-explicit");
+            Core.Models.HttpRequest utf8Request = result.GetRequestByName("upload-utf8-explicit");
             utf8Request.Should().NotBeNull();
             utf8Request.FileBodyReference.Should().NotBeNull();
             utf8Request.FileBodyReference!.FilePath.Should().Be("./unicode-data.json");
@@ -104,7 +103,7 @@ Content-Type: application/json; charset=utf-8
         public async Task ParseAsync_FileBodyWithTraditionalSeparators_ShouldWork()
         {
             // Arrange
-            var content = @"### Raw File Upload
+            string content = @"### Raw File Upload
 
 POST https://api.example.com/upload
 Content-Type: application/octet-stream
@@ -128,29 +127,29 @@ Content-Type: text/plain
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(3);
 
             // All requests should have file body references
-            foreach (var request in result.Requests)
+            foreach (Core.Models.HttpRequest request in result.Requests)
             {
                 request.FileBodyReference.Should().NotBeNull();
                 request.Body.Should().BeNull();
             }
 
             // Check specific requests
-            var rawUpload = result.Requests[0];
+            Core.Models.HttpRequest rawUpload = result.Requests[0];
             rawUpload.FileBodyReference!.FilePath.Should().Be("/absolute/path/to/binary.dat");
             rawUpload.FileBodyReference.ProcessVariables.Should().BeFalse();
 
-            var templateRequest = result.Requests[1];
+            Core.Models.HttpRequest templateRequest = result.Requests[1];
             templateRequest.FileBodyReference!.FilePath.Should().Be("./template.json");
             templateRequest.FileBodyReference.ProcessVariables.Should().BeTrue();
 
-            var legacyRequest = result.Requests[2];
+            Core.Models.HttpRequest legacyRequest = result.Requests[2];
             legacyRequest.FileBodyReference!.FilePath.Should().Be("./legacy.txt");
             legacyRequest.FileBodyReference.ProcessVariables.Should().BeTrue();
             legacyRequest.FileBodyReference.Encoding.Should().Be(Encoding.GetEncoding("ISO-8859-1"));
@@ -169,7 +168,7 @@ Content-Type: text/plain
             string fileBodyLine, string expectedPath, bool expectedProcessVariables, string? expectedEncodingName)
         {
             // Arrange
-            var content = $@"# @name test-request
+            string content = $@"# @name test-request
 POST https://example.com/api
 Content-Type: application/json
 
@@ -178,13 +177,13 @@ Content-Type: application/json
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(1);
 
-            var request = result.GetRequestByName("test-request");
+            Core.Models.HttpRequest request = result.GetRequestByName("test-request");
             request.FileBodyReference.Should().NotBeNull();
             request.FileBodyReference!.FilePath.Should().Be(expectedPath);
             request.FileBodyReference.ProcessVariables.Should().Be(expectedProcessVariables);

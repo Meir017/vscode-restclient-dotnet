@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
@@ -12,10 +11,10 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithValidParameters_ShouldInitializeCorrectly()
         {
             // Arrange
-            var filePath = "./data.json";
-            var processVariables = true;
-            var encoding = Encoding.UTF8;
-            var lineNumber = 42;
+            string filePath = "./data.json";
+            bool processVariables = true;
+            Encoding encoding = Encoding.UTF8;
+            int lineNumber = 42;
 
             // Act
             var fileBodyRef = new FileBodyReference(filePath, processVariables, encoding, lineNumber);
@@ -33,7 +32,7 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithInvalidFilePath_ShouldThrowArgumentException(string invalidPath)
         {
             // Act & Assert
-            var action = () => new FileBodyReference(invalidPath, false, null, 0);
+            Func<FileBodyReference> action = () => new FileBodyReference(invalidPath, false, null, 0);
             action.Should().Throw<ArgumentException>()
                 .WithMessage("File path cannot be null or whitespace*")
                 .And.ParamName.Should().Be("filePath");
@@ -43,7 +42,7 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Constructor_WithNullFilePath_ShouldThrowArgumentException()
         {
             // Act & Assert
-            var action = () => new FileBodyReference(null!, false, null, 0);
+            Func<FileBodyReference> action = () => new FileBodyReference(null!, false, null, 0);
             action.Should().Throw<ArgumentException>()
                 .WithMessage("File path cannot be null or whitespace*")
                 .And.ParamName.Should().Be("filePath");
@@ -53,8 +52,8 @@ namespace RESTClient.NET.Core.Tests.Models
         public void Raw_ShouldCreateRawFileBodyReference()
         {
             // Arrange
-            var filePath = "./data.xml";
-            var lineNumber = 15;
+            string filePath = "./data.xml";
+            int lineNumber = 15;
 
             // Act
             var fileBodyRef = FileBodyReference.Raw(filePath, lineNumber);
@@ -70,8 +69,8 @@ namespace RESTClient.NET.Core.Tests.Models
         public void WithVariables_ShouldCreateFileBodyReferenceWithVariableProcessing()
         {
             // Arrange
-            var filePath = "./template.json";
-            var lineNumber = 20;
+            string filePath = "./template.json";
+            int lineNumber = 20;
 
             // Act
             var fileBodyRef = FileBodyReference.WithVariables(filePath, lineNumber);
@@ -87,9 +86,9 @@ namespace RESTClient.NET.Core.Tests.Models
         public void WithVariablesAndEncoding_ShouldCreateFileBodyReferenceWithCustomEncoding()
         {
             // Arrange
-            var filePath = "./data.txt";
+            string filePath = "./data.txt";
             var encoding = Encoding.GetEncoding("ISO-8859-1");
-            var lineNumber = 25;
+            int lineNumber = 25;
 
             // Act
             var fileBodyRef = FileBodyReference.WithVariablesAndEncoding(filePath, encoding, lineNumber);
@@ -108,7 +107,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var fileBodyRef = FileBodyReference.Raw("./data.json");
 
             // Act
-            var result = fileBodyRef.ToString();
+            string result = fileBodyRef.ToString();
 
             // Assert
             result.Should().Be("< ./data.json");
@@ -121,7 +120,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var fileBodyRef = FileBodyReference.WithVariables("./template.xml");
 
             // Act
-            var result = fileBodyRef.ToString();
+            string result = fileBodyRef.ToString();
 
             // Assert
             result.Should().Be("<@ ./template.xml");
@@ -134,7 +133,7 @@ namespace RESTClient.NET.Core.Tests.Models
             var fileBodyRef = FileBodyReference.WithVariablesAndEncoding("./data.txt", Encoding.GetEncoding("ISO-8859-1"));
 
             // Act
-            var result = fileBodyRef.ToString();
+            string result = fileBodyRef.ToString();
 
             // Assert
             result.Should().Be("<@iso-8859-1 ./data.txt");
@@ -170,8 +169,8 @@ namespace RESTClient.NET.Core.Tests.Models
             var fileBodyRef2 = new FileBodyReference("./data.json", true, Encoding.UTF8, 20); // Different line number
 
             // Act
-            var hash1 = fileBodyRef1.GetHashCode();
-            var hash2 = fileBodyRef2.GetHashCode();
+            int hash1 = fileBodyRef1.GetHashCode();
+            int hash2 = fileBodyRef2.GetHashCode();
 
             // Assert
             hash1.Should().Be(hash2);

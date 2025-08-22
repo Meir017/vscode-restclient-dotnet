@@ -1,6 +1,4 @@
-using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Processing;
 using Xunit;
@@ -13,7 +11,7 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithNull_ReturnsNull()
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(null);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(null);
 
             // Assert
             result.Should().BeNull();
@@ -23,7 +21,7 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithEmpty_ReturnsEmpty()
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(string.Empty);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(string.Empty);
 
             // Assert
             result.Should().BeEmpty();
@@ -33,10 +31,10 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithNoVariables_ReturnsOriginal()
         {
             // Arrange
-            var content = "This is plain text without variables";
+            string content = "This is plain text without variables";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().Be(content);
@@ -46,10 +44,10 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithUnknownVariable_ReturnsOriginal()
         {
             // Arrange
-            var content = "{{$unknownVariable}}";
+            string content = "{{$unknownVariable}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().Be(content);
@@ -59,10 +57,10 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithGuid_ReturnsValidGuid()
         {
             // Arrange
-            var content = "{{$guid}}";
+            string content = "{{$guid}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
@@ -73,13 +71,13 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithMultipleGuids_ReturnsDifferentGuids()
         {
             // Arrange
-            var content = "{{$guid}} and {{$guid}}";
+            string content = "{{$guid}} and {{$guid}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
-            var parts = result!.Split(new[] { " and " }, StringSplitOptions.None);
+            string[] parts = result!.Split([" and "], StringSplitOptions.None);
             parts.Should().HaveCount(2);
             parts[0].Should().NotBe(parts[1]);
             Guid.TryParse(parts[0], out _).Should().BeTrue();
@@ -93,11 +91,11 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithRandomInt_ReturnsValueInRange(string content, int min, int max)
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
-            int.TryParse(result, out var value).Should().BeTrue();
+            int.TryParse(result, out int value).Should().BeTrue();
             value.Should().BeInRange(min, max - 1);
         }
 
@@ -109,7 +107,7 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithInvalidRandomInt_ReturnsOriginal(string content)
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().Be(content);
@@ -119,16 +117,16 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithTimestamp_ReturnsValidUnixTimestamp()
         {
             // Arrange
-            var content = "{{$timestamp}}";
-            var beforeTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string content = "{{$timestamp}}";
+            long beforeTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
-            var afterTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
+            long afterTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // Assert
             result.Should().NotBe(content);
-            long.TryParse(result, out var timestamp).Should().BeTrue();
+            long.TryParse(result, out long timestamp).Should().BeTrue();
             timestamp.Should().BeInRange(beforeTime, afterTime);
         }
 
@@ -139,8 +137,8 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithTimestampOffset_ReturnsAdjustedTimestamp(string content, int offset, string unit)
         {
             // Arrange
-            var expectedBase = DateTimeOffset.UtcNow;
-            var expectedTime = unit switch
+            DateTimeOffset expectedBase = DateTimeOffset.UtcNow;
+            DateTimeOffset expectedTime = unit switch
             {
                 "d" => expectedBase.AddDays(offset),
                 "h" => expectedBase.AddHours(offset),
@@ -149,14 +147,14 @@ namespace RESTClient.NET.Core.Tests.Processing
             };
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
-            long.TryParse(result, out var timestamp).Should().BeTrue();
-            
+            long.TryParse(result, out long timestamp).Should().BeTrue();
+
             var actualTime = DateTimeOffset.FromUnixTimeSeconds(timestamp);
-            var timeDifference = Math.Abs((actualTime - expectedTime).TotalSeconds);
+            double timeDifference = Math.Abs((actualTime - expectedTime).TotalSeconds);
             timeDifference.Should().BeLessThan(2); // Allow 2 seconds tolerance
         }
 
@@ -164,10 +162,10 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithDatetime_ReturnsISO8601Format()
         {
             // Arrange
-            var content = "{{$datetime}}";
+            string content = "{{$datetime}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
@@ -179,10 +177,10 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithLocalDatetime_ReturnsISO8601Format()
         {
             // Arrange
-            var content = "{{$localDatetime}}";
+            string content = "{{$localDatetime}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
@@ -198,11 +196,11 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithDatetimeFormat_ReturnsCorrectFormat(string content, string expectedFormat)
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
-            
+
             if (expectedFormat == "R")
             {
                 // RFC 1123 format
@@ -229,11 +227,11 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithDatetimeFormatAndOffset_ReturnsCorrectDateTime(string content)
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
-            
+
             // Parse result based on expected format
             DateTime parsedDateTime;
             if (content.Contains("rfc1123"))
@@ -260,7 +258,7 @@ namespace RESTClient.NET.Core.Tests.Processing
         public void ResolveSystemVariables_WithComplexContent_ResolvesAllVariables()
         {
             // Arrange
-            var content = @"POST /api/test
+            string content = @"POST /api/test
 Authorization: Bearer {{$guid}}
 Content-Type: application/json
 X-Timestamp: {{$timestamp}}
@@ -273,7 +271,7 @@ X-Random: {{$randomInt 100 200}}
 }";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
@@ -290,7 +288,7 @@ X-Random: {{$randomInt 100 200}}
         public void ResolveSystemVariables_WithInvalidParameters_ReturnsOriginal(string content, string expected)
         {
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().Be(expected);
@@ -300,10 +298,10 @@ X-Random: {{$randomInt 100 200}}
         public void ResolveSystemVariables_CaseInsensitive_ResolvesCorrectly()
         {
             // Arrange
-            var content = "{{$GUID}} {{$randomINT 1 10}} {{$TIMESTAMP}} {{$DateTime}} {{$LocalDateTime}}";
+            string content = "{{$GUID}} {{$randomINT 1 10}} {{$TIMESTAMP}} {{$DateTime}} {{$LocalDateTime}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);
@@ -322,10 +320,10 @@ X-Random: {{$randomInt 100 200}}
         public void ResolveSystemVariables_WithAllTimeUnits_ReturnsValidTimestamp(string unit, int offset)
         {
             // Arrange
-            var content = $"{{{{$timestamp {offset} {unit}}}}}";
+            string content = $"{{{{$timestamp {offset} {unit}}}}}";
 
             // Act
-            var result = SystemVariableProcessor.ResolveSystemVariables(content);
+            string? result = SystemVariableProcessor.ResolveSystemVariables(content);
 
             // Assert
             result.Should().NotBe(content);

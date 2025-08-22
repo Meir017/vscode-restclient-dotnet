@@ -1,4 +1,3 @@
-using System.Linq;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Parsing;
 using Xunit;
@@ -11,7 +10,7 @@ namespace RESTClient.NET.Core.Tests.Parsing
         public async Task ParseAsync_WithAllFileBodyFormats_ShouldParseCorrectly()
         {
             // Arrange
-            var content = @"@baseUrl = https://example.com
+            string content = @"@baseUrl = https://example.com
 
 # @name raw-file-body
 POST {{baseUrl}}/upload
@@ -34,14 +33,14 @@ Content-Type: text/plain
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(3);
 
             // Test raw file body
-            var rawRequest = result.GetRequestByName("raw-file-body");
+            Core.Models.HttpRequest rawRequest = result.GetRequestByName("raw-file-body");
             rawRequest.FileBodyReference.Should().NotBeNull();
             rawRequest.FileBodyReference!.FilePath.Should().Be(@"C:\Users\Default\Desktop\demo.xml");
             rawRequest.FileBodyReference.ProcessVariables.Should().BeFalse();
@@ -49,14 +48,14 @@ Content-Type: text/plain
             rawRequest.Body.Should().BeNull();
 
             // Test file body with variables
-            var variablesRequest = result.GetRequestByName("file-body-with-variables");
+            Core.Models.HttpRequest variablesRequest = result.GetRequestByName("file-body-with-variables");
             variablesRequest.FileBodyReference.Should().NotBeNull();
             variablesRequest.FileBodyReference!.FilePath.Should().Be("./demo.xml");
             variablesRequest.FileBodyReference.ProcessVariables.Should().BeTrue();
             variablesRequest.Body.Should().BeNull();
 
             // Test file body with encoding
-            var encodingRequest = result.GetRequestByName("file-body-with-encoding");
+            Core.Models.HttpRequest encodingRequest = result.GetRequestByName("file-body-with-encoding");
             encodingRequest.FileBodyReference.Should().NotBeNull();
             encodingRequest.FileBodyReference!.FilePath.Should().Be("./demo.xml");
             encodingRequest.FileBodyReference.ProcessVariables.Should().BeTrue();
@@ -68,7 +67,7 @@ Content-Type: text/plain
         public async Task ParseAsync_WithFileBodyAndExpectations_ShouldParseMetadata()
         {
             // Arrange
-            var content = @"# @name file-upload
+            string content = @"# @name file-upload
 # @expect status 201
 # @expect header Location
 POST https://api.example.com/upload
@@ -80,28 +79,28 @@ Authorization: Bearer {{token}}
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(1);
 
-            var request = result.GetRequestByName("file-upload");
+            Core.Models.HttpRequest request = result.GetRequestByName("file-upload");
             request.FileBodyReference.Should().NotBeNull();
             request.FileBodyReference!.FilePath.Should().Be("./upload-data.xml");
             request.FileBodyReference.ProcessVariables.Should().BeTrue();
-            
+
             request.Metadata.Expectations.Should().HaveCount(2);
             request.Headers.Should().HaveCount(2);
             request.Headers["Content-Type"].Should().Be("application/xml");
             request.Headers["Authorization"].Should().Be("Bearer {{token}}");
         }
 
-        [Fact] 
+        [Fact]
         public async Task ParseAsync_WithWhitespaceAroundFilePath_ShouldTrimCorrectly()
         {
             // Arrange
-            var content = @"# @name whitespace-test
+            string content = @"# @name whitespace-test
 POST https://example.com/api
 Content-Type: application/json
 
@@ -110,13 +109,13 @@ Content-Type: application/json
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(1);
 
-            var request = result.GetRequestByName("whitespace-test");
+            Core.Models.HttpRequest request = result.GetRequestByName("whitespace-test");
             request.FileBodyReference.Should().NotBeNull();
             request.FileBodyReference!.FilePath.Should().Be("./data with spaces.json");
         }
@@ -125,7 +124,7 @@ Content-Type: application/json
         public async Task ParseAsync_WithTraditionalSeparators_ShouldWork()
         {
             // Arrange
-            var content = @"### File Body Test 1
+            string content = @"### File Body Test 1
 
 POST https://example.com/api
 Content-Type: application/xml
@@ -134,7 +133,7 @@ Content-Type: application/xml
 
 ### File Body Test 2
 
-POST https://example.com/api  
+POST https://example.com/api
 Content-Type: application/json
 
 <@ ./template.json";
@@ -142,18 +141,18 @@ Content-Type: application/json
             var parser = new HttpFileParser();
 
             // Act
-            var result = await parser.ParseAsync(content);
+            Core.Models.HttpFile result = await parser.ParseAsync(content);
 
             // Assert
             result.Should().NotBeNull();
             result.Requests.Should().HaveCount(2);
 
-            var request1 = result.Requests.First();
+            Core.Models.HttpRequest request1 = result.Requests[0];
             request1.FileBodyReference.Should().NotBeNull();
             request1.FileBodyReference!.FilePath.Should().Be("./file1.xml");
             request1.FileBodyReference.ProcessVariables.Should().BeFalse();
 
-            var request2 = result.Requests.Last();
+            Core.Models.HttpRequest request2 = result.Requests[result.Requests.Count - 1];
             request2.FileBodyReference.Should().NotBeNull();
             request2.FileBodyReference!.FilePath.Should().Be("./template.json");
             request2.FileBodyReference.ProcessVariables.Should().BeTrue();

@@ -48,7 +48,7 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
-            
+
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(e => e.UserId)
@@ -60,12 +60,12 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
-            
+
             entity.HasOne(e => e.Order)
                 .WithMany(o => o.Items)
                 .HasForeignKey(e => e.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             entity.HasOne(e => e.Product)
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(e => e.ProductId)

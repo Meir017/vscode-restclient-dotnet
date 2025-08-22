@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using AwesomeAssertions;
 using RESTClient.NET.Core.Models;
-using RESTClient.NET.Testing;
 using RESTClient.NET.Testing.Extensions;
 using RESTClient.NET.Testing.Models;
 using Xunit;
@@ -14,6 +12,7 @@ namespace RESTClient.NET.Testing.Tests
 {
     public class HttpFileTestBaseTests : IDisposable
     {
+        private static readonly string[] _postPutMethods = ["POST", "PUT"];
         private readonly string _tempHttpFilePath;
         private bool _disposed;
 
@@ -73,7 +72,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void GetHttpFilePath_ShouldReturnConfiguredPath()
         {
             // This tests the abstract method implementation through a concrete test class
-            var path = _tempHttpFilePath;
+            string path = _tempHttpFilePath;
             path.Should().NotBeNullOrEmpty();
             File.Exists(path).Should().BeTrue();
         }
@@ -82,10 +81,10 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void Constructor_WithNonExistentHttpFile_ShouldThrowFileNotFoundException()
         {
             // Arrange
-            var nonExistentPath = Path.Combine(Path.GetTempPath(), "non-existent-file.http");
+            string nonExistentPath = Path.Combine(Path.GetTempPath(), "non-existent-file.http");
 
             // Act & Assert
-            var action = () => new MockHttpFileTestBase(nonExistentPath);
+            Func<MockHttpFileTestBase> action = () => new MockHttpFileTestBase(nonExistentPath);
             action.Should().Throw<FileNotFoundException>()
                 .WithMessage($"*{nonExistentPath}*");
         }
@@ -94,7 +93,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void Constructor_WithEmptyHttpFilePath_ShouldThrowArgumentException()
         {
             // Arrange, Act & Assert
-            var action = () => new MockHttpFileTestBase("");
+            Func<MockHttpFileTestBase> action = () => new MockHttpFileTestBase("");
             action.Should().Throw<ArgumentException>()
                 .WithParameterName("httpFilePath");
         }
@@ -103,7 +102,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void Constructor_WithNullHttpFilePath_ShouldThrowArgumentException()
         {
             // Arrange, Act & Assert
-            var action = () => new MockHttpFileTestBase(null!);
+            Func<MockHttpFileTestBase> action = () => new MockHttpFileTestBase(null!);
             action.Should().Throw<ArgumentException>()
                 .WithParameterName("httpFilePath");
         }
@@ -130,29 +129,29 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Assert
-            var httpFile = mockBase.HttpFilePublic;
+            HttpFile httpFile = mockBase.HttpFilePublic;
             httpFile.Should().NotBeNull();
             // Parser creates 9 total requests (including empty ones between separators)
             httpFile.Requests.Should().HaveCount(9);
-            
+
             // Test that named requests can be found by name
-            httpFile.TryGetRequestByName("get-users", out var getUsersRequest).Should().BeTrue();
+            httpFile.TryGetRequestByName("get-users", out HttpRequest? getUsersRequest).Should().BeTrue();
             getUsersRequest.Should().NotBeNull();
             getUsersRequest!.Method.Should().Be("GET");
-            
-            httpFile.TryGetRequestByName("create-user", out var createUserRequest).Should().BeTrue();
+
+            httpFile.TryGetRequestByName("create-user", out HttpRequest? createUserRequest).Should().BeTrue();
             createUserRequest.Should().NotBeNull();
             createUserRequest!.Method.Should().Be("POST");
-            
-            httpFile.TryGetRequestByName("get-user-by-id", out var getUserByIdRequest).Should().BeTrue();
+
+            httpFile.TryGetRequestByName("get-user-by-id", out HttpRequest? getUserByIdRequest).Should().BeTrue();
             getUserByIdRequest.Should().NotBeNull();
             getUserByIdRequest!.Method.Should().Be("GET");
-            
-            httpFile.TryGetRequestByName("update-user", out var updateUserRequest).Should().BeTrue();
+
+            httpFile.TryGetRequestByName("update-user", out HttpRequest? updateUserRequest).Should().BeTrue();
             updateUserRequest.Should().NotBeNull();
             updateUserRequest!.Method.Should().Be("PUT");
-            
-            httpFile.TryGetRequestByName("delete-user", out var deleteUserRequest).Should().BeTrue();
+
+            httpFile.TryGetRequestByName("delete-user", out HttpRequest? deleteUserRequest).Should().BeTrue();
             deleteUserRequest.Should().NotBeNull();
             deleteUserRequest!.Method.Should().Be("DELETE");
         }
@@ -164,7 +163,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var testCase = mockBase.GetTestCasePublic("get-users");
+            HttpTestCase testCase = mockBase.GetTestCasePublic("get-users");
 
             // Assert
             testCase.Should().NotBeNull();
@@ -180,7 +179,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act & Assert
-            var action = () => mockBase.GetTestCasePublic("non-existent");
+            Func<HttpTestCase> action = () => mockBase.GetTestCasePublic("non-existent");
             action.Should().Throw<KeyNotFoundException>();
         }
 
@@ -191,7 +190,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var result = mockBase.TryGetTestCasePublic("create-user", out var testCase);
+            bool result = mockBase.TryGetTestCasePublic("create-user", out HttpTestCase? testCase);
 
             // Assert
             result.Should().BeTrue();
@@ -207,7 +206,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var result = mockBase.TryGetTestCasePublic("non-existent", out var testCase);
+            bool result = mockBase.TryGetTestCasePublic("non-existent", out HttpTestCase? testCase);
 
             // Assert
             result.Should().BeFalse();
@@ -221,7 +220,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var filteredData = mockBase.GetFilteredTestDataPublic(namePattern: "get");
+            IEnumerable<object[]> filteredData = mockBase.GetFilteredTestDataPublic(namePattern: "get");
 
             // Assert
             filteredData.Should().NotBeEmpty();
@@ -237,7 +236,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var filteredData = mockBase.GetFilteredTestDataPublic(methods: new[] { "POST", "PUT" });
+            IEnumerable<object[]> filteredData = mockBase.GetFilteredTestDataPublic(methods: _postPutMethods);
 
             // Assert
             filteredData.Should().NotBeEmpty();
@@ -253,13 +252,13 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var filteredData = mockBase.GetFilteredTestDataPublic(hasExpectations: true);
+            IEnumerable<object[]> filteredData = mockBase.GetFilteredTestDataPublic(hasExpectations: true);
 
             // Assert
             filteredData.Should().NotBeEmpty();
             var testCases = filteredData.Select(data => (HttpTestCase)data[0]).ToList();
             testCases.Should().HaveCount(2); // get-users and create-user (those with @expect comments)
-            testCases.Should().OnlyContain(tc => tc.ExpectedResponse != null && tc.ExpectedResponse.HasExpectations == true);
+            testCases.Should().OnlyContain(tc => tc.ExpectedResponse != null && tc.ExpectedResponse.HasExpectations);
         }
 
         [Fact]
@@ -273,7 +272,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             };
 
             // Act
-            var processedRequest = mockBase.GetProcessedRequestPublic("get-users", environmentVariables);
+            HttpRequest? processedRequest = mockBase.GetProcessedRequestPublic("get-users", environmentVariables);
 
             // Assert
             processedRequest.Should().NotBeNull();
@@ -288,7 +287,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var processedRequest = mockBase.GetProcessedRequestPublic("non-existent");
+            HttpRequest? processedRequest = mockBase.GetProcessedRequestPublic("non-existent");
 
             // Assert
             processedRequest.Should().BeNull();
@@ -314,7 +313,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var processedRequest = mockBase.GetProcessedRequestPublic("get-users");
+            HttpRequest? processedRequest = mockBase.GetProcessedRequestPublic("get-users");
 
             // Assert
             processedRequest.Should().NotBeNull();
@@ -338,28 +337,30 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void Constructor_WithRelativeHttpFilePath_ShouldResolveCorrectly()
         {
             // Arrange
-            var tempDir = Path.GetTempPath();
-            var relativePath = "test-requests.http";
-            var fullPath = Path.Combine(tempDir, relativePath);
-            
+            string tempDir = Path.GetTempPath();
+            string relativePath = "test-requests.http";
+            string fullPath = Path.Combine(tempDir, relativePath);
+
             try
             {
                 File.WriteAllText(fullPath, TestHttpFileContent);
 
                 // Act & Assert
-                var action = () =>
+                Func<MockHttpFileTestBase> action = () =>
                 {
                     using var mockBase = new MockHttpFileTestBase(fullPath);
                     return mockBase;
                 };
 
-                using var result = action();
+                using MockHttpFileTestBase result = action();
                 result.Should().NotBeNull();
             }
             finally
             {
                 if (File.Exists(fullPath))
+                {
                     File.Delete(fullPath);
+                }
             }
         }
 
@@ -374,7 +375,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
             using var mockBase = new MockHttpFileTestBase(_tempHttpFilePath);
 
             // Act
-            var filteredData = mockBase.GetFilteredTestDataPublic(methods: new[] { method });
+            IEnumerable<object[]> filteredData = mockBase.GetFilteredTestDataPublic(methods: new[] { method });
 
             // Assert
             filteredData.Should().NotBeEmpty();
@@ -386,7 +387,7 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public void HttpFileTestData_ShouldProvideStaticTestData()
         {
             // Act
-            var testData = MockHttpFileTestBase.GetTestDataStatic();
+            IEnumerable<object[]> testData = MockHttpFileTestBase.GetTestDataStatic();
 
             // Assert
             testData.Should().NotBeEmpty();
@@ -404,17 +405,28 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
 
             // Assert
             // Should be safe to call multiple times
-            var action = () => mockBase.Dispose();
+            Action action = () => mockBase.Dispose();
             action.Should().NotThrow();
         }
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
             if (!_disposed)
             {
-                if (File.Exists(_tempHttpFilePath))
-                    File.Delete(_tempHttpFilePath);
-                
+                if (disposing)
+                {
+                    if (File.Exists(_tempHttpFilePath))
+                    {
+                        File.Delete(_tempHttpFilePath);
+                    }
+                }
+
                 _disposed = true;
             }
         }
@@ -423,7 +435,6 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
     // Mock implementation that doesn't rely on WebApplicationFactory
     public class MockHttpFileTestBase : IDisposable
     {
-        private readonly string _httpFilePath;
         private readonly HttpFile _httpFile;
         private bool _disposed;
 
@@ -433,17 +444,19 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         public MockHttpFileTestBase(string httpFilePath)
         {
             if (string.IsNullOrWhiteSpace(httpFilePath))
+            {
                 throw new ArgumentException("HTTP file path cannot be null or empty", nameof(httpFilePath));
-
-            _httpFilePath = httpFilePath;
+            }
 
             if (!File.Exists(httpFilePath))
+            {
                 throw new FileNotFoundException($"HTTP file not found: {httpFilePath}");
+            }
 
             // Load and parse the HTTP file using the core parser
             var parser = new RESTClient.NET.Core.Parsing.HttpFileParser();
             _httpFile = parser.ParseFileAsync(httpFilePath).GetAwaiter().GetResult();
-            
+
             // Call the modification method
             ModifyHttpFile(_httpFile);
         }
@@ -456,16 +469,18 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
         // Public wrappers for testing protected methods
         public HttpTestCase GetTestCasePublic(string name)
         {
-            var request = _httpFile.GetRequestByName(name);
+            HttpRequest request = _httpFile.GetRequestByName(name);
             return _httpFile.GetTestCases().First(tc => tc.Name == name);
         }
 
         public bool TryGetTestCasePublic(string name, out HttpTestCase testCase)
         {
             testCase = null!;
-            
-            if (!_httpFile.TryGetRequestByName(name, out var request))
+
+            if (!_httpFile.TryGetRequestByName(name, out HttpRequest? request))
+            {
                 return false;
+            }
 
             testCase = _httpFile.GetTestCases().First(tc => tc.Name == name);
             return true;
@@ -486,16 +501,26 @@ DELETE {{baseUrl}}/users/123 HTTP/1.1
 
         public static IEnumerable<object[]> GetTestDataStatic()
         {
-            return new List<object[]>
-            {
-                new object[] { new HttpTestCase { Name = "test-case", Method = "GET", Url = "/test" } }
-            };
+            return
+            [
+                [new HttpTestCase { Name = "test-case", Method = "GET", Url = "/test" }]
+            ];
         }
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
             if (!_disposed)
             {
+                if (disposing)
+                {
+                    // Dispose managed resources if any
+                }
                 _disposed = true;
             }
         }

@@ -28,18 +28,19 @@ namespace RESTClient.NET.Core.Tests.Parsing
         public void Properties_ShouldBeSettableAndGettable()
         {
             // Arrange
-            var options = new HttpParseOptions();
-
-            // Act
-            options.ValidateRequestNames = false;
-            options.ProcessVariables = false;
-            options.StrictMode = true;
-            options.ParseExpectations = false;
-            options.RequireRequestNames = false;
-            options.AllowEmptyBodies = false;
-            options.NormalizeLineEndings = false;
-            options.MaxRequestNameLength = 100;
-            options.IgnoreUnknownMetadata = false;
+            var options = new HttpParseOptions
+            {
+                // Act
+                ValidateRequestNames = false,
+                ProcessVariables = false,
+                StrictMode = true,
+                ParseExpectations = false,
+                RequireRequestNames = false,
+                AllowEmptyBodies = false,
+                NormalizeLineEndings = false,
+                MaxRequestNameLength = 100,
+                IgnoreUnknownMetadata = false
+            };
 
             // Assert
             options.ValidateRequestNames.Should().BeFalse();
@@ -84,7 +85,7 @@ namespace RESTClient.NET.Core.Tests.Parsing
             options.RequireRequestNames.Should().BeTrue();
             options.IgnoreUnknownMetadata.Should().BeFalse();
             options.AllowEmptyBodies.Should().BeFalse();
-            
+
             // These should retain default values
             options.ValidateRequestNames.Should().BeTrue();
             options.ProcessVariables.Should().BeTrue();
@@ -105,7 +106,7 @@ namespace RESTClient.NET.Core.Tests.Parsing
             options.RequireRequestNames.Should().BeFalse();
             options.StrictMode.Should().BeFalse();
             options.IgnoreUnknownMetadata.Should().BeTrue();
-            
+
             // These should retain default values
             options.ProcessVariables.Should().BeTrue();
             options.ParseExpectations.Should().BeTrue();
@@ -300,10 +301,11 @@ namespace RESTClient.NET.Core.Tests.Parsing
         public void MaxRequestNameLength_ShouldAcceptPositiveValues(int length)
         {
             // Arrange
-            var options = new HttpParseOptions();
-
-            // Act
-            options.MaxRequestNameLength = length;
+            var options = new HttpParseOptions
+            {
+                // Act
+                MaxRequestNameLength = length
+            };
 
             // Assert
             options.MaxRequestNameLength.Should().Be(length);
@@ -327,10 +329,11 @@ namespace RESTClient.NET.Core.Tests.Parsing
         {
             // Note: The class doesn't validate the value, so this documents current behavior
             // Arrange
-            var options = new HttpParseOptions();
-
-            // Act
-            options.MaxRequestNameLength = length;
+            var options = new HttpParseOptions
+            {
+                // Act
+                MaxRequestNameLength = length
+            };
 
             // Assert
             options.MaxRequestNameLength.Should().Be(length);

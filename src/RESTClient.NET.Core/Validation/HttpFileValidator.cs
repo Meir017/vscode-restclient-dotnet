@@ -10,16 +10,15 @@ namespace RESTClient.NET.Core.Validation
     /// <summary>
     /// Default implementation of HTTP file validator
     /// </summary>
-    public class HttpFileValidator : IHttpFileValidator
+    public partial class HttpFileValidator : IHttpFileValidator
     {
-        private static readonly Regex RequestNameValidationRegex = new Regex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
-        private static readonly Regex UrlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex _requestNameValidationRegex = MyRegex();
+        private static readonly Regex _urlValidationRegex = new Regex(@"^https?://|^/|^\{\{", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <inheritdoc />
         public ValidationResult Validate(HttpFile httpFile)
         {
-            if (httpFile == null)
-                throw new ArgumentNullException(nameof(httpFile));
+            ArgumentNullException.ThrowIfNull(httpFile);
 
             var errors = new List<ValidationError>();
             var warnings = new List<ValidationWarning>();
@@ -41,9 +40,9 @@ namespace RESTClient.NET.Core.Validation
             var requestNames = new HashSet<string>();
             var requestNameCounts = new Dictionary<string, int>();
 
-            foreach (var request in httpFile.Requests)
+            foreach (HttpRequest request in httpFile.Requests)
             {
-                var requestName = request.Name;
+                string requestName = request.Name;
 
                 // Check for empty request names
                 if (string.IsNullOrWhiteSpace(requestName))
@@ -56,7 +55,7 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Check request name format
-                if (!RequestNameValidationRegex.IsMatch(requestName))
+                if (!_requestNameValidationRegex.IsMatch(requestName))
                 {
                     errors.Add(new ValidationError(
                         request.LineNumber,
@@ -76,33 +75,25 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Track duplicates
-                if (requestNames.Contains(requestName))
+                if (!requestNames.Add(requestName))
                 {
-                    if (requestNameCounts.ContainsKey(requestName))
-                    {
-                        requestNameCounts[requestName]++;
-                    }
-                    else
-                    {
-                        requestNameCounts[requestName] = 2;
-                    }
+                    requestNameCounts[requestName] = requestNameCounts.TryGetValue(requestName, out int count) ? count + 1 : 2;
                 }
                 else
                 {
-                    requestNames.Add(requestName);
                     requestNameCounts[requestName] = 1;
                 }
             }
 
             // Report duplicate request names
-            foreach (var kvp in requestNameCounts.Where(x => x.Value > 1))
+            foreach (KeyValuePair<string, int> kvp in requestNameCounts.Where(x => x.Value > 1))
             {
                 var duplicateRequests = httpFile.Requests
                     .Where(r => r.Name == kvp.Key)
                     .Skip(1) // Skip the first occurrence
                     .ToList();
 
-                foreach (var request in duplicateRequests)
+                foreach (HttpRequest? request in duplicateRequests)
                 {
                     errors.Add(new ValidationError(
                         request.LineNumber,
@@ -114,7 +105,7 @@ namespace RESTClient.NET.Core.Validation
 
         private static void ValidateRequests(HttpFile httpFile, List<ValidationError> errors, List<ValidationWarning> warnings)
         {
-            foreach (var request in httpFile.Requests)
+            foreach (HttpRequest request in httpFile.Requests)
             {
                 // Validate HTTP method
                 ValidateHttpMethod(request, errors, warnings);
@@ -132,7 +123,7 @@ namespace RESTClient.NET.Core.Validation
 
         private static void ValidateHttpMethod(HttpRequest request, List<ValidationError> errors, List<ValidationWarning> warnings)
         {
-            var validMethods = new[]
+            string[] validMethods = new[]
             {
                 "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS",
                 "CONNECT", "TRACE", "LOCK", "UNLOCK", "PROPFIND", "PROPPATCH",
@@ -165,7 +156,7 @@ namespace RESTClient.NET.Core.Validation
             }
 
             // Basic URL format validation
-            if (!UrlValidationRegex.IsMatch(request.Url))
+            if (!_urlValidationRegex.IsMatch(request.Url))
             {
                 warnings.Add(new ValidationWarning(
                     request.LineNumber,
@@ -173,7 +164,7 @@ namespace RESTClient.NET.Core.Validation
             }
 
             // Check for common URL issues
-            if (request.Url.Contains(" ") && !request.Url.Contains("{{"))
+            if (request.Url.Contains(' ') && !request.Url.Contains("{{"))
             {
                 warnings.Add(new ValidationWarning(
                     request.LineNumber,
@@ -183,7 +174,7 @@ namespace RESTClient.NET.Core.Validation
 
         private static void ValidateHeaders(HttpRequest request, List<ValidationError> errors, List<ValidationWarning> warnings)
         {
-            foreach (var header in request.Headers)
+            foreach (KeyValuePair<string, string> header in request.Headers)
             {
                 // Check for empty header names
                 if (string.IsNullOrWhiteSpace(header.Key))
@@ -196,7 +187,7 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Check for invalid header name characters
-                if (header.Key.Contains(" ") || header.Key.Contains("\t"))
+                if (header.Key.Contains(' ') || header.Key.Contains('\t'))
                 {
                     warnings.Add(new ValidationWarning(
                         request.LineNumber,
@@ -209,13 +200,13 @@ namespace RESTClient.NET.Core.Validation
         }
 
         private static void ValidateSpecificHeaders(
-            HttpRequest request, 
-            string headerName, 
-            string headerValue, 
-            List<ValidationError> errors, 
+            HttpRequest request,
+            string headerName,
+            string headerValue,
+            List<ValidationError> errors,
             List<ValidationWarning> warnings)
         {
-            var lowerHeaderName = headerName.ToLowerInvariant();
+            string lowerHeaderName = headerName.ToLowerInvariant();
 
             switch (lowerHeaderName)
             {
@@ -242,17 +233,21 @@ namespace RESTClient.NET.Core.Validation
                         request.LineNumber,
                         "Content-Length header will be automatically calculated"));
                     break;
+
+                default:
+                    // No specific validation for other headers
+                    break;
             }
         }
 
         private static void ValidateExpectations(HttpRequest request, List<ValidationError> errors, List<ValidationWarning> warnings)
         {
-            foreach (var expectation in request.Metadata.Expectations)
+            foreach (TestExpectation expectation in request.Metadata.Expectations)
             {
                 switch (expectation.Type)
                 {
                     case ExpectationType.StatusCode:
-                        if (!int.TryParse(expectation.Value, out var statusCode) || statusCode < 100 || statusCode >= 600)
+                        if (!int.TryParse(expectation.Value, out int statusCode) || statusCode < 100 || statusCode >= 600)
                         {
                             errors.Add(new ValidationError(
                                 request.LineNumber,
@@ -262,8 +257,8 @@ namespace RESTClient.NET.Core.Validation
                         break;
 
                     case ExpectationType.MaxTime:
-                        if (!expectation.Value.EndsWith("ms") || 
-                            !int.TryParse(expectation.Value.Substring(0, expectation.Value.Length - 2), out var timeMs) ||
+                        if (!expectation.Value.EndsWith("ms", StringComparison.Ordinal) ||
+                            !int.TryParse(expectation.Value.AsSpan(0, expectation.Value.Length - 2), out int timeMs) ||
                             timeMs <= 0)
                         {
                             errors.Add(new ValidationError(
@@ -292,13 +287,37 @@ namespace RESTClient.NET.Core.Validation
                                 ValidationErrorType.InvalidExpectation));
                         }
                         break;
+
+                    case ExpectationType.Header:
+                        if (string.IsNullOrWhiteSpace(expectation.Value))
+                        {
+                            errors.Add(new ValidationError(
+                                request.LineNumber,
+                                "header expectation cannot be empty",
+                                ValidationErrorType.InvalidExpectation));
+                        }
+                        break;
+
+                    case ExpectationType.BodyContains:
+                        if (string.IsNullOrWhiteSpace(expectation.Value))
+                        {
+                            errors.Add(new ValidationError(
+                                request.LineNumber,
+                                "body-contains expectation cannot be empty",
+                                ValidationErrorType.InvalidExpectation));
+                        }
+                        break;
+
+                    default:
+                        // Unknown expectation type
+                        break;
                 }
             }
         }
 
         private static void ValidateFileVariables(HttpFile httpFile, List<ValidationError> errors, List<ValidationWarning> warnings)
         {
-            foreach (var variable in httpFile.FileVariables)
+            foreach (KeyValuePair<string, string> variable in httpFile.FileVariables)
             {
                 // Check for empty variable names
                 if (string.IsNullOrWhiteSpace(variable.Key))
@@ -311,7 +330,7 @@ namespace RESTClient.NET.Core.Validation
                 }
 
                 // Check for invalid variable name characters
-                if (variable.Key.Contains(" ") || variable.Key.Contains("\t"))
+                if (variable.Key.Contains(' ') || variable.Key.Contains('\t'))
                 {
                     warnings.Add(new ValidationWarning(
                         0,
@@ -328,5 +347,8 @@ namespace RESTClient.NET.Core.Validation
                 }
             }
         }
+
+        [GeneratedRegex(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled)]
+        private static partial Regex MyRegex();
     }
 }
